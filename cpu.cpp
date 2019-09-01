@@ -530,34 +530,7 @@ std::shared_ptr<operand> cpu::IDX() {
 //! is to load the data in Register 6 into Register C.
 std::shared_ptr<operand> cpu::REG() {
         auto result = std::make_shared<operand_reference>();
-
-        switch (operandReg) {
-                case reg::A:
-                        result->ref = std::make_shared<uint8_t>(regA);
-                        break;
-                case reg::B:
-                        result->ref = std::make_shared<uint8_t>(regB);
-                        break;
-                case reg::C:
-                        result->ref = std::make_shared<uint8_t>(regC);
-                        break;
-                case reg::D:
-                        result->ref = std::make_shared<uint8_t>(regD);
-                        break;
-                case reg::E:
-                        result->ref = std::make_shared<uint8_t>(regE);
-                        break;
-                case reg::F:
-                        result->ref = std::make_shared<uint8_t>(regF);
-                        break;
-                case reg::H:
-                        result->ref = std::make_shared<uint8_t>(regH);
-                        break;
-                case reg::L:
-                        result->ref = std::make_shared<uint8_t>(regL);
-                        break;
-        }
-
+        result->ref = GetRegister(operandReg);
         return std::dynamic_pointer_cast<operand>(result);
 }
 
@@ -957,7 +930,21 @@ void cpu::JP() {
         }
 }
 
-//! Add n to current address and jump to it
+//! \brief Add n to current address and jump to it
+//!
+//! This instruction provides for conditional and uncoditional branching to
+//! other segments of a program depending on the results of a test on the Carry
+//! Flag. If the flag = 1, the value of displace-ment e is added to the Program
+//! Counter (PC) and the next instruction is fetched from the location
+//! designated by the new contents of the PC. The jump is measured from the
+//! address of the instruction op code and contains a range of –126 to +129
+//! bytes. The assembler auto-matically adjusts for the twice incremented PC.
+//!
+//! If the flag = 0, the next instruction executed is taken from the location
+//! following this instruction.
+//! If condition is met: 3 cycles
+//! If conditions is not met: 2 cycles
+//!
 //! 0x18: JR    n
 //! 0x20: JR NZ,n
 //! 0x28: JR  Z,n
@@ -969,7 +956,7 @@ void cpu::JR() {
 
         auto jump = [this](uint16_t address) { pc = address; };
 
-        uint16_t value = std::static_pointer_cast<operand_value>(operand2)->value;
+        int16_t value = (int16_t)std::static_pointer_cast<operand_value>(operand2)->value;
         uint16_t address = pc + value;
 
         auto zero = FlagGet('z');
@@ -998,7 +985,30 @@ void cpu::JR() {
         }
 }
 
-//! Push address of next instruction onto the stack and then jump to address nn.
+//! \brief Push address of next instruction onto the stack and then jump to address nn
+//!
+//! If condition cc is true, this instruction pushes the current contents of the
+//! Program Counter (PC) are pushed onto the top of the external memory
+//! stack. The operands nn are then loaded to the PC to point to the address in
+//! mem-ory at which the first op code of a subroutine is to be fetched. At the
+//! end of the subroutine, a RETurn instruction can be used to return to the
+//! original program flow by popping the top of the stack back to the PC.
+//!
+//! Condition cc is programmed as one of eight statuses that corresponds to
+//! condition bits in the Flag Register (Register F). These eight statuses are
+//! defined in the following table, which also specifies the corresponding cc
+//! bit fields in the assembled object code.
+//!
+//! cc  | Condition         | Flag
+//!-----+-------------------+----
+//! 000 | Non-Zero (NZ)     | Z
+//! 001 | Zero (Z)          | Z
+//! 010 | Non-Carry (NC)    | C
+//! 011 | Carry (C)         | C
+//! 100 | Parity-Odd (PO)   | P/V
+//! 101 | Parity-Even (PE)  | P/V
+//! 110 | Sign-Positive (P) | S
+//! 111 | Sign-Negative (M) | S
 void cpu::CALL() {
         operandReg = reg::F;
         operand1 = ((*this).*(instruction->getOperand1))();
@@ -1107,6 +1117,20 @@ void cpu::RET() {
         }
 }
 
+//! This instruction is used at the end of a maskable interrupt service routine
+//! to:
+//!
+//! • Restore the contents of the Program Counter (analogous to the RET
+//!   instruction)
+//!
+//! • Signal an I/O device that the interrupt routine is
+//!   completed. The RETI instruction also facilitates the nesting of interrupts,
+//!   allowing higher priority devices to temporarily suspend service of lower
+//!   priority service routines. However, this instruction does not enable
+//!   interrupts that were disabled when the interrupt routine was entered. Before
+//!   doing the RETI instruction, the enable interrupt instruction (EI) should be
+//!   executed to allow recognition of interrupts after completion of the current
+//!   service routine.
 void cpu::RETI() {
         RET();
         // TODO: Enable interrupts?!?!
@@ -1122,6 +1146,11 @@ void cpu::InstructionFetch(uint8_t memory[]) {
 
         opcodeByte = msgBus->Read(pc++);
 
+        // Some opcodes are two-bytes long; these are prefixed with the byte
+        // 0x10 or 0xCB.
+        // TODO: I'm not sure if these are ordered B1|B2 or B2|B1.
+        //       I'm assuming B1|B2 in this implementation but may need to
+        //       follow up on that.
         if (0x10 == opcodeByte || 0xCB == opcodeByte) {
                 opcode = (opcodeByte << 8);
                 opcodeByte = msgBus->Read(pc++);
