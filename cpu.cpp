@@ -257,48 +257,48 @@ static std::map<int,instruction> instructionMap = {
         { 0x003B, { "DEC SP", &cpu::DEC, &cpu::IMP, &cpu::IND, 8 } },
 
         // Miscellaneous
-        { 0x0037, { "SWAP A", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0030, { "SWAP B", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0031, { "SWAP C", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0032, { "SWAP D", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0033, { "SWAP E", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0034, { "SWAP H", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
-        { 0x0035, { "SWAP L", &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0037, { "SWAP A",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0030, { "SWAP B",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0031, { "SWAP C",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0032, { "SWAP D",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0033, { "SWAP E",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0034, { "SWAP H",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
+        { 0x0035, { "SWAP L",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
         { 0x0036, { "SWAP (HL)", &cpu::SWAP, &cpu::IMP, &cpu::IND, 16 } },
 
-        { 0x0027, { "DAA", &cpu::DAA, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x002F, { "CPL", &cpu::CPL, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x003F, { "CCF", &cpu::CCF, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x0037, { "SCF", &cpu::SCF, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x0000, { "NOP", &cpu::NOP, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x0027, { "DAA",  &cpu::DAA, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x002F, { "CPL",  &cpu::CPL, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x003F, { "CCF",  &cpu::CCF, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x0037, { "SCF",  &cpu::SCF, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x0000, { "NOP",  &cpu::NOP, &cpu::IMP, &cpu::IMP, 4 } },
         { 0x0076, { "HALT", &cpu::HALT, &cpu::IMP, &cpu::IMP, 4 } },
         { 0x1000, { "STOP", &cpu::STOP, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x00F3, { "DI", &cpu::DI, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x00FB, { "EI", &cpu::EI, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x00F3, { "DI",   &cpu::DI, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x00FB, { "EI",   &cpu::EI, &cpu::IMP, &cpu::IMP, 4 } },
 
         // Rotates and Shifts
         { 0x0007, { "RLCA", &cpu::RLCA, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x0017, { "RLA", &cpu::RLA, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x0017, { "RLA",  &cpu::RLA,  &cpu::IMP, &cpu::IMP, 4 } },
         { 0x000F, { "RRCA", &cpu::RRCA, &cpu::IMP, &cpu::IMP, 4 } },
-        { 0x001F, { "RRA", &cpu::RRA, &cpu::IMP, &cpu::IMP, 4 } },
+        { 0x001F, { "RRA",  &cpu::RRA,  &cpu::IMP, &cpu::IMP, 4 } },
 
-        { 0xCB07, { "RLC A", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB00, { "RLC B", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB01, { "RLC C", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB02, { "RLC D", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB03, { "RLC E", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB04, { "RLC H", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB05, { "RLC L", &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB06, { "RLC (HL)", &cpu::RLC, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB07, { "RLC A",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB00, { "RLC B",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB01, { "RLC C",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB02, { "RLC D",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB03, { "RLC E",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB04, { "RLC H",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB05, { "RLC L",    &cpu::RLC, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB06, { "RLC (HL)", &cpu::RLC, &cpu::IMP, &cpu::IND, 16 } },
 
-        { 0xCB17, { "RL A", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB10, { "RL B", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB11, { "RL C", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB12, { "RL D", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB13, { "RL E", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB14, { "RL H", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB15, { "RL L", &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB16, { "RL (HL)", &cpu::RL, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB17, { "RL A",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB10, { "RL B",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB11, { "RL C",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB12, { "RL D",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB13, { "RL E",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB14, { "RL H",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB15, { "RL L",    &cpu::RL, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB16, { "RL (HL)", &cpu::RL, &cpu::IMP, &cpu::IND, 16 } },
 
         { 0xCB0F, { "RRC A", &cpu::RRC, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB08, { "RRC B", &cpu::RRC, &cpu::IMP, &cpu::REG, 8 } },
@@ -307,7 +307,7 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB0B, { "RRC E", &cpu::RRC, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB0C, { "RRC H", &cpu::RRC, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB0D, { "RRC L", &cpu::RRC, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB0E, { "RRC (HL)", &cpu::RRC, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB0E, { "RRC (HL)", &cpu::RRC, &cpu::IMP, &cpu::IND, 16 } },
 
         { 0xCB1F, { "RR A", &cpu::RR, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB18, { "RR B", &cpu::RR, &cpu::IMP, &cpu::REG, 8 } },
@@ -316,7 +316,7 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB1B, { "RR E", &cpu::RR, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB1C, { "RR H", &cpu::RR, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB1D, { "RR L", &cpu::RR, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB1E, { "RR (HL)", &cpu::RR, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB1E, { "RR (HL)", &cpu::RR, &cpu::IMP, &cpu::IND, 16 } },
 
         { 0xCB27, { "SLA A", &cpu::SLA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB20, { "SLA B", &cpu::SLA, &cpu::IMP, &cpu::REG, 8 } },
@@ -325,7 +325,7 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB23, { "SLA E", &cpu::SLA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB24, { "SLA H", &cpu::SLA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB25, { "SLA L", &cpu::SLA, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB26, { "SLA (HL)", &cpu::SLA, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB26, { "SLA (HL)", &cpu::SLA, &cpu::IMP, &cpu::IND, 16 } },
 
         { 0xCB2F, { "SRA A", &cpu::SRA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB28, { "SRA B", &cpu::SRA, &cpu::IMP, &cpu::REG, 8 } },
@@ -334,7 +334,7 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB2B, { "SRA E", &cpu::SRA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB2C, { "SRA H", &cpu::SRA, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB2D, { "SRA L", &cpu::SRA, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB2E, { "SRA (HL)", &cpu::SRA, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB2E, { "SRA (HL)", &cpu::SRA, &cpu::IMP, &cpu::IND, 16 } },
 
         { 0xCB3F, { "SRL A", &cpu::SRL, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB38, { "SRL B", &cpu::SRL, &cpu::IMP, &cpu::REG, 8 } },
@@ -343,55 +343,55 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB3B, { "SRL E", &cpu::SRL, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB3C, { "SRL H", &cpu::SRL, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCB3D, { "SRL L", &cpu::SRL, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB3E, { "SRL (HL)", &cpu::SRL, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB3E, { "SRL (HL)", &cpu::SRL, &cpu::IMP, &cpu::IND, 16 } },
 
         // Bit Operations
-        { 0xCB47, { "BIT b,A", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB40, { "BIT b,B", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB41, { "BIT b,C", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB42, { "BIT b,D", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB43, { "BIT b,E", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB44, { "BIT b,H", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
-        { 0xCB45, { "BIT b,L", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB47, { "BIT b,A",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB40, { "BIT b,B",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB41, { "BIT b,C",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB42, { "BIT b,D",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB43, { "BIT b,E",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB44, { "BIT b,H",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB45, { "BIT b,L",    &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
         { 0xCB46, { "BIT b,(HL)", &cpu::BIT, &cpu::IMM, &cpu::BTI, 16 } },
 
-        { 0xCBC7, { "SET b,A", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC0, { "SET b,B", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC1, { "SET b,C", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC2, { "SET b,D", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC3, { "SET b,E", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC4, { "SET b,H", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC5, { "SET b,L", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCBC6, { "SET b,(HL)", &cpu::SET, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCBC7, { "SET b,A",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC0, { "SET b,B",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC1, { "SET b,C",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC2, { "SET b,D",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC3, { "SET b,E",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC4, { "SET b,H",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC5, { "SET b,L",    &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCBC6, { "SET b,(HL)", &cpu::SET, &cpu::IMP, &cpu::IND, 16 } },
 
-        { 0xCBC8, { "RES b,A", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB80, { "RES b,B", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB81, { "RES b,C", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB82, { "RES b,D", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB83, { "RES b,E", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB84, { "RES b,H", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB85, { "RES b,L", &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB86, { "RES b,(HL)", &cpu::RES, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCBC8, { "RES b,A",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB80, { "RES b,B",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB81, { "RES b,C",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB82, { "RES b,D",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB83, { "RES b,E",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB84, { "RES b,H",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB85, { "RES b,L",    &cpu::RES, &cpu::IMP, &cpu::REG, 8 } },
+        { 0xCB86, { "RES b,(HL)", &cpu::RES, &cpu::IMP, &cpu::IND, 16 } },
 
         // Jumps
-        { 0x00C3, { "JP nn", &cpu::JP, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00C2, { "JP NZ,nn", &cpu::JP, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00CA, { "JP Z,nn", &cpu::JP, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00D2, { "JP NC,nn", &cpu::JP, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00DA, { "JP C,nn", &cpu::JP, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00E9, { "JP (HL)", &cpu::JP, &cpu::IMP, &cpu::IND, 4 } },
-        { 0x0018, { "JR n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
-        { 0x0020, { "JR NZ,n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
-        { 0x0028, { "JR Z,n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
-        { 0x0030, { "JR NC,n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
-        { 0x0038, { "JR C,n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
+        { 0x00C3, { "JP nn",    &cpu::JP, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00C2, { "JP NZ,nn", &cpu::JP, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00CA, { "JP Z,nn",  &cpu::JP, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00D2, { "JP NC,nn", &cpu::JP, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00DA, { "JP C,nn",  &cpu::JP, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00E9, { "JP (HL)",  &cpu::JP, &cpu::IMP, &cpu::IND, 4 } },
+        { 0x0018, { "JR n",     &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
+        { 0x0020, { "JR NZ,n",  &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
+        { 0x0028, { "JR Z,n",   &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
+        { 0x0030, { "JR NC,n",  &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
+        { 0x0038, { "JR C,n" ,  &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
 
         // Calls
-        { 0x00CD, { "CALL    nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
-        { 0x00C4, { "CALL NZ,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
-        { 0x00C4, { "CALL  Z,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
-        { 0x00C4, { "CALL NC,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
-        { 0x00C4, { "CALL  C,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
+        { 0x00CD, { "CALL nn",    &cpu::CALL, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL NZ,nn", &cpu::CALL, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL Z,nn",  &cpu::CALL, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL NC,nn", &cpu::CALL, &cpu::IMP, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL C,nn",  &cpu::CALL, &cpu::IMP, &cpu::IME, 12 } },
 
         // Restarts
         { 0x00C7, { "RST 0x00", &cpu::RST, &cpu::IMP, &cpu::IMP, 32 } },
@@ -406,9 +406,9 @@ static std::map<int,instruction> instructionMap = {
         // Returns
         { 0x00C9, { "RET",    &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
         { 0x00C0, { "RET NZ", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
-        { 0x00C8, { "RET  Z", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00C8, { "RET Z",  &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
         { 0x00D0, { "RET NC", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
-        { 0x00D8, { "RET  C", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00D8, { "RET C",  &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
         { 0x00D9, { "RETI",   &cpu::RETI,&cpu::REG, &cpu::IMP, 8 } },
 };
 
@@ -662,44 +662,7 @@ uint8_t cpu::MaskForBitAt(uint8_t bitToSet) {
         return (1 << bitToSet);
 }
 
-void cpu::FlagReset(char c) {
-        uint8_t bit;
-        switch (c) {
-                case 's':
-                case 'S':
-                        bit = 0x7;
-                        break;
-                case 'z':
-                case 'Z':
-                        bit = 0x6;
-                        break;
-                case 'h':
-                case'H':
-                        bit = 0x4;
-                        break;
-                case 'p':
-                case 'P':
-                case 'v':
-                case 'V':
-                        bit = 0x2;
-                        break;
-                case 'n':
-                case 'N':
-                        bit = 0x1;
-                        break;
-                case 'c':
-                case 'C':
-                        bit = 0x0;
-                        break;
-        }
-        FlagReset(bit);
-}
-
-void cpu::FlagReset(uint8_t bit) {
-        regF |= (0 << bit);
-}
-
-void cpu::FlagSet(char c) {
+void cpu::FlagSet(char c, uint8_t onOrOff) {
         uint8_t bit = 0;
         switch (c) {
                 case 's':
@@ -729,11 +692,17 @@ void cpu::FlagSet(char c) {
                         bit = 0x0;
                         break;
         }
-        FlagSet(bit);
+        FlagSet(bit, onOrOff);
 }
 
-void cpu::FlagSet(uint8_t bit) {
-        regF |= (1 << bit);
+void cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
+        uint8_t bitFlag = 1 << bit;
+
+        if (onOrOff) {
+                regF |= bitFlag;
+        } else {
+                regF &= (~bitFlag);
+        }
 }
 
 uint8_t cpu::FlagGet(char c) {
@@ -778,6 +747,137 @@ uint8_t cpu::FlagGet(uint8_t bitToCheck) {
 // Operations
 //------------------------------------------------------------------------------
 
+//! The contents of the Accumulator (Register A) are rotated left 1 bit
+//! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
+//! 0. Bit 0 is the least-significant bit.
+void cpu::RLCA() {
+        operandReg = reg::A;
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! The contents of the Accumulator (Register A) are rotated left 1 bit position
+//! through the Carry flag. The previous contents of the Carry flag are copied
+//! to bit 0. Bit 0 is the least-significant bit.
+void cpu::RLA() {
+        operandReg = reg::A;
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t oldCarry = FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! The contents of the Accumulator (Register A) are rotated right 1 bit
+//! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::RRCA() {
+        operandReg = reg::A;
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | (carry << 0x7);
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! The contents of the Accumulator (Register A) are rotated right 1 bit
+//! position through the Carry flag. The previous contents of the Carry flag are
+//! copied to bit 7. Bit 0 is the least-significant bit.
+void cpu::RRA() {
+        operandReg = reg::A;
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t oldCarry = FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | (oldCarry << 0x7);
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! \return 1 if parity is even, otherwise 0
+//! \see https://stackoverflow.com/a/21618038
+int Parity(uint8_t byte) {
+        byte ^= byte >> 4;
+        byte ^= byte >> 2;
+        byte ^= byte >> 1;
+        return (~byte) & 1;
+}
+
+//! The contents of register r are rotated left 1 bit position. The contents of
+//! bit 7 are copied to the Carry flag and also to bit 0. In the assembled
+//! object code, operand r is specified as fol-lows:
+//! B: 000
+//! C: 001
+//! D: 010
+//! E: 011
+//! H: 100
+//! L: 101
+//! A: 111
+void cpu::RLC() {
+        switch (opcode) {
+                case 0xCB07:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB00:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB01:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB02:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB03:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB04:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB05:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB06:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('s', newValue & (0x1 << 0x7));
+        FlagSet('z', newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('n', 0);
+        FlagSet('c', carry);
+}
+
 //! Test bit in register
 void cpu::BIT() {
         operand1 = ((*this).*(instruction->getOperand1))();
@@ -786,14 +886,9 @@ void cpu::BIT() {
         uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
         uint8_t mask = MaskForBitAt(bit);
 
-        FlagReset('n');
-        FlagSet('h');
-
-        if (operand2->Get() & mask) {
-                FlagReset('z');
-        } else {
-                FlagSet('z');
-        }
+        FlagSet('n', 0);
+        FlagSet('h', 1);
+        FlagSet('z', operand2->Get() & mask);
 }
 
 //! Set bit in register
@@ -821,40 +916,123 @@ void cpu::RES() {
         operand2->Set(current & mask);
 }
 
+//! Jump to the specified address
+//! 0xC3: JP    nn
+//! 0xC2: JP NZ,nn
+//! 0xCA: JP  Z,nn
+//! 0xD2: JP NC,nn
+//! 0xDA: JP  C,nn
+//! 0xE9: JP  (HL)
+void cpu::JP() {
+        operand1 = ((*this).*(instruction->getOperand1))();
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        auto jump = [this](uint16_t address) { pc = address; };
+
+        uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
+        auto zero = FlagGet('z');
+        auto carry = FlagGet('c');
+
+        switch (opcode) {
+                case 0xE9:
+                case 0xC3:
+                        jump(address);
+                        break;
+                case 0xC2:
+                        if (0 == zero)
+                                jump(address);
+                        break;
+                case 0xCA:
+                        if (0 != zero)
+                                jump(address);
+                        break;
+                case 0xD2:
+                        if (0 == carry)
+                                jump(address);
+                        break;
+                case 0xDA:
+                        if (0 == carry)
+                                jump(address);
+                        break;
+        }
+}
+
+//! Add n to current address and jump to it
+//! 0x18: JR    n
+//! 0x20: JR NZ,n
+//! 0x28: JR  Z,n
+//! 0x30: JR NC,n
+//! 0x38: JR  C,n
+void cpu::JR() {
+        operand1 = ((*this).*(instruction->getOperand1))();
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        auto jump = [this](uint16_t address) { pc = address; };
+
+        uint16_t value = std::static_pointer_cast<operand_value>(operand2)->value;
+        uint16_t address = pc + value;
+
+        auto zero = FlagGet('z');
+        auto carry = FlagGet('c');
+
+        switch (opcode) {
+                case 0x18:
+                        jump(address);
+                        break;
+                case 0x20:
+                        if (0 == zero)
+                                jump(address);
+                        break;
+                case 0x28:
+                        if (0 != zero)
+                                jump(address);
+                        break;
+                case 0x30:
+                        if (0 == carry)
+                                jump(address);
+                        break;
+                case 0x38:
+                        if (0 == carry)
+                                jump(address);
+                        break;
+        }
+}
+
 //! Push address of next instruction onto the stack and then jump to address nn.
 void cpu::CALL() {
         operandReg = reg::F;
         operand1 = ((*this).*(instruction->getOperand1))();
         operand2 = ((*this).*(instruction->getOperand2))();
 
-        auto jump = [&]() {
-                            uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
+        auto jump = [this](uint16_t address) {
                             stack.push_back(pc);
                             sp++;
                             pc = address;
                     };
 
+        uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
         auto zero = FlagGet('z');
         auto carry = FlagGet('c');
+
         switch (opcode) {
                 case 0xCD:
-                        jump();
+                        jump(address);
                         break;
                 case 0xC4:
                         if (0 == zero)
-                                jump();
+                                jump(address);
                         break;
                 case 0xCC:
                         if (0 != zero)
-                                jump();
+                                jump(address);
                         break;
                 case 0xD4:
                         if (0 == carry)
-                                jump();
+                                jump(address);
                         break;
                 case 0xDC:
                         if (0 == carry)
-                                jump();
+                                jump(address);
                         break;
         }
 }
@@ -898,32 +1076,33 @@ void cpu::RET() {
         uint16_t address = stack[sp];
         stack.pop_back();
 
-        auto jump = [&]() {
+        auto jump = [this](uint16_t address) {
                             sp--;
                             pc = address;
                     };
 
         auto zero = FlagGet('z');
         auto carry = FlagGet('c');
+
         switch (opcode) {
                 case 0xC9:
-                        jump();
+                        jump(address);
                         break;
                 case 0xC0:
                         if (0 == zero)
-                                jump();
+                                jump(address);
                         break;
                 case 0xC8:
                         if (0 != zero)
-                                jump();
+                                jump(address);
                         break;
                 case 0xD0:
                         if (0 == carry)
-                                jump();
+                                jump(address);
                         break;
                 case 0xD8:
                         if (0 != carry)
-                                jump();
+                                jump(address);
                         break;
         }
 }

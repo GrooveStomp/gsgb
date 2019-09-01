@@ -165,10 +165,8 @@ private:
         std::shared_ptr<operand> operand2;
         std::shared_ptr<gs::instruction> instruction = nullptr;
 
-        void FlagReset(uint8_t);
-        void FlagReset(char);
-        void FlagSet(uint8_t);
-        void FlagSet(char);
+        void FlagSet(uint8_t, uint8_t);
+        void FlagSet(char, uint8_t);
         uint8_t FlagGet(char);
         uint8_t FlagGet(uint8_t);
         std::shared_ptr<uint8_t> GetRegister(gs::reg);
