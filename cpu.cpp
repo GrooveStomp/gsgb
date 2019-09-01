@@ -578,32 +578,30 @@ std::shared_ptr<operand> cpu::IMP() {
 //! be used as a pointer to any location in memory. This type of instruction is
 //! powerful and it is used in a wide range of applications.
 std::shared_ptr<operand> cpu::IND() {
-        // TODO
-        // uint8_t byteLo, byteHi;
+        uint8_t byteLo, byteHi;
 
-        // reg_pair regPair = HL; // TODO: determine which register is desired?!??! Might want to create a new tagged union parameter type...
-        // switch(regPair) {
-        //         case BC:
-        //                 byteLo = regB;
-        //                 byteHi = regC;
-        //                 break;
-        //         case DE:
-        //                 byteLo = regD;
-        //                 byteHi = regE;
-        //                 break;
-        //         case HL:
-        //                 byteLo = regH;
-        //                 byteHi = regL;
-        //                 break;
-        //         default:
-        //                 byteLo = 0;
-        //                 byteHi = 0;
-        //                 break;
-        // }
+        switch(operandRegPair) {
+                case reg_pair::BC:
+                        byteLo = regB;
+                        byteHi = regC;
+                        break;
+                case reg_pair::DE:
+                        byteLo = regD;
+                        byteHi = regE;
+                        break;
+                case reg_pair::HL:
+                        byteLo = regH;
+                        byteHi = regL;
+                        break;
+                default:
+                        byteLo = 0;
+                        byteHi = 0;
+                        break;
+        }
 
-        // uint16_t operand = (byteHi << 8) | byteLo;
-        // return operand;
-        return nullptr;
+        auto result = std::make_shared<operand_address>();
+        result->address = (byteHi << 8) | byteLo;
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! Bit Addressing
@@ -783,7 +781,7 @@ uint8_t cpu::FlagGet(uint8_t bitToCheck) {
 //! Test bit in register
 void cpu::BIT() {
         operand1 = ((*this).*(instruction->getOperand1))();
-        auto op = ((*this).*(instruction->getOperand2))();
+        operand2 = ((*this).*(instruction->getOperand2))();
 
         uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
         uint8_t mask = MaskForBitAt(bit);

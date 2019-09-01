@@ -159,6 +159,7 @@ private:
         uint16_t opcode = 0x0;
 
         reg operandReg;
+        reg_pair operandRegPair;
         std::vector<uint16_t> stack;
         std::shared_ptr<operand> operand1;
         std::shared_ptr<operand> operand2;
