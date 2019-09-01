@@ -15,15 +15,19 @@
 
 #include <string>
 #include <map>
+#include <cassert>
 
 #include "cpu.hpp"
 #include "bus.hpp"
+#include "operand.hpp"
+
+namespace gs {
 
 struct instruction {
         std::string name;
         void (cpu::*operation)();
-        void (cpu::*addr1)();
-        void (cpu::*addr2)();
+        std::shared_ptr<operand> (cpu::*getOperand1)();
+        std::shared_ptr<operand> (cpu::*getOperand2)();
         unsigned int cycles;
 };
 
@@ -342,14 +346,14 @@ static std::map<int,instruction> instructionMap = {
         { 0xCB3E, { "SRL (HL)", &cpu::SRL, &cpu::IMP, &cpu::REG, 16 } },
 
         // Bit Operations
-        { 0xCB47, { "BIT b,A", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB40, { "BIT b,B", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB41, { "BIT b,C", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB42, { "BIT b,D", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB43, { "BIT b,E", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB44, { "BIT b,H", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB45, { "BIT b,L", &cpu::BIT, &cpu::IMP, &cpu::REG, 8 } },
-        { 0xCB46, { "BIT b,(HL)", &cpu::BIT, &cpu::IMP, &cpu::REG, 16 } },
+        { 0xCB47, { "BIT b,A", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB40, { "BIT b,B", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB41, { "BIT b,C", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB42, { "BIT b,D", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB43, { "BIT b,E", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB44, { "BIT b,H", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB45, { "BIT b,L", &cpu::BIT, &cpu::IMM, &cpu::BTA, 8 } },
+        { 0xCB46, { "BIT b,(HL)", &cpu::BIT, &cpu::IMM, &cpu::BTI, 16 } },
 
         { 0xCBC7, { "SET b,A", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
         { 0xCBC0, { "SET b,B", &cpu::SET, &cpu::IMP, &cpu::REG, 8 } },
@@ -383,11 +387,11 @@ static std::map<int,instruction> instructionMap = {
         { 0x0038, { "JR C,n", &cpu::JP, &cpu::IMP, &cpu::IMM, 8 } },
 
         // Calls
-        { 0x00CD, { "CALL    nn", &cpu::CALL, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00C4, { "CALL NZ,nn", &cpu::CALL, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00C4, { "CALL  Z,nn", &cpu::CALL, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00C4, { "CALL NC,nn", &cpu::CALL, &cpu::IMP, &cpu::IMM, 12 } },
-        { 0x00C4, { "CALL  C,nn", &cpu::CALL, &cpu::IMP, &cpu::IMM, 12 } },
+        { 0x00CD, { "CALL    nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL NZ,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL  Z,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL NC,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
+        { 0x00C4, { "CALL  C,nn", &cpu::CALL, &cpu::REG, &cpu::IME, 12 } },
 
         // Restarts
         { 0x00C7, { "RST 0x00", &cpu::RST, &cpu::IMP, &cpu::IMP, 32 } },
@@ -400,12 +404,12 @@ static std::map<int,instruction> instructionMap = {
         { 0x00FF, { "RST 0x38", &cpu::RST, &cpu::IMP, &cpu::IMP, 32 } },
 
         // Returns
-        { 0x00C9, { "RET",    &cpu::RET, &cpu::IMP, &cpu::IMP, 8 } },
-        { 0x00C0, { "RET NZ", &cpu::RET, &cpu::IMP, &cpu::IMP, 8 } },
-        { 0x00C8, { "RET  Z", &cpu::RET, &cpu::IMP, &cpu::IMP, 8 } },
-        { 0x00D0, { "RET NC", &cpu::RET, &cpu::IMP, &cpu::IMP, 8 } },
-        { 0x00D8, { "RET  C", &cpu::RET, &cpu::IMP, &cpu::IMP, 8 } },
-        { 0x00D9, { "RETI",   &cpu::RETI,&cpu::IMP, &cpu::IMP, 8 } },
+        { 0x00C9, { "RET",    &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00C0, { "RET NZ", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00C8, { "RET  Z", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00D0, { "RET NC", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00D8, { "RET  C", &cpu::RET, &cpu::REG, &cpu::IMP, 8 } },
+        { 0x00D9, { "RETI",   &cpu::RETI,&cpu::REG, &cpu::IMP, 8 } },
 };
 
 //------------------------------------------------------------------------------
@@ -414,6 +418,7 @@ static std::map<int,instruction> instructionMap = {
 
 cpu::cpu(bus *messageBus) : msgBus(messageBus) {
         pc = 0x100;
+        sp = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -428,9 +433,10 @@ cpu::cpu(bus *messageBus) : msgBus(messageBus) {
 //! An example of this type of instruction is to load the Accumulator with a
 //! constant, in which the constant is the byte immediately following the op
 //! code.
-void cpu::IMM() {
-        operand = 0 | msgBus->Read(pc++);
-        operandNumBytes = 1;
+std::shared_ptr<operand> cpu::IMM() {
+        auto result = std::make_shared<operand_value>();
+        result->value = 0 | msgBus->Read(pc++);
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! \brief Immediate Mode Extended Addressing
@@ -440,11 +446,12 @@ void cpu::IMM() {
 //!
 //! An example of this type of instruction is to load the HL register pair
 //! (16-bit register) with 16 bits (two bytes) of data.
-void cpu::IME() {
-        operand = 0;
-        operand |= msgBus->Read(pc++);
-        operand |= (msgBus->Read(pc++) << 8);
-        operandNumBytes = 2;
+std::shared_ptr<operand> cpu::IME() {
+        auto result = std::make_shared<operand_value>();
+        result->value = 0;
+        result->value |= msgBus->Read(pc++);
+        result->value |= (msgBus->Read(pc++) << 8);
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! \brief Modified Page Zero Addressing
@@ -455,8 +462,9 @@ void cpu::IME() {
 //! value of this instruction is that it allows a single byte to specify a
 //! complete 16-bit address at which commonly-called subroutines are located,
 //! thereby saving memory space.
-void cpu::MPZ() {
+std::shared_ptr<operand> cpu::MPZ() {
         // TODO
+        return nullptr;
 }
 
 //! Relative Addressing
@@ -474,9 +482,11 @@ void cpu::MPZ() {
 //! +127 and –128 from A+2. This range allows for a total dis-placement of +129
 //! to –126 from the jump relative op code address. Another major advantage is
 //! that it allows for relocatable code.
-void cpu::REL() {
-        operand = 0 | msgBus->Read(pc++);
-        operandNumBytes = 1;
+std::shared_ptr<operand> cpu::REL() {
+        int8_t off = (int16_t)msgBus->Read(pc++);
+        auto result = std::make_shared<operand_address>();
+        result->address = (int16_t)pc + (int16_t)off;
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! Extended Addressing
@@ -487,11 +497,12 @@ void cpu::REL() {
 //!
 //! Extended addressing is required for a program to jump from any location in
 //! memory to any other location, or load and store data in any memory location.
-void cpu::EXT() {
-        operand = 0;
-        operand |= msgBus->Read(pc++);
-        operand |= (msgBus->Read(pc++) << 8);
-        operandNumBytes = 2;
+std::shared_ptr<operand> cpu::EXT() {
+        auto result = std::make_shared<operand_address>();
+        result->address = 0;
+        result->address |= msgBus->Read(pc++);
+        result->address |= (msgBus->Read(pc++) << 8);
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! Indexed Addressing
@@ -503,45 +514,51 @@ void cpu::EXT() {
 //! (the op code specifies which index register is used) to form a pointer to
 //! memory. The contents of the index register are not altered by this
 //! operation.
-void cpu::IDX() {
+std::shared_ptr<operand> cpu::IDX() {
         // nop
+        return nullptr;
 }
+
+//------------------------------------------------------------------------------
+// Other
+//------------------------------------------------------------------------------
 
 //! Register Addressing
 //!
 //! Many of the Z80 op codes contain bits of information that specify which CPU
 //! register is to be used for an operation. An example of register addressing
 //! is to load the data in Register 6 into Register C.
-void cpu::REG() {
-        operandNumBytes = 1;
+std::shared_ptr<operand> cpu::REG() {
+        auto result = std::make_shared<operand_reference>();
 
-        reg cpuReg = A; // TODO: determine which register is desired?!??! Might want to create a new tagged union parameter type...
-        switch (cpuReg) {
-                case A:
-                        operand = 0 | regA;
+        switch (operandReg) {
+                case reg::A:
+                        result->ref = std::make_shared<uint8_t>(regA);
                         break;
-                case F:
-                        operand = 0 | regF;
+                case reg::B:
+                        result->ref = std::make_shared<uint8_t>(regB);
                         break;
-                case B:
-                        operand = 0 | regB;
+                case reg::C:
+                        result->ref = std::make_shared<uint8_t>(regC);
                         break;
-                case C:
-                        operand = 0 | regC;
+                case reg::D:
+                        result->ref = std::make_shared<uint8_t>(regD);
                         break;
-                case D:
-                        operand = 0 | regD;
+                case reg::E:
+                        result->ref = std::make_shared<uint8_t>(regE);
                         break;
-                case E:
-                        operand = 0 | regE;
+                case reg::F:
+                        result->ref = std::make_shared<uint8_t>(regF);
                         break;
-                case H:
-                        operand = 0 | regH;
+                case reg::H:
+                        result->ref = std::make_shared<uint8_t>(regH);
                         break;
-                case L:
-                        operand = 0 | regL;
+                case reg::L:
+                        result->ref = std::make_shared<uint8_t>(regL);
                         break;
         }
+
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! Implied Addressing
@@ -550,8 +567,9 @@ void cpu::REG() {
 //! implies one or more CPU registers as containing the operands. An example is
 //! the set of arithmetic opera-tions in which the Accumulator is always implied
 //! to be the destination of the results.
-void cpu::IMP() {
+std::shared_ptr<operand> cpu::IMP() {
         // nop
+        return nullptr;
 }
 
 //! Register Indirect Addressing
@@ -559,31 +577,33 @@ void cpu::IMP() {
 //! This type of addressing specifies a 16-bit CPU register pair (such as HL) to
 //! be used as a pointer to any location in memory. This type of instruction is
 //! powerful and it is used in a wide range of applications.
-void cpu::IND() {
-        uint8_t byteLo, byteHi;
+std::shared_ptr<operand> cpu::IND() {
+        // TODO
+        // uint8_t byteLo, byteHi;
 
-        reg_pair regPair = HL; // TODO: determine which register is desired?!??! Might want to create a new tagged union parameter type...
-        switch(regPair) {
-                case BC:
-                        byteLo = regB;
-                        byteHi = regC;
-                        break;
-                case DE:
-                        byteLo = regD;
-                        byteHi = regE;
-                        break;
-                case HL:
-                        byteLo = regH;
-                        byteHi = regL;
-                        break;
-                default:
-                        byteLo = 0;
-                        byteHi = 0;
-                        break;
-        }
+        // reg_pair regPair = HL; // TODO: determine which register is desired?!??! Might want to create a new tagged union parameter type...
+        // switch(regPair) {
+        //         case BC:
+        //                 byteLo = regB;
+        //                 byteHi = regC;
+        //                 break;
+        //         case DE:
+        //                 byteLo = regD;
+        //                 byteHi = regE;
+        //                 break;
+        //         case HL:
+        //                 byteLo = regH;
+        //                 byteHi = regL;
+        //                 break;
+        //         default:
+        //                 byteLo = 0;
+        //                 byteHi = 0;
+        //                 break;
+        // }
 
-        operand = (byteHi << 8) | byteLo;
-        operandNumBytes = 2;
+        // uint16_t operand = (byteHi << 8) | byteLo;
+        // return operand;
+        return nullptr;
 }
 
 //! Bit Addressing
@@ -593,12 +613,330 @@ void cpu::IND() {
 //! to be specified for a bit operation through one of three previous addressing
 //! modes (register, Register Indirect, and indexed) while three bits in the op
 //! code specify which of the eight bits is to be manipulated.
-void cpu::BTA() {
-        // nop
+//!
+//! NOTE: As a prerequisite, operand1 must have been fetched.
+std::shared_ptr<operand> cpu::BTA() {
+        uint8_t whichReg = operand1->Get() & 0x7; // bits 2,1,0
+
+        auto result = std::make_shared<operand_reference>();
+        result->ref = GetRegister(static_cast<gs::reg>(whichReg));
+        return std::dynamic_pointer_cast<operand>(result);
+}
+
+//! Bit addressing, but indirect
+std::shared_ptr<operand> cpu::BTI() {
+        uint8_t whichReg = operand1->Get() & 0x7; // bits 2,1,0
+        assert(0x6 == whichReg);
+
+        auto result = std::make_shared<operand_address>();
+        result->address = ((uint16_t)regH << 8) | regL;
+        return std::dynamic_pointer_cast<operand>(result);
+}
+
+std::shared_ptr<uint8_t> cpu::GetRegister(gs::reg reg) {
+        switch (reg) {
+                case reg::B:
+                        return std::make_shared<uint8_t>(regB);
+                case reg::C:
+                        return std::make_shared<uint8_t>(regC);
+                case reg::D:
+                        return std::make_shared<uint8_t>(regD);
+                case reg::E:
+                        return std::make_shared<uint8_t>(regE);
+                case reg::H:
+                        return std::make_shared<uint8_t>(regH);
+                case reg::L:
+                        return std::make_shared<uint8_t>(regL);
+                case reg::A:
+                        return std::make_shared<uint8_t>(regA);
+                case reg::F:
+                        return std::make_shared<uint8_t>(regF);
+                default:
+                        return nullptr;
+        }
+        return nullptr;
+}
+
+uint8_t cpu::MaskForBitAt(uint8_t bitToSet) {
+        if (bitToSet > 7)
+                return 0;
+
+        return (1 << bitToSet);
+}
+
+void cpu::FlagReset(char c) {
+        uint8_t bit;
+        switch (c) {
+                case 's':
+                case 'S':
+                        bit = 0x7;
+                        break;
+                case 'z':
+                case 'Z':
+                        bit = 0x6;
+                        break;
+                case 'h':
+                case'H':
+                        bit = 0x4;
+                        break;
+                case 'p':
+                case 'P':
+                case 'v':
+                case 'V':
+                        bit = 0x2;
+                        break;
+                case 'n':
+                case 'N':
+                        bit = 0x1;
+                        break;
+                case 'c':
+                case 'C':
+                        bit = 0x0;
+                        break;
+        }
+        FlagReset(bit);
+}
+
+void cpu::FlagReset(uint8_t bit) {
+        regF |= (0 << bit);
+}
+
+void cpu::FlagSet(char c) {
+        uint8_t bit = 0;
+        switch (c) {
+                case 's':
+                case 'S':
+                        bit = 0x7;
+                        break;
+                case 'z':
+                case 'Z':
+                        bit = 0x6;
+                        break;
+                case 'h':
+                case'H':
+                        bit = 0x4;
+                        break;
+                case 'p':
+                case 'P':
+                case 'v':
+                case 'V':
+                        bit = 0x2;
+                        break;
+                case 'n':
+                case 'N':
+                        bit = 0x1;
+                        break;
+                case 'c':
+                case 'C':
+                        bit = 0x0;
+                        break;
+        }
+        FlagSet(bit);
+}
+
+void cpu::FlagSet(uint8_t bit) {
+        regF |= (1 << bit);
+}
+
+uint8_t cpu::FlagGet(char c) {
+        uint8_t bit = 0;
+        switch (c) {
+                case 's':
+                case 'S':
+                        bit = 0x7;
+                        break;
+                case 'z':
+                case 'Z':
+                        bit = 0x6;
+                        break;
+                case 'h':
+                case'H':
+                        bit = 0x4;
+                        break;
+                case 'p':
+                case 'P':
+                case 'v':
+                case 'V':
+                        bit = 0x2;
+                        break;
+                case 'n':
+                case 'N':
+                        bit = 0x1;
+                        break;
+                case 'c':
+                case 'C':
+                        bit = 0x0;
+                        break;
+        }
+        return FlagGet(bit);
+}
+
+uint8_t cpu::FlagGet(uint8_t bitToCheck) {
+        uint8_t bit = regF & (1 << bitToCheck);
+        return bit >> bitToCheck;
 }
 
 //------------------------------------------------------------------------------
 // Operations
+//------------------------------------------------------------------------------
+
+//! Test bit in register
+void cpu::BIT() {
+        operand1 = ((*this).*(instruction->getOperand1))();
+        auto op = ((*this).*(instruction->getOperand2))();
+
+        uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
+        uint8_t mask = MaskForBitAt(bit);
+
+        FlagReset('n');
+        FlagSet('h');
+
+        if (operand2->Get() & mask) {
+                FlagReset('z');
+        } else {
+                FlagSet('z');
+        }
+}
+
+//! Set bit in register
+void cpu::SET() {
+        operand1 = ((*this).*(instruction->getOperand1))();
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
+        uint8_t mask = MaskForBitAt(bit);
+
+        operand2->Set(operand2->Get() | mask);
+}
+
+//! Reset bit in register.
+void cpu::RES() {
+        operand1 = ((*this).*(instruction->getOperand1))();
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
+        uint8_t mask = MaskForBitAt(bit);
+        mask = ~mask;
+
+        uint8_t current = operand2->Get();
+
+        operand2->Set(current & mask);
+}
+
+//! Push address of next instruction onto the stack and then jump to address nn.
+void cpu::CALL() {
+        operandReg = reg::F;
+        operand1 = ((*this).*(instruction->getOperand1))();
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        auto jump = [&]() {
+                            uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
+                            stack.push_back(pc);
+                            sp++;
+                            pc = address;
+                    };
+
+        auto zero = FlagGet('z');
+        auto carry = FlagGet('c');
+        switch (opcode) {
+                case 0xCD:
+                        jump();
+                        break;
+                case 0xC4:
+                        if (0 == zero)
+                                jump();
+                        break;
+                case 0xCC:
+                        if (0 != zero)
+                                jump();
+                        break;
+                case 0xD4:
+                        if (0 == carry)
+                                jump();
+                        break;
+                case 0xDC:
+                        if (0 == carry)
+                                jump();
+                        break;
+        }
+}
+
+//! Push present address onto stack. Jump to address $0000 + n.
+void cpu::RST() {
+        uint16_t address = 0;
+        switch (opcode) {
+                case 0xC7:
+                        address = 0x00;
+                        break;
+                case 0xCF:
+                        address = 0x08;
+                        break;
+                case 0xD7:
+                        address = 0x10;
+                        break;
+                case 0xDF:
+                        address = 0x18;
+                        break;
+                case 0xE7:
+                        address = 0x20;
+                        break;
+                case 0xEF:
+                        address = 0x28;
+                        break;
+                case 0xF7:
+                        address = 0x30;
+                        break;
+                case 0xFF:
+                        address = 0x38;
+                        break;
+        }
+
+        stack.push_back(pc);
+        sp++;
+        pc = address;
+}
+
+void cpu::RET() {
+        uint16_t address = stack[sp];
+        stack.pop_back();
+
+        auto jump = [&]() {
+                            sp--;
+                            pc = address;
+                    };
+
+        auto zero = FlagGet('z');
+        auto carry = FlagGet('c');
+        switch (opcode) {
+                case 0xC9:
+                        jump();
+                        break;
+                case 0xC0:
+                        if (0 == zero)
+                                jump();
+                        break;
+                case 0xC8:
+                        if (0 != zero)
+                                jump();
+                        break;
+                case 0xD0:
+                        if (0 == carry)
+                                jump();
+                        break;
+                case 0xD8:
+                        if (0 != carry)
+                                jump();
+                        break;
+        }
+}
+
+void cpu::RETI() {
+        RET();
+        // TODO: Enable interrupts?!?!
+}
+
+//------------------------------------------------------------------------------
+// Public interface
 //------------------------------------------------------------------------------
 
 void cpu::InstructionFetch(uint8_t memory[]) {
@@ -613,6 +951,7 @@ void cpu::InstructionFetch(uint8_t memory[]) {
         }
 
         opcode = (opcode | opcodeByte);
+        instruction = std::make_shared<gs::instruction>(instructionMap[opcode]);
 }
 
 void cpu::InstructionDecode() {
@@ -620,10 +959,7 @@ void cpu::InstructionDecode() {
 }
 
 void cpu::InstructionExecute() {
-        (this->*instructionMap[opcode].operation)();
-        // // Get operands
-        // // Something with addr1 and addr2.
-        // auto fn = currentInstruction->operation;
-        // //((*this).*fn)();
-        // (this->*fn)();
+        ((*this).*(instruction->operation))();
 }
+
+} // namespace gs

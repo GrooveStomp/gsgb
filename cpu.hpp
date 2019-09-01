@@ -13,21 +13,37 @@
   details.
  ******************************************************************************/
 
+/*
+  Flags:
+  C: Carry
+  N: Add/Subtract
+  P: Parity/Overflow
+  V: Parity/Overflow
+  H: Half Carry Flag
+  Z: Zero Flag
+  S: Sign Flag
+*/
+
 #ifndef CPU_VERSION
 #define CPU_VERSION "0.1.0" //!< include guard
 
+#include <vector>
 #include <memory>
 #include <cstdint>
+
+namespace gs {
 
 //! \file cpu.hpp
 //! \see http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 //! \see http://z80.info/zip/z80cpu_um.pdf
 
 enum reg_pair { AF, BC, DE, HL };
-enum reg { A, F, B, C, D, E, H, L };
+enum reg { B = 0, C, D, E, H, L, A = 7, F = 99 };
 
 class bus;
-class cpu_priv;
+class operand;
+
+struct instruction;
 
 class cpu {
         // General purpose registers
@@ -56,12 +72,7 @@ class cpu {
         uint16_t sp; //!< stack pointer
         uint16_t i; //!< interrupt vector
 
-        std::shared_ptr<bus> msgBus;
-
-        uint16_t opcode;
-
-        uint16_t operand;
-        int operandNumBytes;
+        std::shared_ptr<gs::bus> msgBus;
 
 public:
         cpu(bus *messageBus);
@@ -72,16 +83,17 @@ public:
         void InstructionExecute();
 
         // Addressing Modes
-        void IMM();
-        void IME();
-        void MPZ();
-        void REL();
-        void EXT();
-        void IDX();
-        void REG();
-        void IMP();
-        void IND();
-        void BTA();
+        std::shared_ptr<operand> IMM();
+        std::shared_ptr<operand> IME();
+        std::shared_ptr<operand> MPZ();
+        std::shared_ptr<operand> REL();
+        std::shared_ptr<operand> EXT();
+        std::shared_ptr<operand> IDX();
+        std::shared_ptr<operand> REG();
+        std::shared_ptr<operand> IMP();
+        std::shared_ptr<operand> IND();
+        std::shared_ptr<operand> BTA();
+        std::shared_ptr<operand> BTI();
 
         // Load operations
         void LD();
@@ -142,7 +154,26 @@ public:
         void RETI(); // Return, enabling interrupts
 
 private:
-        cpu_priv *priv;
+
+        // Variables and functions to assist in emulation
+        uint16_t opcode = 0x0;
+
+        reg operandReg;
+        std::vector<uint16_t> stack;
+        std::shared_ptr<operand> operand1;
+        std::shared_ptr<operand> operand2;
+        std::shared_ptr<gs::instruction> instruction = nullptr;
+
+        void FlagReset(uint8_t);
+        void FlagReset(char);
+        void FlagSet(uint8_t);
+        void FlagSet(char);
+        uint8_t FlagGet(char);
+        uint8_t FlagGet(uint8_t);
+        std::shared_ptr<uint8_t> GetRegister(gs::reg);
+        uint8_t MaskForBitAt(uint8_t);
 };
+
+} // namespace gs
 
 #endif // CPU_VERSION
