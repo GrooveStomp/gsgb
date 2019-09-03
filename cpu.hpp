@@ -4,7 +4,7 @@
 
   File: cpu.hpp
   Created: 2019-08-29
-  Updated: 2019-08-30
+  Updated: 2019-09-03
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -154,6 +154,11 @@ public:
         void RETI(); // Return, enabling interrupts
 
 private:
+        bool halted = false;
+        bool waitForButtonPress = false;
+        bool interruptsDisabled = false;
+        bool interruptsDisabledRequested = false;
+        bool interruptsEnabledRequested = false;
 
         // Variables and functions to assist in emulation
         uint16_t opcode = 0x0;

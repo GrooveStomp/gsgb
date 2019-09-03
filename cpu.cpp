@@ -523,6 +523,22 @@ std::shared_ptr<operand> cpu::IDX() {
 // Other
 //------------------------------------------------------------------------------
 
+//! \brief Get the low or high nibble from byte
+//! \param byte value to get nibble from
+//! \param pos 0 for low nibble, 1 for high nibble.
+//! \return high or low nibble of byte as specified by pos
+uint8_t Nibble(uint8_t byte, uint8_t pos) {
+        uint8_t result;
+
+        if (pos) {
+                result = (byte & 0xF0) >> 4;
+        } else {
+                result = byte & 0x0F;
+        }
+
+        return result;
+}
+
 //! \return 1 if parity is even, otherwise 0
 //! \see https://stackoverflow.com/a/21618038
 int Parity(uint8_t byte) {
@@ -549,9 +565,12 @@ std::shared_ptr<operand> cpu::REG() {
 //! implies one or more CPU registers as containing the operands. An example is
 //! the set of arithmetic opera-tions in which the Accumulator is always implied
 //! to be the destination of the results.
+//!
+//! Generally, the register being used with IMP() is the Accumulator.
 std::shared_ptr<operand> cpu::IMP() {
-        // nop
-        return nullptr;
+        auto result = std::make_shared<operand_reference>();
+        result->ref = GetRegister(reg::A);
+        return std::static_pointer_cast<operand>(result);
 }
 
 //! Register Indirect Addressing
@@ -728,6 +747,173 @@ uint8_t cpu::FlagGet(uint8_t bitToCheck) {
 //------------------------------------------------------------------------------
 // Operations
 //------------------------------------------------------------------------------
+
+//! \brief Swap upper & lower nibbles of operand.
+void cpu::SWAP() {
+        switch (opcode) {
+                case 0xCB37:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB30:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB31:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB32:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB33:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB34:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB35:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB36:
+                        operandReg = reg_pair::HL;
+                        break;
+        }
+
+        uint8_t oldValue = static_cast<uint8_t>(operand2->Get());
+        uint8_t nibbleHi = Nibble(oldValue, 1);
+        uint8_t nibbleLo = Nibble(oldValue, 0);
+        uint8_t newValue = (nibbleLo << 4) | nibbleHi;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', 0);
+}
+
+//! \brief Decimal adjust register A.
+//!
+//! This instruction adjusts register A so that the correct representation of
+//! Binary Coded Decimal (BCD) is obtained.
+//!
+//! DAA is intended to be run immediately after an addition or subtraction
+//! operation, where the operands were BCD encoded. It then makes the
+//! corrections described above, so the result (stored in the A register) is the
+//! BCD encoded result of the previous operation.
+//!
+//! \see https://ehaskins.com/2018-01-30%20Z80%20DAA/
+void cpu::DAA() {
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t val = static_cast<uint8_t>(operand2->Get());
+
+        uint8_t wasCarryHalf = FlagGet('h');
+        uint8_t wasCarry = FlagGet('c');
+        uint8_t wasSubtraction = FlagGet('n');
+
+        uint8_t nibbleLo = Nibble(val, 0);
+        uint8_t nibbleHi = Nibble(val, 1);
+
+        if (wasSubtraction) {
+                if (nibbleLo > 9 || wasCarryHalf) {
+                        nibbleLo -= 6;
+                }
+                if (nibbleHi > 9 || wasCarry) {
+                        nibbleHi -= 6;
+                }
+        } else {
+                if (nibbleLo > 9 || wasCarryHalf) {
+                        nibbleLo += 6;
+                }
+                if (nibbleHi > 9 || wasCarry) {
+                        nibbleHi += 6;
+                }
+        }
+
+        uint8_t newValue = (nibbleHi << 4) | nibbleLo;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('c', newValue > 0x99); // TODO verify against table in Z80 manual
+}
+
+//! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
+void cpu:CPL() {
+        operandReg = reg::A;
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t val = static_cast<uint8_t>(operand2->Get());
+        val = ~val;
+        operand2->Set(val);
+
+        FlagSet('h', 1);
+        FlagSet('n', 1);
+}
+
+// TODO: Not used in GB?
+//! \brief Perform two's complement negation on A.
+//!
+//! The contents of the Accumulator are negated (two’s complement). This method
+//! is the same as subtracting the contents of the Accumulator from zero.
+void cpu::NEG() {
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t val = static_cast<uint8_t>(operand2->Get());
+        uint16_t onesComplement = ~val;
+        uint16_t twosComplement = onesComplement + 1;
+        operand2->Set(static_cast<uint8_t>(twosComplement));
+
+        FlagSet('s', twosComplement & 0x7);
+        FlagSet('z', !twosComplement);
+        // TODO: set if borrow from bit 4. // FlagSet('h', (twosComplement >> 0x4)
+        FlagSet('p', 0x80 == val);
+        FlagSet('n', 0);
+        FlagSet('c', !(0x00 == val));
+}
+
+//! \brief The carry flag is inverted in the F register.
+void cpu::CCF() {
+        FlagSet('h', 0);
+        FlagSet('n', 0);
+        FlagSet('c', !FlagGet('c'));
+}
+
+//! \brief the carry flag is set in the F register.
+void cpu::SCF() {
+        FlagSet('h', 0);
+        FlagSet('n', 0);
+        FlagSet('c', 1);
+}
+
+void cpu::NOP() {
+}
+
+//! \brief Power down CPU until an interrupt occurs.
+//!
+//! The HALT instruction suspends CPU operation until a subsequent interrupt or
+//! reset is received. While in the HALT state, the processor executes NOPs to
+//! maintain memory refresh logic.
+void cpu::HALT() {
+        halted = true;
+        waitForButtonPress = false;
+}
+
+//! \brief Halt CPU & LCD display until button press.
+void cpu::STOP() {
+        halted = true;
+        waitForButtonPress = true;
+}
+
+//! \brief Disable interrupts after next instruction.
+//!
+//! When the CPU executes the instruction DI the maskable interrupt is disabled
+//! until it is subsequently re-enabled by an EI instruction. The CPU does not
+//! respond to an Interrupt Request (INT) signal.
+void cpu::DI() {
+        interruptsDisabledRequested = true;
+}
+
+//! \brief Enable interrupts after next instruction.
+void cpu::EI() {
+        interruptsEnabledRequested = true;
+}
 
 //! \brief Rotate A left. Old bit 7 is copied to the carry flag.
 //!
@@ -1427,7 +1613,9 @@ void cpu::RET() {
 //!   service routine.
 void cpu::RETI() {
         RET();
-        // TODO: Enable interrupts?!?!
+        interruptsDisabled = false;
+        interruptsDisabledRequested = false;
+        interruptsEnabledRequested = false;
 }
 
 //------------------------------------------------------------------------------
