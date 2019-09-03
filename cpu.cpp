@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-08-30
+  Updated: 2019-09-03
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -523,6 +523,15 @@ std::shared_ptr<operand> cpu::IDX() {
 // Other
 //------------------------------------------------------------------------------
 
+//! \return 1 if parity is even, otherwise 0
+//! \see https://stackoverflow.com/a/21618038
+int Parity(uint8_t byte) {
+        byte ^= byte >> 4;
+        byte ^= byte >> 2;
+        byte ^= byte >> 1;
+        return (~byte) & 1;
+}
+
 //! Register Addressing
 //!
 //! Many of the Z80 op codes contain bits of information that specify which CPU
@@ -720,6 +729,8 @@ uint8_t cpu::FlagGet(uint8_t bitToCheck) {
 // Operations
 //------------------------------------------------------------------------------
 
+//! \brief Rotate A left. Old bit 7 is copied to the carry flag.
+//!
 //! The contents of the Accumulator (Register A) are rotated left 1 bit
 //! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
 //! 0. Bit 0 is the least-significant bit.
@@ -737,6 +748,8 @@ void cpu::RLCA() {
         FlagSet('c', carry);
 }
 
+//! \brief Rotate A left through the carry flag.
+//!
 //! The contents of the Accumulator (Register A) are rotated left 1 bit position
 //! through the Carry flag. The previous contents of the Carry flag are copied
 //! to bit 0. Bit 0 is the least-significant bit.
@@ -755,6 +768,8 @@ void cpu::RLA() {
         FlagSet('c', carry);
 }
 
+//! \brief Rotate A right. Old bit 0 is copied to the carry flag.
+//!
 //! The contents of the Accumulator (Register A) are rotated right 1 bit
 //! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
 //! least-significant bit.
@@ -772,6 +787,8 @@ void cpu::RRCA() {
         FlagSet('c', carry);
 }
 
+//! \brief Rotate A right through the carry flag.
+//!
 //! The contents of the Accumulator (Register A) are rotated right 1 bit
 //! position through the Carry flag. The previous contents of the Carry flag are
 //! copied to bit 7. Bit 0 is the least-significant bit.
@@ -790,15 +807,8 @@ void cpu::RRA() {
         FlagSet('c', carry);
 }
 
-//! \return 1 if parity is even, otherwise 0
-//! \see https://stackoverflow.com/a/21618038
-int Parity(uint8_t byte) {
-        byte ^= byte >> 4;
-        byte ^= byte >> 2;
-        byte ^= byte >> 1;
-        return (~byte) & 1;
-}
-
+//! \brief Rotate left. Old bit 7 is copied to the carry flag.
+//!
 //! The contents of register r are rotated left 1 bit position. The contents of
 //! bit 7 are copied to the Carry flag and also to bit 0. In the assembled
 //! object code, operand r is specified as fol-lows:
@@ -842,16 +852,298 @@ void cpu::RLC() {
         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
         operand2->Set(newValue);
 
-        FlagSet('z', !newValue);
         FlagSet('s', newValue & (0x1 << 0x7));
-        FlagSet('z', newValue);
+        FlagSet('z', !newValue);
         FlagSet('h', 0);
         FlagSet('p', Parity(newValue));
         FlagSet('n', 0);
         FlagSet('c', carry);
 }
 
-//! Test bit in register
+//! \brief Rotate left through carry flag.
+//!
+//! The contents of the m operand are rotated left 1 bit position. The contents
+//! of bit 7 are copied to the Carry flag, and the previous contents of the
+//! Carry flag are copied to bit 0.
+void cpu::RL() {
+        switch (opcode) {
+                case 0xCB17:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB10:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB11:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB12:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB13:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB14:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB15:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB16:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t oldCarry = FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
+        operand2->Set(newValue);
+
+        FlagSet('s', newValue & (0x1 << 0x7));
+        FlagSet('z', !newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('n', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Rotate right. Old bit 0 is set to the carry flag.
+//!
+//! The contents of the m operand are rotated right 1 bit position. The contents
+//! of bit 0 are copied to the Carry flag and also to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::RRC() {
+        switch (opcode) {
+                case 0xCB0F:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB08:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB09:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB0A:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB0B:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB0C:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB0D:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB0E:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | carry;
+        operand2->Set(newValue);
+
+        FlagSet('s', newValue & (0x1 << 0x7));
+        FlagSet('z', !newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('n', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Rotate n right through carry flag.
+//!
+//! The contents of operand m are rotated right 1 bit position through the carry
+//! flag. The contents of bit 0 are copied to the carry flag and the previous
+//! contents of the carry flag are copied to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::RR() {
+        switch (opcode) {
+                case 0xCB0F:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB08:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB09:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB0A:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB0B:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB0C:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB0D:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB0E:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint16_t oldValue = operand2->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t oldCarry = FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | oldCarry;
+        operand2->Set(newValue);
+
+        FlagSet('s', newValue & (0x1 << 0x7));
+        FlagSet('z', !newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('n', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Shift left into carry. LSB is set to 0.
+//!
+//! An arithmetic shift left 1 bit position is performed on the contents of
+//! operand m. The contents of bit 7 are copied to the Carry flag. Bit 0 is the
+//! least-significant bit.
+void cpu::SLA() {
+        switch (opcode) {
+                case 0xCB27:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB20:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB21:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB22:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB23:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB24:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB25:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB26:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t oldValue = (uint8_t)operand2->Get();
+        uint8_t carry = oldValue & (0x1 << 0x7);
+        uint8_t newValue = oldValue << 1;
+        operand2->Set(newValue);
+
+        FlagSet('s', (newValue >> 0x7) & 0x1);
+        FlagSet('z', !newValue);
+        FlagSet('h', 0);
+        FlagSet('p', Parity(newValue));
+        FlagSet('n', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Shift right into Carry. MSB doesn't change.
+//!
+//! An arithmetic shift right 1 bit position is performed on the contents of
+//! operand m. The contents of bit 0 are copied to the Carry flag and the
+//! previous contents of bit 7 remain unchanged. Bit 0 is the least-significant
+//! bit.
+void cpu::SRA() {
+        switch (opcode) {
+                case 0xCB2F:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB28:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB29:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB2A:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB2B:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB2C:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB2D:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB2E:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t oldValue = (uint8_t)operand2->Get();
+        uint8_t msb = (oldValue & 0x7);
+        uint8_t carry = oldValue & 0x1;
+        uint8_t newValue = (oldValue >> 1) | msb;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Shift right into Carry. MSB is set to 0.
+//!
+//! The contents of operand m are shifted right 1 bit position. The contents of
+//! bit 0 are copied to the Carry flag, and bit 7 is reset. Bit 0 is the
+//! least-significant bit.
+void cpu::SRL() {
+        switch (opcode) {
+                case 0xCB2F:
+                        operandReg = reg::A;
+                        break;
+                case 0xCB28:
+                        operandReg = reg::B;
+                        break;
+                case 0xCB29:
+                        operandReg = reg::C;
+                        break;
+                case 0xCB2A:
+                        operandReg = reg::D;
+                        break;
+                case 0xCB2B:
+                        operandReg = reg::E;
+                        break;
+                case 0xCB2C:
+                        operandReg = reg::H;
+                        break;
+                case 0xCB2D:
+                        operandReg = reg::L;
+                        break;
+                case 0xCB2E:
+                        operandRegPair = reg_pair::HL;
+                        break;
+        }
+
+        operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t oldValue = (uint8_t)operand2->Get();
+        uint8_t carry = oldValue & 0x1;
+        uint8_t newValue = oldValue >> 1;
+        operand2->Set(newValue);
+
+        FlagSet('z', !newValue);
+        FlagSet('n', 0);
+        FlagSet('h', 0);
+        FlagSet('c', carry);
+}
+
+//! \brief Test bit in register
+//!
+//! This instruction tests bit b in register r and sets the Z flag
+//! accordingly.
 void cpu::BIT() {
         operand1 = ((*this).*(instruction->getOperand1))();
         operand2 = ((*this).*(instruction->getOperand2))();
@@ -864,7 +1156,9 @@ void cpu::BIT() {
         FlagSet('z', operand2->Get() & mask);
 }
 
-//! Set bit in register
+//! \brief Set bit in register
+//!
+//! Bit b in register r (any of registers B, C, D, E, H, L, or A) is set.
 void cpu::SET() {
         operand1 = ((*this).*(instruction->getOperand1))();
         operand2 = ((*this).*(instruction->getOperand2))();
