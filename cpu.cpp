@@ -139,10 +139,10 @@ static std::map<int,instruction> instructionMap = {
         { 0x00C5, { "PUSH BC", &cpu::PUSH, &cpu::IMP, &cpu::REG, 16 } },
         { 0x00D5, { "PUSH DE", &cpu::PUSH, &cpu::IMP, &cpu::REG, 16 } },
         { 0x00E5, { "PUSH HL", &cpu::PUSH, &cpu::IMP, &cpu::REG, 16 } },
-        { 0x00F1, { "POP AF", &cpu::POP, &cpu::IMP, &cpu::REG, 12 } },
-        { 0x00C1, { "POP BC", &cpu::POP, &cpu::IMP, &cpu::REG, 12 } },
-        { 0x00D1, { "POP DE", &cpu::POP, &cpu::IMP, &cpu::REG, 12 } },
-        { 0x00E1, { "POP HL", &cpu::POP, &cpu::IMP, &cpu::REG, 12 } },
+        { 0x00F1, { "POP AF", &cpu::POP, &cpu::IMP, &cpu::RPR, 12 } },
+        { 0x00C1, { "POP BC", &cpu::POP, &cpu::IMP, &cpu::RPR, 12 } },
+        { 0x00D1, { "POP DE", &cpu::POP, &cpu::IMP, &cpu::RPR, 12 } },
+        { 0x00E1, { "POP HL", &cpu::POP, &cpu::IMP, &cpu::RPR, 12 } },
 
         // 8-bit ALU
         { 0x0087, { "ADD A,A", &cpu::ADD, &cpu::REG, &cpu::REG, 4 } },
@@ -244,17 +244,16 @@ static std::map<int,instruction> instructionMap = {
         { 0x0035, { "DEC (HL)", &cpu::DEC, &cpu::IMP, &cpu::IND, 12 } },
 
         // 16-bit Arithmetic
-        { 0x0009, { "ADD HL,BC", &cpu::ADD, &cpu::IND, &cpu::IMM, 8 } },
-        { 0x0019, { "ADD HL,DE", &cpu::ADD, &cpu::IND, &cpu::IMM, 8 } },
-        { 0x0029, { "ADD HL,HL", &cpu::ADD, &cpu::IND, &cpu::IMM, 8 } },
-        { 0x0039, { "ADD HL,SP", &cpu::ADD, &cpu::IND, &cpu::IMM, 8 } },
+        { 0x0009, { "ADD HL,BC", &cpu::ADD, &cpu::RPR, &cpu::RPR, 8 } },
+        { 0x0019, { "ADD HL,DE", &cpu::ADD, &cpu::RPR, &cpu::RPR, 8 } },
+        { 0x0029, { "ADD HL,HL", &cpu::ADD, &cpu::RPR, &cpu::RPR, 8 } },
+        { 0x0039, { "ADD HL,SP", &cpu::ADD, &cpu::RPR, &cpu::RPR, 8 } },
+        { 0x00E8, { "ADD SP,n",  &cpu::ADD, &cpu::RPR, &cpu::IMM, 16 } },
 
-        { 0x00E8, { "ADD SP,nn", &cpu::ADD, &cpu::IND, &cpu::IMM, 16 } },
-
-        { 0x000B, { "DEC BC", &cpu::DEC, &cpu::IMP, &cpu::IND, 8 } },
-        { 0x001B, { "DEC DE", &cpu::DEC, &cpu::IMP, &cpu::IND, 8 } },
-        { 0x002B, { "DEC HL", &cpu::DEC, &cpu::IMP, &cpu::IND, 8 } },
-        { 0x003B, { "DEC SP", &cpu::DEC, &cpu::IMP, &cpu::IND, 8 } },
+        { 0x000B, { "DEC BC", &cpu::DEC, &cpu::IMP, &cpu::RPR, 8 } },
+        { 0x001B, { "DEC DE", &cpu::DEC, &cpu::IMP, &cpu::RPR, 8 } },
+        { 0x002B, { "DEC HL", &cpu::DEC, &cpu::IMP, &cpu::RPR, 8 } },
+        { 0x003B, { "DEC SP", &cpu::DEC, &cpu::IMP, &cpu::IMP, 8 } },
 
         // Miscellaneous
         { 0x0037, { "SWAP A",    &cpu::SWAP, &cpu::IMP, &cpu::REG, 8 } },
@@ -555,7 +554,7 @@ int Parity(uint8_t byte) {
 //! is to load the data in Register 6 into Register C.
 std::shared_ptr<operand> cpu::REG() {
         auto result = std::make_shared<operand_reference>();
-        result->ref = GetRegister(operandReg);
+        result->ref = GetRegister(operandType.reg);
         return std::dynamic_pointer_cast<operand>(result);
 }
 
@@ -568,9 +567,36 @@ std::shared_ptr<operand> cpu::REG() {
 //!
 //! Generally, the register being used with IMP() is the Accumulator.
 std::shared_ptr<operand> cpu::IMP() {
+        // TODO: Treat 16-bit register specially?  Ie., DEC ss needs SP register...
         auto result = std::make_shared<operand_reference>();
-        result->ref = GetRegister(reg::A);
+        result->ref = GetRegister(reg8::A);
         return std::static_pointer_cast<operand>(result);
+}
+
+//! \brief Register Pair
+std::shared_ptr<operand> cpu::RPR() {
+        auto result = std::make_shared<operand_pair_reference>();
+
+        switch (operandType.regPair) {
+                case reg16::BC:
+                        result->ref1 = std::make_shared<uint8_t>(regB);
+                        result->ref2 = std::make_shared<uint8_t>(regC);
+                        break;
+                case reg16::DE:
+                        result->ref1 = std::make_shared<uint8_t>(regD);
+                        result->ref2 = std::make_shared<uint8_t>(regE);
+                        break;
+                case reg16::HL:
+                        result->ref1 = std::make_shared<uint8_t>(regH);
+                        result->ref2 = std::make_shared<uint8_t>(regL);
+                        break;
+                case reg16::AF:
+                        result->ref1 = std::make_shared<uint8_t>(regA);
+                        result->ref2 = std::make_shared<uint8_t>(regF);
+                        break;
+        }
+
+        return std::dynamic_pointer_cast<operand>(result);
 }
 
 //! Register Indirect Addressing
@@ -581,16 +607,16 @@ std::shared_ptr<operand> cpu::IMP() {
 std::shared_ptr<operand> cpu::IND() {
         uint8_t byteLo, byteHi;
 
-        switch(operandRegPair) {
-                case reg_pair::BC:
+        switch (operandType.regPair) {
+                case reg16::BC:
                         byteLo = regB;
                         byteHi = regC;
                         break;
-                case reg_pair::DE:
+                case reg16::DE:
                         byteLo = regD;
                         byteHi = regE;
                         break;
-                case reg_pair::HL:
+                case reg16::HL:
                         byteLo = regH;
                         byteHi = regL;
                         break;
@@ -618,7 +644,7 @@ std::shared_ptr<operand> cpu::BTA() {
         uint8_t whichReg = operand1->Get() & 0x7; // bits 2,1,0
 
         auto result = std::make_shared<operand_reference>();
-        result->ref = GetRegister(static_cast<gs::reg>(whichReg));
+        result->ref = GetRegister(static_cast<reg8>(whichReg));
         return std::dynamic_pointer_cast<operand>(result);
 }
 
@@ -632,23 +658,23 @@ std::shared_ptr<operand> cpu::BTI() {
         return std::dynamic_pointer_cast<operand>(result);
 }
 
-std::shared_ptr<uint8_t> cpu::GetRegister(gs::reg reg) {
+std::shared_ptr<uint8_t> cpu::GetRegister(reg8 reg) {
         switch (reg) {
-                case reg::B:
+                case reg8::B:
                         return std::make_shared<uint8_t>(regB);
-                case reg::C:
+                case reg8::C:
                         return std::make_shared<uint8_t>(regC);
-                case reg::D:
+                case reg8::D:
                         return std::make_shared<uint8_t>(regD);
-                case reg::E:
+                case reg8::E:
                         return std::make_shared<uint8_t>(regE);
-                case reg::H:
+                case reg8::H:
                         return std::make_shared<uint8_t>(regH);
-                case reg::L:
+                case reg8::L:
                         return std::make_shared<uint8_t>(regL);
-                case reg::A:
+                case reg8::A:
                         return std::make_shared<uint8_t>(regA);
-                case reg::F:
+                case reg8::F:
                         return std::make_shared<uint8_t>(regF);
                 default:
                         return nullptr;
@@ -748,35 +774,223 @@ uint8_t cpu::FlagGet(uint8_t bitToCheck) {
 // Operations
 //------------------------------------------------------------------------------
 
+void cpu::LD() {
+        switch (opcode) {
+                case 0x01:
+                        break;
+                case 0x11:
+                        break;
+                case 0x21:
+                        break;
+                case 0x31:
+                        break;
+        }
+}
+
+//! Push register pair nn onto stack. Decrement Stack Pointer (SP) twice.
+void cpu::PUSH() {
+        switch (opcode) {
+                case 0xF5:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::AF;
+                        break;
+                case 0xC5:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::BC;
+                        break;
+                case 0xD5:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::DE;
+                        break;
+                case 0xE5:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        break;
+        }
+
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        uint16_t word = operand2->Get();
+        msgBus->Write(--sp, static_cast<uint8_t>(word | 0xFF));
+        msgBus->Write(--sp, static_cast<uint8_t>(word >> 8));
+}
+
+//! Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP)
+//! twice.
+void cpu::POP() {
+        switch (opcode) {
+                case 0xF1:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::AF;
+                        break;
+                case 0xC1:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::BC;
+                        break;
+                case 0xD1:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::DE;
+                        break;
+                case 0xE1:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+
+        uint16_t word = 0;
+        uint8_t byte = msgBus->Read(sp++);
+        word = byte << 8;
+        byte = msgBus->Read(sp++);
+        word |= byte;
+
+        operand2->Set(word);
+}
+
+void cpu::ADD() {
+        switch (opcode) {
+                case 0xE8: {
+                        operandType.tag = reg_tag::regSP;
+                        operandType.regSP = reg_sp::SP;
+                        operand1 = ((*this).*(instruction->getOperand1))();
+                        operand2 = ((*this).*(instruction->getOperand2))();
+                        break;
+                }
+                case 0x09: {
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        operand1 = ((*this).*(instruction->getOperand1))();
+
+                        operandType.regPair = reg16::BC;
+                        operand2 = ((*this).*(instruction->getOperand2))();
+                        break;
+                }
+                case 0x19: {
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        operand1 = ((*this).*(instruction->getOperand1))();
+
+                        operandType.regPair = reg16::DE;
+                        operand2 = ((*this).*(instruction->getOperand2))();
+                        break;
+                }
+                case 0x29: {
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        operand1 = ((*this).*(instruction->getOperand1))();
+                        operand2 = ((*this).*(instruction->getOperand2))();
+                        break;
+                }
+                case 0x39: {
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        operand1 = ((*this).*(instruction->getOperand1))();
+
+                        operandType.tag = reg_tag::regSP;
+                        operandType.regSP = reg_sp::SP;
+                        operand2 = ((*this).*(instruction->getOperand2))();
+                        break;
+                }
+        }
+        auto left = operand1->Get();
+        auto right = operand2->Get();
+        operand1->Set(left + right);
+
+        FlagSet('z', 0);
+        FlagSet('n', 0);
+        // Set if carry from bit 11
+        FlagSet('h', ((left >> 0x11) & 0x1) && ((right >> 0x11) & 0x1));
+        // Set if carry from bit 15
+        FlagSet('h', ((left >> 0x15) & 0x1) && ((right >> 0x15) & 0x1));
+}
+
+//! \brief Increment wide register
+//!
+//! The contents of register pair ss (any of register pairs BC, DE, HL, or SP)
+//! are incremented.
+void cpu::INC() {
+        switch (opcode) {
+                case 0x03:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::BC;
+                        break;
+                case 0x13:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::DE;
+                        break;
+                case 0x23:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        break;
+                case 0x33:
+                        operandType.tag = reg_tag::regSP;
+                        operandType.regSP = reg_sp::SP;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        auto oldValue = operand2->Get();
+        auto newValue = oldValue + 1;
+        operand2->Set(newValue);
+}
+
+//! \brief Decrement wide register
+//!
+//! The contents of register pair ss (any of the register pairs BC, DE, HL, or
+//! SP) are decremented.
+void cpu::DEC() {
+        switch (opcode) {
+                case 0x0B:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::BC;
+                        break;
+                case 0x1B:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::DE;
+                        break;
+                case 0x2B:
+                        operandType.tag = reg_tag::reg16;
+                        operandType.regPair = reg16::HL;
+                        break;
+                case 0x3B:
+                        operandType.tag = reg_tag::regSP;
+                        operandType.regSP = reg_sp::SP;
+                        break;
+        }
+        operand2 = ((*this).*(instruction->getOperand2))();
+        auto oldValue = operand2->Get();
+        auto newValue = oldValue - 1;
+        operand2->Set(newValue);
+}
+
 //! \brief Swap upper & lower nibbles of operand.
 void cpu::SWAP() {
         switch (opcode) {
                 case 0xCB37:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB30:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB31:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB32:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB33:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB34:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB35:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB36:
-                        operandReg = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
-
+        operand2 = ((*this).*(instruction->getOperand2))();
         uint8_t oldValue = static_cast<uint8_t>(operand2->Get());
         uint8_t nibbleHi = Nibble(oldValue, 1);
         uint8_t nibbleLo = Nibble(oldValue, 0);
@@ -837,8 +1051,8 @@ void cpu::DAA() {
 }
 
 //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
-void cpu:CPL() {
-        operandReg = reg::A;
+void cpu::CPL() {
+        operandType.reg = reg8::A;
         operand2 = ((*this).*(instruction->getOperand2))();
         uint8_t val = static_cast<uint8_t>(operand2->Get());
         val = ~val;
@@ -853,20 +1067,20 @@ void cpu:CPL() {
 //!
 //! The contents of the Accumulator are negated (two’s complement). This method
 //! is the same as subtracting the contents of the Accumulator from zero.
-void cpu::NEG() {
-        operand2 = ((*this).*(instruction->getOperand2))();
-        uint16_t val = static_cast<uint8_t>(operand2->Get());
-        uint16_t onesComplement = ~val;
-        uint16_t twosComplement = onesComplement + 1;
-        operand2->Set(static_cast<uint8_t>(twosComplement));
+// void cpu::NEG() {
+//         operand2 = ((*this).*(instruction->getOperand2))();
+//         uint16_t val = static_cast<uint8_t>(operand2->Get());
+//         uint16_t onesComplement = ~val;
+//         uint16_t twosComplement = onesComplement + 1;
+//         operand2->Set(static_cast<uint8_t>(twosComplement));
 
-        FlagSet('s', twosComplement & 0x7);
-        FlagSet('z', !twosComplement);
-        // TODO: set if borrow from bit 4. // FlagSet('h', (twosComplement >> 0x4)
-        FlagSet('p', 0x80 == val);
-        FlagSet('n', 0);
-        FlagSet('c', !(0x00 == val));
-}
+//         FlagSet('s', twosComplement & 0x7);
+//         FlagSet('z', !twosComplement);
+//         // TODO: set if borrow from bit 4. // FlagSet('h', (twosComplement >> 0x4)
+//         FlagSet('p', 0x80 == val);
+//         FlagSet('n', 0);
+//         FlagSet('c', !(0x00 == val));
+// }
 
 //! \brief The carry flag is inverted in the F register.
 void cpu::CCF() {
@@ -921,7 +1135,7 @@ void cpu::EI() {
 //! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
 //! 0. Bit 0 is the least-significant bit.
 void cpu::RLCA() {
-        operandReg = reg::A;
+        operandType.reg = reg8::A;
         operand2 = ((*this).*(instruction->getOperand2))();
         uint16_t oldValue = operand2->Get();
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
@@ -940,7 +1154,7 @@ void cpu::RLCA() {
 //! through the Carry flag. The previous contents of the Carry flag are copied
 //! to bit 0. Bit 0 is the least-significant bit.
 void cpu::RLA() {
-        operandReg = reg::A;
+        operandType.reg = reg8::A;
         operand2 = ((*this).*(instruction->getOperand2))();
         uint16_t oldValue = operand2->Get();
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
@@ -960,7 +1174,7 @@ void cpu::RLA() {
 //! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
 //! least-significant bit.
 void cpu::RRCA() {
-        operandReg = reg::A;
+        operandType.reg = reg8::A;
         operand2 = ((*this).*(instruction->getOperand2))();
         uint16_t oldValue = operand2->Get();
         uint8_t carry = (uint8_t)oldValue & 0x1;
@@ -979,7 +1193,7 @@ void cpu::RRCA() {
 //! position through the Carry flag. The previous contents of the Carry flag are
 //! copied to bit 7. Bit 0 is the least-significant bit.
 void cpu::RRA() {
-        operandReg = reg::A;
+        operandType.reg = reg8::A;
         operand2 = ((*this).*(instruction->getOperand2))();
         uint16_t oldValue = operand2->Get();
         uint8_t carry = (uint8_t)oldValue & 0x1;
@@ -1008,28 +1222,28 @@ void cpu::RRA() {
 void cpu::RLC() {
         switch (opcode) {
                 case 0xCB07:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB00:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB01:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB02:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB03:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB04:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB05:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB06:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
         operand2 = ((*this).*(instruction->getOperand2))();
@@ -1054,28 +1268,28 @@ void cpu::RLC() {
 void cpu::RL() {
         switch (opcode) {
                 case 0xCB17:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB10:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB11:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB12:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB13:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB14:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB15:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB16:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
         operand2 = ((*this).*(instruction->getOperand2))();
@@ -1101,28 +1315,28 @@ void cpu::RL() {
 void cpu::RRC() {
         switch (opcode) {
                 case 0xCB0F:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB08:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB09:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB0A:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB0B:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB0C:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB0D:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB0E:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
         operand2 = ((*this).*(instruction->getOperand2))();
@@ -1148,28 +1362,28 @@ void cpu::RRC() {
 void cpu::RR() {
         switch (opcode) {
                 case 0xCB0F:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB08:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB09:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB0A:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB0B:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB0C:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB0D:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB0E:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
         operand2 = ((*this).*(instruction->getOperand2))();
@@ -1195,28 +1409,28 @@ void cpu::RR() {
 void cpu::SLA() {
         switch (opcode) {
                 case 0xCB27:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB20:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB21:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB22:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB23:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB24:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB25:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB26:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
 
@@ -1243,28 +1457,28 @@ void cpu::SLA() {
 void cpu::SRA() {
         switch (opcode) {
                 case 0xCB2F:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB28:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB29:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB2A:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB2B:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB2C:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB2D:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB2E:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
 
@@ -1289,28 +1503,28 @@ void cpu::SRA() {
 void cpu::SRL() {
         switch (opcode) {
                 case 0xCB2F:
-                        operandReg = reg::A;
+                        operandType.reg = reg8::A;
                         break;
                 case 0xCB28:
-                        operandReg = reg::B;
+                        operandType.reg = reg8::B;
                         break;
                 case 0xCB29:
-                        operandReg = reg::C;
+                        operandType.reg = reg8::C;
                         break;
                 case 0xCB2A:
-                        operandReg = reg::D;
+                        operandType.reg = reg8::D;
                         break;
                 case 0xCB2B:
-                        operandReg = reg::E;
+                        operandType.reg = reg8::E;
                         break;
                 case 0xCB2C:
-                        operandReg = reg::H;
+                        operandType.reg = reg8::H;
                         break;
                 case 0xCB2D:
-                        operandReg = reg::L;
+                        operandType.reg = reg8::L;
                         break;
                 case 0xCB2E:
-                        operandRegPair = reg_pair::HL;
+                        operandType.regPair = reg16::HL;
                         break;
         }
 
@@ -1490,13 +1704,13 @@ void cpu::JR() {
 //! 110 | Sign-Positive (P) | S
 //! 111 | Sign-Negative (M) | S
 void cpu::CALL() {
-        operandReg = reg::F;
+        operandType.reg = reg8::F;
         operand1 = ((*this).*(instruction->getOperand1))();
         operand2 = ((*this).*(instruction->getOperand2))();
 
         auto jump = [this](uint16_t address) {
-                            stack.push_back(pc);
-                            sp++;
+                            msgBus->Write(--sp, static_cast<uint8_t>(pc & 0xFF));
+                            msgBus->Write(--sp, static_cast<uint8_t>(pc >> 8));
                             pc = address;
                     };
 
@@ -1557,17 +1771,18 @@ void cpu::RST() {
                         break;
         }
 
-        stack.push_back(pc);
-        sp++;
+        msgBus->Write(--sp, static_cast<uint8_t>(pc & 0xFF));
+        msgBus->Write(--sp, static_cast<uint8_t>(pc >> 8));
         pc = address;
 }
 
 void cpu::RET() {
-        uint16_t address = stack[sp];
-        stack.pop_back();
-
-        auto jump = [this](uint16_t address) {
-                            sp--;
+        auto jump = [this]() {
+                            uint16_t address;
+                            uint8_t byte = msgBus->Read(sp++);
+                            address = byte << 8;
+                            byte = msgBus->Read(sp++);
+                            address = address | byte;
                             pc = address;
                     };
 
@@ -1576,23 +1791,23 @@ void cpu::RET() {
 
         switch (opcode) {
                 case 0xC9:
-                        jump(address);
+                        jump();
                         break;
                 case 0xC0:
                         if (0 == zero)
-                                jump(address);
+                                jump();
                         break;
                 case 0xC8:
                         if (0 != zero)
-                                jump(address);
+                                jump();
                         break;
                 case 0xD0:
                         if (0 == carry)
-                                jump(address);
+                                jump();
                         break;
                 case 0xD8:
                         if (0 != carry)
-                                jump(address);
+                                jump();
                         break;
         }
 }

@@ -4,7 +4,7 @@
 
   File: cpu.hpp
   Created: 2019-08-29
-  Updated: 2019-09-03
+  Updated: 2019-09-07
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -12,6 +12,60 @@
   you are welcome to redistribute it under certain conditions; See LICENSE for
   details.
  ******************************************************************************/
+
+/*
+  NOTE / TODO
+  The current implementation of opcodes here tries to pre-allocated data statically and then use that data at runtime.
+  I don't like this approach because the opcodes are not homogenous, so each instruction needs to include special conditions for each opcode.
+
+  I think a better approach is to dynamically configure the following instruction.
+  Here's an example in the current system:
+
+      // statically allocate metadata:
+      instructions = {
+        ...,
+        { 0x00F5, { "PUSH AF", PUSH, IMP, RPR, 16 } },
+        ...
+      }
+
+      void cpu::PUSH() {
+        switch (opcode) {
+          ...
+          case 0xF5:
+            ...
+            break;
+          ...
+        }
+
+        // Do instruction here
+      }
+
+  And here's what I'm suggesting:
+
+// statically allocate metadata:
+opcodes = {
+  ...
+  { 0x00F5, { Opcode_0x00F5, "PUSH AF", 16 } }
+  ...
+}
+
+void cpu::Execute() {
+  ...
+  opcodes[opcode]->fn();
+  ...
+}
+
+void cpu::Opcode_0x00F5() {
+  operand1 = std::make_shared<operand_sp_reference>();
+  operand1->ref = regSP
+
+  operand2 = std::make_shared<operand_pair_reference>();
+  operand2->ref1 = A;
+  operand2->ref2 = F;
+
+  ADD();
+}
+ */
 
 /*
   Flags:
@@ -27,8 +81,7 @@
 #ifndef CPU_VERSION
 #define CPU_VERSION "0.1.0" //!< include guard
 
-#include <vector>
-#include <memory>
+#include <memory> // TODO: Remove dependency
 #include <cstdint>
 
 namespace gs {
@@ -37,13 +90,23 @@ namespace gs {
 //! \see http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 //! \see http://z80.info/zip/z80cpu_um.pdf
 
-enum reg_pair { AF, BC, DE, HL };
-enum reg { B = 0, C, D, E, H, L, A = 7, F = 99 };
-
 class bus;
 class operand;
 
 struct instruction;
+
+enum class reg8 { A,B,C,D,E,F,H,L };
+enum class reg16 { AF,BC,DE,HL };
+enum class reg_sp { SP };
+enum class reg_tag { reg8,reg16,regSP };
+struct operand_type {
+        reg_tag tag;
+        union {
+                reg8 reg;
+                reg16 regPair;
+                reg_sp regSP;
+        };
+};
 
 class cpu {
         // General purpose registers
@@ -91,6 +154,7 @@ public:
         std::shared_ptr<operand> IDX();
         std::shared_ptr<operand> REG();
         std::shared_ptr<operand> IMP();
+        std::shared_ptr<operand> RPR();
         std::shared_ptr<operand> IND();
         std::shared_ptr<operand> BTA();
         std::shared_ptr<operand> BTI();
@@ -163,9 +227,7 @@ private:
         // Variables and functions to assist in emulation
         uint16_t opcode = 0x0;
 
-        reg operandReg;
-        reg_pair operandRegPair;
-        std::vector<uint16_t> stack;
+        operand_type operandType;
         std::shared_ptr<operand> operand1;
         std::shared_ptr<operand> operand2;
         std::shared_ptr<gs::instruction> instruction = nullptr;
@@ -174,7 +236,7 @@ private:
         void FlagSet(char, uint8_t);
         uint8_t FlagGet(char);
         uint8_t FlagGet(uint8_t);
-        std::shared_ptr<uint8_t> GetRegister(gs::reg);
+        std::shared_ptr<uint8_t> GetRegister(reg8);
         uint8_t MaskForBitAt(uint8_t);
 };
 

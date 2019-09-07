@@ -25,16 +25,28 @@ uint16_t operand_address::Get() {
         return bus->Read(address);
 }
 
-void operand_address::Set(uint8_t value) {
-        bus->Write(address, value);
+// TODO NOTE Only uses the lower 8 bits!
+void operand_address::Set(uint16_t value) {
+        bus->Write(address, static_cast<uint8_t>(value));
 }
 
 uint16_t operand_reference::Get() {
         return *ref;
 }
 
-void operand_reference::Set(uint8_t value) {
+void operand_reference::Set(uint16_t value) {
         *ref = value;
+}
+
+uint16_t operand_pair_reference::Get() {
+        uint8_t hi = *ref1;
+        uint8_t lo = *ref2;
+        return (hi << 8) | lo;
+}
+
+void operand_pair_reference::Set(uint16_t value) {
+        *ref1 = static_cast<uint8_t>(value >> 8);
+        *ref2 = static_cast<uint8_t>(value);
 }
 
 } // namespace gs
