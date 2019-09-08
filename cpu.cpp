@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-09-07
+  Updated: 2019-09-08
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -872,8 +872,96 @@ void cpu::impl::Op_00E2() {
         LD();
 }
 
-// HERE
+//! \brief LDD A,(HL)
+//!
+//! Put value at address HL into A. Decrement HL. Same as: LD A,(HL) - DEC HL
+void cpu::impl::Op_003A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
 
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+
+        mCpu->HL--;
+}
+
+//! \brief LDD (HL),A
+//!
+//! Put A into memory address HL. Decrement HL. Same as: LD (HL),A - DEC HL
+void cpu::impl::Op_0032() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+
+        mCpu->HL--;
+}
+
+//! \brief LDI A,(HL)
+//!
+//! Put value at address HL into A. Increment HL. Same as: LD A,(HL) - INC HL
+void cpu::impl::Op_002A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+
+        mCpu->HL++;
+}
+
+//! \brief LDI (HL),A
+//!
+//! Put A into memory address HL. Increment HL. Same as: LD (HL),A - INC HL
+void cpu::impl::Op_0022() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+
+        mCpu->HL++;
+}
+
+//! \brief LDH (n),A
+//!
+//! Put A into memory address $FF00+n
+void cpu::impl::Op_00E0() {
+        uint16_t address = mBus->Read(mCpu->pc++) + 0xFF00;
+        auto op1 = std::make_shared<operand_address>(address, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LDH A,(n)
+//!
+//! Put memory address $FF00+n into A.
+void cpu::impl::Op_00F0() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t address = mBus->Read(mCpu->pc++) + 0xFF00;
+        auto op2 = std::make_shared<operand_address>(address, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+// HERE ------------------------------------------------------------------------
+// TODO(NEXT): 16-Bit Loads
 
 // These instructions are of the form RST n where the current address is pushed
 // onto the stack, then n specifies which address to jump to.
