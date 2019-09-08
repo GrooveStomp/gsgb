@@ -16,7 +16,6 @@
 #define OPERAND_VERSION "0.1.0" //!< include guard
 
 #include <cstdint>
-#include <memory>
 
 //! \file operand.hpp
 
@@ -34,40 +33,45 @@ class operand_value : public operand {
 public:
         uint16_t value;
 
+        operand_value(uint16_t);
         virtual uint16_t Get();
         virtual void Set(uint16_t value) {}; // nop for value types.
 };
 
 class operand_address : public operand {
 public:
-        std::shared_ptr<gs::bus> bus;
+        bus *msgBus;
         uint16_t address;
 
+        operand_address(uint16_t, bus *);
         virtual uint16_t Get();
         virtual void Set(uint16_t value);
 };
 
 class operand_reference : public operand {
 public:
-        std::shared_ptr<uint8_t> ref;
+        uint8_t *ref;
 
+        operand_reference(uint8_t);
         virtual uint16_t Get();
         virtual void Set(uint16_t value);
 };
 
 class operand_pair_reference : public operand {
 public:
-        std::shared_ptr<uint8_t> ref1;
-        std::shared_ptr<uint8_t> ref2;
+        uint8_t *ref1;
+        uint8_t *ref2;
 
+        operand_pair_reference(uint16_t);
         virtual uint16_t Get();
         void Set(uint16_t value);
 };
 
 class operand_sp_reference : public operand {
 public:
-        std::shared_ptr<uint16_t> ref;
+        uint16_t *ref;
 
+        operand_sp_reference(uint16_t);
         virtual uint16_t Get();
         virtual void Set(uint16_t value);
 };

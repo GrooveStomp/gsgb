@@ -22,12 +22,12 @@ uint16_t operand_value::Get() {
 }
 
 uint16_t operand_address::Get() {
-        return bus->Read(address);
+        return msgBus->Read(address);
 }
 
 // TODO NOTE Only uses the lower 8 bits!
 void operand_address::Set(uint16_t value) {
-        bus->Write(address, static_cast<uint8_t>(value));
+        msgBus->Write(address, static_cast<uint8_t>(value));
 }
 
 uint16_t operand_reference::Get() {
