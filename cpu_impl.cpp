@@ -4,7 +4,7 @@
 
   File: cpu_impl.cpp
   Created: 2019-09-07
-  Updated: 2019-09-08
+  Updated: 2019-09-10
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -43,10 +43,10 @@ public:
         // Arithmetic/logic operations
         void PUSH();
         void POP();
-        void ADD();
-        void ADC();
-        void SUB();
-        void SBC();
+        void ADD8();
+        void ADC8();
+        void SUB8();
+        void SBC8();
         void AND();
         void OR();
         void XOR();

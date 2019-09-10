@@ -59,6 +59,12 @@ cpu::impl::impl(cpu *cpuIn, bus *busIn) {
 cpu::impl::~impl() {
 }
 
+uint8_t TwosComplement(uint8_t num) {
+        return (~num) + 1;
+}
+
+//-- 8-Bit Load Opcodes --------------------------------------------------------
+
 // These operations are of the form LD R,n where R is a register and n is an
 // 8-bit immediate value that is loaded into R.
 
@@ -964,6 +970,8 @@ void cpu::impl::Op_00F0() {
         LD();
 }
 
+//-- 16-Bit Load Opcodes -------------------------------------------------------
+
 //! \brief LD BC,nn
 //!
 //! Put 16-bit value nn into register pair BC.
@@ -1154,6 +1162,347 @@ void cpu::impl::Op_00E1() {
 
         POP();
 }
+
+//-- 8-Bit ALU Opcodes ---------------------------------------------------------
+
+//! \brief ADD A,A
+void cpu::impl::Op_0087() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,B
+void cpu::impl::Op_0080() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,C
+void cpu::impl::Op_0081() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,D
+void cpu::impl::Op_0082() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,E
+void cpu::impl::Op_0083() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,H
+void cpu::impl::Op_0084() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,L
+void cpu::impl::Op_0085() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,(HL)
+void cpu::impl::Op_0086() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADD A,#
+void cpu::impl::Op_00C6() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>(byte);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADD8();
+}
+
+//! \brief ADC A,A
+void cpu::impl::Op_008F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,B
+void cpu::impl::Op_0088() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,C
+void cpu::impl::Op_0089() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,D
+void cpu::impl::Op_008A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,E
+void cpu::impl::Op_008B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,H
+void cpu::impl::Op_008C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,L
+void cpu::impl::Op_008D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,(HL)
+void cpu::impl::Op_008E() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief ADC A,#
+void cpu::impl::Op_00CE() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>(byte);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        ADC8();
+}
+
+//! \brief SUB A
+void cpu::impl::Op_0097() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB B
+void cpu::impl::Op_0090() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB C
+void cpu::impl::Op_0091() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB D
+void cpu::impl::Op_0092() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB E
+void cpu::impl::Op_0093() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB H
+void cpu::impl::Op_0094() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB L
+void cpu::impl::Op_0095() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB (HL)
+void cpu::impl::Op_0096() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SUB #
+void cpu::impl::Op_00D6() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SUB8();
+}
+
+//! \brief SBC A
+void cpu::impl::Op_009F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC B
+void cpu::impl::Op_0098() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC C
+void cpu::impl::Op_0099() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC D
+void cpu::impl::Op_009A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC E
+void cpu::impl::Op_009B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC H
+void cpu::impl::Op_009C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC L
+void cpu::impl::Op_009D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+//! \brief SBC (HL)
+void cpu::impl::Op_009E() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SBC8();
+}
+
+// TODO: HERE: 8-Bit AND, OR, XOR, CP, INC, DEC
 
 // These instructions are of the form RST n where the current address is pushed
 // onto the stack, then n specifies which address to jump to.
@@ -1993,62 +2342,74 @@ void cpu::impl::POP() {
         operand1->Set(word);
 }
 
-// void cpu::ADD() {
-//         switch (opcode) {
-//                 case 0xE8: {
-//                         operandType.tag = reg_tag::regSP;
-//                         operandType.regSP = reg_sp::SP;
-//                         operand1 = ((*this).*(instruction->getOperand1))();
-//                         operand2 = ((*this).*(instruction->getOperand2))();
-//                         break;
-//                 }
-//                 case 0x09: {
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         operand1 = ((*this).*(instruction->getOperand1))();
+void cpu::impl::ADD8() {
+        uint8_t left = operand1->Get();
+        uint8_t right = operand2->Get();
 
-//                         operandType.regPair = reg16::BC;
-//                         operand2 = ((*this).*(instruction->getOperand2))();
-//                         break;
-//                 }
-//                 case 0x19: {
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         operand1 = ((*this).*(instruction->getOperand1))();
+        uint8_t sum = left + right;
+        bool halfCarry = ((left & 0xF) + (right & 0xF)) & 0x10;
+        bool carry = ((uint16_t)left + (uint16_t)right) & 0x100;
 
-//                         operandType.regPair = reg16::DE;
-//                         operand2 = ((*this).*(instruction->getOperand2))();
-//                         break;
-//                 }
-//                 case 0x29: {
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         operand1 = ((*this).*(instruction->getOperand1))();
-//                         operand2 = ((*this).*(instruction->getOperand2))();
-//                         break;
-//                 }
-//                 case 0x39: {
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         operand1 = ((*this).*(instruction->getOperand1))();
+        operand1->Set(sum);
 
-//                         operandType.tag = reg_tag::regSP;
-//                         operandType.regSP = reg_sp::SP;
-//                         operand2 = ((*this).*(instruction->getOperand2))();
-//                         break;
-//                 }
-//         }
-//         auto left = operand1->Get();
-//         auto right = operand2->Get();
-//         operand1->Set(left + right);
+        mCpu->FlagSet('z', 0 == sum);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', halfCarry);
+        mCpu->FlagSet('c', carry);
+}
 
-//         FlagSet('z', 0);
-//         FlagSet('n', 0);
-//         // Set if carry from bit 11
-//         FlagSet('h', ((left >> 0x11) & 0x1) && ((right >> 0x11) & 0x1));
-//         // Set if carry from bit 15
-//         FlagSet('h', ((left >> 0x15) & 0x1) && ((right >> 0x15) & 0x1));
-// }
+//! The operand, along with the Carry Flag (C in the F Register) is added to the
+//! contents of the Accumulator, and the result is stored in the Accumulator.
+void cpu::impl::ADC8() {
+        uint8_t left = operand1->Get();
+        uint8_t right = operand2->Get();
+
+        uint8_t prevCarry = mCpu->FlagGet('c') ? 1 : 0;
+        uint8_t sum = left + right + prevCarry;
+        bool halfCarry = ((left & 0xF) + (right & 0xF) + prevCarry) & 0x10;
+        bool carry = ((uint16_t)left + (uint16_t)right + prevCarry) & 0x100;
+
+        operand1->Set(sum);
+
+        mCpu->FlagSet('z', 0 == sum);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', halfCarry);
+        mCpu->FlagSet('c', carry);
+}
+
+void cpu::impl::SUB8() {
+        uint8_t minuend = mCpu->A;
+        uint8_t subtrahend = TwosComplement(operand1->Get());
+
+        uint8_t difference = minuend - subtrahend;
+        bool halfCarry = ((minuend & 0xF) + (subtrahend & 0xF)) & 0x10;
+        bool carry = ((uint16_t)minuend + (uint16_t)subtrahend) & 0x100;
+
+        operand1->Set(difference);
+
+        mCpu->FlagSet('z', 0 == difference);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', halfCarry); // TODO: invert logic?
+        mCpu->FlagSet('c', carry); // TODO: invert logic?
+}
+
+void cpu::impl::SBC8() {
+        uint8_t minuend = mCpu->A;
+        uint8_t prevCarry = mCpu->FlagGet('c') ? 1 : 0;
+        uint8_t subtrahend = operand1->Get() + prevCarry;
+        subtrahend = TwosComplement(subtrahend);
+
+        uint8_t difference = minuend + subtrahend;
+        bool halfCarry = ((minuend & 0xF) + (subtrahend & 0xF)) & 0x10;
+        bool carry = ((uint16_t)minuend + (uint16_t)subtrahend) & 0x100;
+
+        operand1->Set(difference);
+
+        mCpu->FlagSet('z', 0 == difference);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', halfCarry); // TODO: invert logic?
+        mCpu->FlagSet('c', carry); // TODO: invert logic?
+}
 
 // //! \brief Increment wide register
 // //!
