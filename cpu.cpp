@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-09-08
+  Updated: 2019-09-10
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -33,19 +33,23 @@ struct instruction {
         unsigned int cycles;
 };
 
-// TODO: These enums and operand_type might not even be needed...
-enum class reg8 { A,B,C,D,E,F,H,L };
-enum class reg16 { AF,BC,DE,HL };
-enum class reg_sp { SP };
-enum class reg_tag { reg8,reg16,regSP };
-struct operand_type {
-        reg_tag tag;
-        union {
-                reg8 reg;
-                reg16 regPair;
-                reg_sp regSP;
-        };
-};
+cpu::cpu(bus *messageBus) {
+        BC = 0;
+        DE = 0;
+        HL = 0;
+        AF = 0;
+        R = 0;
+        PC = 0x100;
+        SP = 0;
+        I = 0;
+        opcode = 0x0;
+        msgBus = messageBus;
+
+        implementation = new impl(this, messageBus);
+}
+
+cpu::~cpu() {
+}
 
 cpu::impl::impl(cpu *cpuIn, bus *busIn) {
         mCpu = cpuIn;
@@ -62,7 +66,7 @@ void cpu::impl::Op_0006() {
         auto op1 = std::make_shared<operand_reference>(mCpu->B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -72,7 +76,7 @@ void cpu::impl::Op_000E() {
         auto op1 = std::make_shared<operand_reference>(mCpu->C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -82,7 +86,7 @@ void cpu::impl::Op_0016() {
         auto op1 = std::make_shared<operand_reference>(mCpu->D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -92,7 +96,7 @@ void cpu::impl::Op_001E() {
         auto op1 = std::make_shared<operand_reference>(mCpu->E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -102,7 +106,7 @@ void cpu::impl::Op_0026() {
         auto op1 = std::make_shared<operand_reference>(mCpu->H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -112,7 +116,7 @@ void cpu::impl::Op_002E() {
         auto op1 = std::make_shared<operand_reference>(mCpu->L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -685,7 +689,7 @@ void cpu::impl::Op_0036() {
         auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -718,8 +722,8 @@ void cpu::impl::Op_00FA() {
         auto op1 = std::make_shared<operand_reference>(mCpu->A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        uint8_t lsb = mBus->Read(mCpu->pc++);
-        uint8_t msb = mBus->Read(mCpu->pc++);
+        uint8_t lsb = mBus->Read(mCpu->PC++);
+        uint8_t msb = mBus->Read(mCpu->PC++);
         uint16_t address = (msb << 8) | lsb;
 
         auto op2 = std::make_shared<operand_address>(address, mBus);
@@ -732,7 +736,7 @@ void cpu::impl::Op_003E() {
         auto op1 = std::make_shared<operand_reference>(mCpu->A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->pc++));
+        auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -832,8 +836,8 @@ void cpu::impl::Op_0077() {
 }
 
 void cpu::impl::Op_00EA() {
-        uint8_t lsb = mBus->Read(mCpu->pc++);
-        uint8_t msb = mBus->Read(mCpu->pc++);
+        uint8_t lsb = mBus->Read(mCpu->PC++);
+        uint8_t msb = mBus->Read(mCpu->PC++);
         uint16_t address = (msb << 8) | lsb;
         auto op1 = std::make_shared<operand_address>(address, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
@@ -936,7 +940,7 @@ void cpu::impl::Op_0022() {
 //!
 //! Put A into memory address $FF00+n
 void cpu::impl::Op_00E0() {
-        uint16_t address = mBus->Read(mCpu->pc++) + 0xFF00;
+        uint16_t address = mBus->Read(mCpu->PC++) + 0xFF00;
         auto op1 = std::make_shared<operand_address>(address, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
@@ -953,15 +957,203 @@ void cpu::impl::Op_00F0() {
         auto op1 = std::make_shared<operand_reference>(mCpu->A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        uint16_t address = mBus->Read(mCpu->pc++) + 0xFF00;
+        uint16_t address = mBus->Read(mCpu->PC++) + 0xFF00;
         auto op2 = std::make_shared<operand_address>(address, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
-// HERE ------------------------------------------------------------------------
-// TODO(NEXT): 16-Bit Loads
+//! \brief LD BC,nn
+//!
+//! Put 16-bit value nn into register pair BC.
+void cpu::impl::Op_0001() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t lo = mBus->Read(mCpu->PC++);
+        uint16_t hi = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LD DE,nn
+//!
+//! Put 16-bit value nn into register pair BC.
+void cpu::impl::Op_0011() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t lo = mBus->Read(mCpu->PC++);
+        uint16_t hi = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LD HL,nn
+//!
+//! Put 16-bit value nn into register pair BC.
+void cpu::impl::Op_0021() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t lo = mBus->Read(mCpu->PC++);
+        uint16_t hi = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LD SP,nn
+//!
+//! Put 16-bit value nn into Stack Pointer (SP).
+void cpu::impl::Op_0031() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t lo = mBus->Read(mCpu->PC++);
+        uint16_t hi = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LD SP,HL
+//!
+//! Put HL into Stack Pointer (SP).
+void cpu::impl::Op_00F9() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->HL);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief LDHL SP,n
+//!
+//! Put SP + n effective address into HL.
+void cpu::impl::Op_00F8() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        uint16_t value = mCpu->SP;
+        uint16_t byte = mBus->Read(mCpu->PC++);
+        auto op2 = std::make_shared<operand_value>(value + byte);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+
+        bool halfCarry = ((value & 0xFFF) + (byte & 0xFFF)) & 0x1000;
+        bool carry = ((uint32_t)value + (uint32_t)byte) & 0x10000;
+
+        mCpu->FlagSet('z', 0);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', halfCarry);
+        mCpu->FlagSet('c', carry);
+}
+
+//! \brief LD (nn),SP
+//!
+//! Put Stack Pointer (SP) at address nn.
+void cpu::impl::Op_0008() {
+        uint16_t lo = mBus->Read(mCpu->PC++);
+        uint16_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_address>((hi << 8) + lo, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->SP);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        LD();
+}
+
+//! \brief PUSH AF
+//!
+//! Push register pair AF onto stack.  Decrement Stack Pointer (SP) twice.
+void cpu::impl::Op_00F5() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->AF);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        PUSH();
+}
+
+//! \brief PUSH BC
+//!
+//! Push register pair BC onto stack.  Decrement Stack Pointer (SP) twice.
+void cpu::impl::Op_00C5() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        PUSH();
+}
+
+//! \brief PUSH DE
+//!
+//! Push register pair DE onto stack.  Decrement Stack Pointer (SP) twice.
+void cpu::impl::Op_00D5() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        PUSH();
+}
+
+//! \brief PUSH HL
+//!
+//! Push register pair HL onto stack.  Decrement Stack Pointer (SP) twice.
+void cpu::impl::Op_00E5() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        PUSH();
+}
+
+//! \brief POP AF
+//!
+//! Pop two bytes off of the stack into AF. Increment Stack Pointer (SP) twice.
+void cpu::impl::Op_00F1() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->AF);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        POP();
+}
+
+//! \brief POP BC
+//!
+//! Pop two bytes off of the stack into BC. Increment Stack Pointer (SP) twice.
+void cpu::impl::Op_00C1() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        POP();
+}
+
+//! \brief POP DE
+//!
+//! Pop two bytes off of the stack into DE. Increment Stack Pointer (SP) twice.
+void cpu::impl::Op_00D1() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        POP();
+}
+
+//! \brief POP HL
+//!
+//! Pop two bytes off of the stack into HL. Increment Stack Pointer (SP) twice.
+void cpu::impl::Op_00E1() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        POP();
+}
 
 // These instructions are of the form RST n where the current address is pushed
 // onto the stack, then n specifies which address to jump to.
@@ -1423,25 +1615,6 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00D9, { "RETI",   &cpu::impl::Op_00D9,8 } },
 };
 
-//------------------------------------------------------------------------------
-// Class stuff
-//------------------------------------------------------------------------------
-
-cpu::cpu(bus *messageBus) {
-        BC = 0;
-        DE = 0;
-        HL = 0;
-        AF = 0;
-        r = 0;
-        pc = 0x100;
-        sp = 0;
-        i = 0;
-        opcode = 0x0;
-        msgBus = messageBus;
-
-        implementation = new impl(this, messageBus);
-}
-
 // //------------------------------------------------------------------------------
 // // Addressing modes
 // //------------------------------------------------------------------------------
@@ -1456,7 +1629,7 @@ cpu::cpu(bus *messageBus) {
 // //! code.
 // std::shared_ptr<operand> cpu::IMM() {
 //         auto result = std::make_shared<operand_value>();
-//         result->value = 0 | msgBus->Read(mCpu->pc++);
+//         result->value = 0 | msgBus->Read(mCpu->PC++);
 //         return std::dynamic_pointer_cast<operand>(result);
 // }
 
@@ -1470,8 +1643,8 @@ cpu::cpu(bus *messageBus) {
 // std::shared_ptr<operand> cpu::IME() {
 //         auto result = std::make_shared<operand_value>();
 //         result->value = 0;
-//         result->value |= msgBus->Read(mCpu->pc++);
-//         result->value |= (msgBus->Read(mCpu->pc++) << 8);
+//         result->value |= msgBus->Read(mCpu->PC++);
+//         result->value |= (msgBus->Read(mCpu->PC++) << 8);
 //         return std::dynamic_pointer_cast<operand>(result);
 // }
 
@@ -1504,7 +1677,7 @@ cpu::cpu(bus *messageBus) {
 // //! to –126 from the jump relative op code address. Another major advantage is
 // //! that it allows for relocatable code.
 // std::shared_ptr<operand> cpu::REL() {
-//         int8_t off = (int16_t)msgBus->Read(mCpu->pc++);
+//         int8_t off = (int16_t)msgBus->Read(mCpu->PC++);
 //         auto result = std::make_shared<operand_address>();
 //         result->address = (int16_t)pc + (int16_t)off;
 //         return std::dynamic_pointer_cast<operand>(result);
@@ -1521,8 +1694,8 @@ cpu::cpu(bus *messageBus) {
 // std::shared_ptr<operand> cpu::EXT() {
 //         auto result = std::make_shared<operand_address>();
 //         result->address = 0;
-//         result->address |= msgBus->Read(mCpu->pc++);
-//         result->address |= (msgBus->Read(mCpu->pc++) << 8);
+//         result->address |= msgBus->Read(mCpu->PC++);
+//         result->address |= (msgBus->Read(mCpu->PC++) << 8);
 //         return std::dynamic_pointer_cast<operand>(result);
 // }
 
@@ -1800,65 +1973,25 @@ void cpu::impl::LD() {
         operand1->Set(operand2->Get());
 }
 
-// //! Push register pair nn onto stack. Decrement Stack Pointer (SP) twice.
-// void cpu::PUSH() {
-//         switch (opcode) {
-//                 case 0xF5:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::AF;
-//                         break;
-//                 case 0xC5:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::BC;
-//                         break;
-//                 case 0xD5:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::DE;
-//                         break;
-//                 case 0xE5:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
+//! Push register pair nn onto stack. Decrement Stack Pointer (SP) twice.
+//! Write Little-Endian, so the LSB occurs first in memory.
+void cpu::impl::PUSH() {
+        uint16_t word = operand1->Get();
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(word >> 8));
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(word | 0xFF));
+}
 
-//         operand2 = ((*this).*(instruction->getOperand2))();
+//! Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP)
+//! twice.
+void cpu::impl::POP() {
+        uint16_t word = 0;
+        uint16_t byte = mBus->Read(mCpu->SP++);
+        word = byte << 8;
+        byte = mBus->Read(mCpu->SP++);
+        word |= byte;
 
-//         uint16_t word = operand2->Get();
-//         msgBus->Write(--sp, static_cast<uint8_t>(word | 0xFF));
-//         msgBus->Write(--sp, static_cast<uint8_t>(word >> 8));
-// }
-
-// //! Pop two bytes off stack into register pair nn. Increment Stack Pointer (SP)
-// //! twice.
-// void cpu::POP() {
-//         switch (opcode) {
-//                 case 0xF1:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::AF;
-//                         break;
-//                 case 0xC1:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::BC;
-//                         break;
-//                 case 0xD1:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::DE;
-//                         break;
-//                 case 0xE1:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-
-//         uint16_t word = 0;
-//         uint8_t byte = msgBus->Read(sp++);
-//         word = byte << 8;
-//         byte = msgBus->Read(sp++);
-//         word |= byte;
-
-//         operand2->Set(word);
-// }
+        operand1->Set(word);
+}
 
 // void cpu::ADD() {
 //         switch (opcode) {
@@ -2799,7 +2932,7 @@ void cpu::InstructionFetch() {
         uint8_t opcodeByte;
         opcode = 0;
 
-        opcodeByte = msgBus->Read(pc++);
+        opcodeByte = msgBus->Read(PC++);
 
         // Some opcodes are two-bytes long; these are prefixed with the byte
         // 0x10 or 0xCB.
@@ -2808,7 +2941,7 @@ void cpu::InstructionFetch() {
         //       follow up on that.
         if (0x10 == opcodeByte || 0xCB == opcodeByte) {
                 opcode = (opcodeByte << 8);
-                opcodeByte = msgBus->Read(pc++);
+                opcodeByte = msgBus->Read(PC++);
         }
 
         opcode = (opcode | opcodeByte);

@@ -4,7 +4,7 @@
 
   File: cpu.hpp
   Created: 2019-08-29
-  Updated: 2019-09-08
+  Updated: 2019-09-10
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -22,6 +22,34 @@
   H: Half Carry Flag
   Z: Zero Flag
   S: Sign Flag
+
+The Carry Flag (C) is set or cleared depending on the operation being performed. For
+ADD instructions that generate a Carry, and for SUB instructions that generate a Borrow,
+the Carry Flag is set. The Carry Flag is reset by an ADD instruction that does not generate
+a Carry, and by a SUB instruction that does not generate a Borrow. This saved Carry facil-
+itates software routines for extended precision arithmetic. Additionally, the DAA instruc-
+tion sets the Carry Flag if the conditions for making the decimal adjustment are met.
+For the RLA, RRA, RLS, and RRS instructions, the Carry bit is used as a link between the
+least-significant byte (LSB) and the most-significant byte (MSB) for any register or mem-
+ory location. During the RLCA, RLC, and SLA instructions, the Carry flag contains the
+final value shifted out of bit 7 of any register or memory location. During the RRCA,
+RRC, SRA, and SRL instructions, the Carry flag contains the final value shifted out of bit
+0 of any register or memory location.
+For the logical instructions AND, OR, and XOR, the Carry flag is reset.
+The Carry flag can also be set by the Set Carry Flag (SCF) instruction and complemented
+by the Compliment Carry Flag (CCF) instruction. (See p82 of Z80 CPU User Manual.)
+
+The Half Carry Flag (H) is set (1) or cleared (0) depending on the Carry and Borrow status
+between bits 3 and 4 of an 8-bit arithmetic operation. This flag is used by the Decimal
+Adjust Accumulator (DAA) instruction to correct the result of a packed BCD add or sub-
+tract operation. The H Flag is set (1) or cleared (0) as shown:
+
+| H Flag | Add                                 | Subtract                    |
+|--------+-------------------------------------+-----------------------------|
+|      1 | A Carry occurs from bit 3 to bit 4  | A Borrow from bit 4 occurs  |
+|      0 | No Carry occurs from bit 3 to bit 4 | No Borrow from bit 4 occurs |
+
+(See p82 of Z80 CPU User Manual.)
 */
 
 #ifndef CPU_VERSION
@@ -85,10 +113,10 @@ public:
         };
 
         // Special purpose registers
-        uint8_t r; //!< memory refresh
-        uint16_t pc; //!< program counter
-        uint16_t sp; //!< stack pointer
-        uint16_t i; //!< interrupt vector
+        uint8_t R; //!< memory refresh
+        uint16_t PC; //!< program counter
+        uint16_t SP; //!< stack pointer
+        uint16_t I; //!< interrupt vector
 
         uint16_t opcode = 0x0;
         bus *msgBus;
