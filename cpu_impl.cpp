@@ -51,8 +51,11 @@ public:
         void OR();
         void XOR();
         void CP();
-        void INC();
-        void DEC();
+        void INC8();
+        void DEC8();
+        void ADD16();
+        void INC16();
+        void DEC16();
 
         // Miscellaneous operations
         void SWAP();
@@ -110,6 +113,7 @@ public:
         void Op_0000();
         void Op_0001();
         void Op_0002();
+        void Op_0003();
         void Op_0004();
         void Op_0005();
         void Op_0006();
@@ -124,6 +128,7 @@ public:
         void Op_000F();
         void Op_0011();
         void Op_0012();
+        void Op_0013();
         void Op_0014();
         void Op_0015();
         void Op_0016();
@@ -139,6 +144,7 @@ public:
         void Op_0020();
         void Op_0021();
         void Op_0022();
+        void Op_0023();
         void Op_0024();
         void Op_0025();
         void Op_0026();
