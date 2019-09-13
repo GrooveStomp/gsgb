@@ -4,7 +4,7 @@
 
   File: operand.hpp
   Created: 2019-08-31
-  Updated: 2019-08-31
+  Updated: 2019-09-12
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -26,31 +26,44 @@ class bus;
 class operand {
 public:
         virtual uint16_t Get() = 0;
-        virtual void Set(uint8_t) = 0;
+        virtual void Set(uint16_t) = 0;
 };
 
 class operand_value : public operand {
 public:
-        uint16_t value;
+        uint8_t value;
 
+        operand_value(uint8_t);
         virtual uint16_t Get();
-        virtual void Set(uint8_t value) {}; // nop for value types.
+        virtual void Set(uint16_t value) {}; // nop for value types.
 };
 
 class operand_address : public operand {
 public:
-        std::shared_ptr<gs::bus> bus;
+        bus *msgBus;
         uint16_t address;
 
+        operand_address(uint16_t, bus *);
         virtual uint16_t Get();
-        virtual void Set(uint8_t value);
+        virtual void Set(uint16_t value);
 };
 
 class operand_reference : public operand {
 public:
-        std::shared_ptr<uint8_t> ref;
+        uint8_t *ref;
+
+        operand_reference(uint8_t &);
         virtual uint16_t Get();
-        virtual void Set(uint8_t value);
+        virtual void Set(uint16_t value);
+};
+
+class operand_pair_reference : public operand {
+public:
+        uint16_t *ref;
+
+        operand_pair_reference(uint16_t &);
+        virtual uint16_t Get();
+        void Set(uint16_t value);
 };
 
 } // namespace gs

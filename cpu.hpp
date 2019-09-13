@@ -4,7 +4,7 @@
 
   File: cpu.hpp
   Created: 2019-08-29
-  Updated: 2019-09-03
+  Updated: 2019-09-10
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -22,13 +22,39 @@
   H: Half Carry Flag
   Z: Zero Flag
   S: Sign Flag
+
+The Carry Flag (C) is set or cleared depending on the operation being performed. For
+ADD instructions that generate a Carry, and for SUB instructions that generate a Borrow,
+the Carry Flag is set. The Carry Flag is reset by an ADD instruction that does not generate
+a Carry, and by a SUB instruction that does not generate a Borrow. This saved Carry facil-
+itates software routines for extended precision arithmetic. Additionally, the DAA instruc-
+tion sets the Carry Flag if the conditions for making the decimal adjustment are met.
+For the RLA, RRA, RLS, and RRS instructions, the Carry bit is used as a link between the
+least-significant byte (LSB) and the most-significant byte (MSB) for any register or mem-
+ory location. During the RLCA, RLC, and SLA instructions, the Carry flag contains the
+final value shifted out of bit 7 of any register or memory location. During the RRCA,
+RRC, SRA, and SRL instructions, the Carry flag contains the final value shifted out of bit
+0 of any register or memory location.
+For the logical instructions AND, OR, and XOR, the Carry flag is reset.
+The Carry flag can also be set by the Set Carry Flag (SCF) instruction and complemented
+by the Compliment Carry Flag (CCF) instruction. (See p82 of Z80 CPU User Manual.)
+
+The Half Carry Flag (H) is set (1) or cleared (0) depending on the Carry and Borrow status
+between bits 3 and 4 of an 8-bit arithmetic operation. This flag is used by the Decimal
+Adjust Accumulator (DAA) instruction to correct the result of a packed BCD add or sub-
+tract operation. The H Flag is set (1) or cleared (0) as shown:
+
+| H Flag | Add                                 | Subtract                    |
+|--------+-------------------------------------+-----------------------------|
+|      1 | A Carry occurs from bit 3 to bit 4  | A Borrow from bit 4 occurs  |
+|      0 | No Carry occurs from bit 3 to bit 4 | No Borrow from bit 4 occurs |
+
+(See p82 of Z80 CPU User Manual.)
 */
 
 #ifndef CPU_VERSION
 #define CPU_VERSION "0.1.0" //!< include guard
 
-#include <vector>
-#include <memory>
 #include <cstdint>
 
 namespace gs {
@@ -37,145 +63,67 @@ namespace gs {
 //! \see http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 //! \see http://z80.info/zip/z80cpu_um.pdf
 
-enum reg_pair { AF, BC, DE, HL };
-enum reg { B = 0, C, D, E, H, L, A = 7, F = 99 };
-
 class bus;
-class operand;
-
-struct instruction;
+class instruction;
 
 class cpu {
-        // General purpose registers
-        uint8_t regB;
-        uint8_t regC;
-        uint8_t regD;
-        uint8_t regE;
-        uint8_t regH;
-        uint8_t regL;
-        uint8_t regBp;
-        uint8_t regCp;
-        uint8_t regDp;
-        uint8_t regEp;
-        uint8_t regHp;
-        uint8_t regLp;
-
-        // Accumulator and flag registers
-        uint8_t regA;
-        uint8_t regF;
-        uint8_t regAp;
-        uint8_t regFp;
-
-        // Special purpose registers
-        uint8_t r; //!< memory refresh
-        uint16_t pc; //!< program counter
-        uint16_t sp; //!< stack pointer
-        uint16_t i; //!< interrupt vector
-
-        std::shared_ptr<gs::bus> msgBus;
-
 public:
         cpu(bus *messageBus);
         ~cpu();
 
-        void InstructionFetch(uint8_t memory[]);
-        void InstructionDecode();
+        void InstructionFetch();
         void InstructionExecute();
-
-        // Addressing Modes
-        std::shared_ptr<operand> IMM();
-        std::shared_ptr<operand> IME();
-        std::shared_ptr<operand> MPZ();
-        std::shared_ptr<operand> REL();
-        std::shared_ptr<operand> EXT();
-        std::shared_ptr<operand> IDX();
-        std::shared_ptr<operand> REG();
-        std::shared_ptr<operand> IMP();
-        std::shared_ptr<operand> IND();
-        std::shared_ptr<operand> BTA();
-        std::shared_ptr<operand> BTI();
-
-        // Load operations
-        void LD();
-        void LDD();
-        void LDI();
-        void LDH();
-        void LDHL();
-
-        // Arithmetic/logic operations
-        void PUSH();
-        void POP();
-        void ADD();
-        void ADC();
-        void SUB();
-        void SBC();
-        void AND();
-        void OR();
-        void XOR();
-        void CP();
-        void INC();
-        void DEC();
-
-        // Miscellaneous operations
-        void SWAP();
-        void DAA();
-        void CPL();
-        void CCF();
-        void SCF();
-        void NOP();
-        void HALT();
-        void STOP();
-        void DI();
-        void EI();
-
-        // Rotate and shift operations
-        void RLCA();
-        void RLA();
-        void RRCA();
-        void RRA();
-        void RLC();
-        void RL();
-        void RRC();
-        void RR();
-        void SLA();
-        void SRA();
-        void SRL();
-
-        // Bit operations
-        void BIT();
-        void SET();
-        void RES();
-
-        void JP(); // Jump
-        void JR(); // Jump
-        void CALL(); // Call
-        void RST(); // Restart
-        void RET(); // Return
-        void RETI(); // Return, enabling interrupts
-
-private:
-        bool halted = false;
-        bool waitForButtonPress = false;
-        bool interruptsDisabled = false;
-        bool interruptsDisabledRequested = false;
-        bool interruptsEnabledRequested = false;
-
-        // Variables and functions to assist in emulation
-        uint16_t opcode = 0x0;
-
-        reg operandReg;
-        reg_pair operandRegPair;
-        std::vector<uint16_t> stack;
-        std::shared_ptr<operand> operand1;
-        std::shared_ptr<operand> operand2;
-        std::shared_ptr<gs::instruction> instruction = nullptr;
+        char *InstructionDesc();
 
         void FlagSet(uint8_t, uint8_t);
         void FlagSet(char, uint8_t);
         uint8_t FlagGet(char);
         uint8_t FlagGet(uint8_t);
-        std::shared_ptr<uint8_t> GetRegister(gs::reg);
-        uint8_t MaskForBitAt(uint8_t);
+
+        // General purpose registers
+        union {
+                uint16_t BC;
+                struct {
+                        uint8_t B;
+                        uint8_t C;
+                };
+        };
+        union {
+                uint16_t DE;
+                struct {
+                        uint8_t D;
+                        uint8_t E;
+                };
+        };
+        union {
+                uint16_t HL;
+                struct {
+                        uint8_t H;
+                        uint8_t L;
+                };
+        };
+
+        // Accumulator and Flag registers
+        union {
+                uint16_t AF;
+                struct {
+                        uint8_t A;
+                        uint8_t F;
+                };
+        };
+
+        // Special purpose registers
+        uint8_t R; //!< memory refresh
+        uint16_t PC; //!< program counter
+        uint16_t SP; //!< stack pointer
+        uint16_t I; //!< interrupt vector
+
+        uint16_t opcode = 0x0;
+        bus *msgBus;
+private:
+        friend class instruction;
+        class impl;
+        impl *implementation;
 };
 
 } // namespace gs

@@ -2,8 +2,8 @@
   GrooveStomp's GB Emulator
   Copyright (c) 2019 Aaron Oman (GrooveStomp)
 
-  File: bus.hpp
-  Created: 2019-08-30
+  File: bus.cpp
+  Created: 2019-09-07
   Updated: 2019-09-07
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
@@ -13,19 +13,16 @@
   details.
  ******************************************************************************/
 
-#ifndef BUS_VERSION
-#define BUS_VERSION "0.1.0" //!< include guard
-
-#include <cstdint>
+#include "bus.hpp"
 
 namespace gs {
 
-class bus {
-public:
-        void Write(uint16_t ptr, uint8_t value);
-        uint8_t Read(uint16_t ptr);
-};
+void bus::Write(uint16_t ptr, uint8_t value) {
+}
+
+uint8_t bus::Read(uint16_t ptr) {
+        // TODO implement me!
+        return 0;
+}
 
 } // namespace gs
-
-#endif // BUS_VERSION
