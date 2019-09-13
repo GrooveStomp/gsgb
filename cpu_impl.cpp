@@ -33,6 +33,8 @@ public:
         impl(cpu *cpuIn, bus *busIn);
         ~impl();
 
+        void InitInstructionMap();
+
         // Load operations
         void LD();
         void LDD();
@@ -107,7 +109,7 @@ public:
         std::shared_ptr<operand> operand1;
         std::shared_ptr<operand> operand2;
         std::shared_ptr<instruction> mInstruction = nullptr;
-        static std::map<int,instruction> instructionMap;
+        std::map<int,instruction> instructionMap;
 
         // Opcodes
         void Op_0000();

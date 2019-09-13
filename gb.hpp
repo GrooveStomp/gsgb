@@ -15,15 +15,34 @@
 #ifndef GB_VERSION
 #define GB_VERSION "0.1.0" //!< include guard
 
+#include <cstdint>
+#include <cstddef>
+
 //! \file gb.hpp
 //! \see http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 
-class Gb {
-        std::byte *memory;
-        std::byte *videoMemory;
+namespace gs {
+
+class bus;
+class cpu;
+
+class gb {
+        char *memory;
+        uint8_t *videoMemory;
+        bus *mBus;
+        cpu *mCpu;
+
+        static char *bootRom;
+
 public:
-        Gb();
-        ~Gb();
+        gb();
+        ~gb();
+
+        void Boot();
+        void RomLoad(char *rom, size_t size);
+        void RomExecute();
 };
 
 #endif // GB_VERSION
+
+} // namespace gs
