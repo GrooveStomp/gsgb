@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-09-12
+  Updated: 2019-09-13
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -51,6 +51,87 @@ cpu::cpu(bus *messageBus) {
 cpu::~cpu() {
 }
 
+void cpu::FlagSet(char c, uint8_t onOrOff) {
+        uint8_t bit = 0;
+        switch (c) {
+                case 's':
+                case 'S':
+                        bit = 0x7;
+                        break;
+                case 'z':
+                case 'Z':
+                        bit = 0x6;
+                        break;
+                case 'h':
+                case'H':
+                        bit = 0x4;
+                        break;
+                case 'p':
+                case 'P':
+                case 'v':
+                case 'V':
+                        bit = 0x2;
+                        break;
+                case 'n':
+                case 'N':
+                        bit = 0x1;
+                        break;
+                case 'c':
+                case 'C':
+                        bit = 0x0;
+                        break;
+        }
+        FlagSet(bit, onOrOff);
+}
+
+void cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
+        uint8_t bitFlag = 1 << bit;
+
+        if (onOrOff) {
+                F |= bitFlag;
+        } else {
+                F &= (~bitFlag);
+        }
+}
+
+uint8_t cpu::FlagGet(char c) {
+        uint8_t bit = 0;
+        switch (c) {
+                case 's':
+                case 'S':
+                        bit = 0x7;
+                        break;
+                case 'z':
+                case 'Z':
+                        bit = 0x6;
+                        break;
+                case 'h':
+                case'H':
+                        bit = 0x4;
+                        break;
+                case 'p':
+                case 'P':
+                case 'v':
+                case 'V':
+                        bit = 0x2;
+                        break;
+                case 'n':
+                case 'N':
+                        bit = 0x1;
+                        break;
+                case 'c':
+                case 'C':
+                        bit = 0x0;
+                        break;
+        }
+        return FlagGet(bit);
+}
+
+uint8_t cpu::FlagGet(uint8_t bitToCheck) {
+        uint8_t bit = F & (1 << bitToCheck);
+        return bit >> bitToCheck;
+}
+
 cpu::impl::impl(cpu *cpuIn, bus *busIn) {
         mCpu = cpuIn;
         mBus = busIn;
@@ -62,6 +143,35 @@ cpu::impl::~impl() {
 uint8_t TwosComplement(uint8_t num) {
         return (~num) + 1;
 }
+
+//! \brief Get the low or high nibble from byte
+//! \param byte value to get nibble from
+//! \param pos 0 for low nibble, 1 for high nibble.
+//! \return high or low nibble of byte as specified by pos
+uint8_t Nibble(uint8_t byte, uint8_t pos) {
+        uint8_t result;
+
+        if (pos) {
+                result = (byte & 0xF0) >> 4;
+        } else {
+                result = byte & 0x0F;
+        }
+
+        return result;
+}
+
+//! \return 1 if parity is even, otherwise 0
+//! \see https://stackoverflow.com/a/21618038
+int Parity(uint8_t byte) {
+        byte ^= byte >> 4;
+        byte ^= byte >> 2;
+        byte ^= byte >> 1;
+        return (~byte) & 1;
+}
+
+//-----------------------------------------------------------------------------
+// Opcode Implementations
+//-----------------------------------------------------------------------------
 
 //-- 8-Bit Load Opcodes --------------------------------------------------------
 
@@ -2173,17 +2283,473 @@ void cpu::impl::Op_00FB() {
 
 //-- Rotate & Shift Opcodes ---------------------------------------------------
 
-// TODO RLCA
-// TODO RLA
-// TODO RRCA
-// TODO RRA
-// TODO RLC
-// TODO RL
-// TODO RRC
-// TODO RR
-// TODO SLA
-// TODO SRA
-// TODO SRL
+//! \brief RLCA
+void cpu::impl::Op_0007() {
+        RLCA();
+}
+
+//! \brief RLA
+void cpu::impl::Op_0017() {
+        RLA();
+}
+
+//! \brief RRCA
+void cpu::impl::Op_000F() {
+        RRCA();
+}
+
+//! \brief RRA
+void cpu::impl::Op_001F() {
+        RRA();
+}
+
+//! \brief RLC A
+void cpu::impl::Op_CB07() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC B
+void cpu::impl::Op_CB00() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC C
+void cpu::impl::Op_CB01() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC D
+void cpu::impl::Op_CB02() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC E
+void cpu::impl::Op_CB03() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC H
+void cpu::impl::Op_CB04() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC L
+void cpu::impl::Op_CB05() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RLC (HL)
+void cpu::impl::Op_CB06() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RLC();
+}
+
+//! \brief RL A
+void cpu::impl::Op_CB17() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL B
+void cpu::impl::Op_CB10() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL C
+void cpu::impl::Op_CB11() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL D
+void cpu::impl::Op_CB12() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL E
+void cpu::impl::Op_CB13() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL H
+void cpu::impl::Op_CB14() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL L
+void cpu::impl::Op_CB15() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RL (HL)
+void cpu::impl::Op_CB16() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RL();
+}
+
+//! \brief RRC A
+void cpu::impl::Op_CB0F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC B
+void cpu::impl::Op_CB08() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC C
+void cpu::impl::Op_CB09() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC D
+void cpu::impl::Op_CB0A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC E
+void cpu::impl::Op_CB0B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC H
+void cpu::impl::Op_CB0C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC L
+void cpu::impl::Op_CB0D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RRC (HL)
+void cpu::impl::Op_CB0E() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RRC();
+}
+
+//! \brief RR A
+void cpu::impl::Op_CB1F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR B
+void cpu::impl::Op_CB18() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR C
+void cpu::impl::Op_CB19() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR D
+void cpu::impl::Op_CB1A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR E
+void cpu::impl::Op_CB1B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR H
+void cpu::impl::Op_CB1C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR L
+void cpu::impl::Op_CB1D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief RR (HL)
+void cpu::impl::Op_CB1E() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        RR();
+}
+
+//! \brief SLA A
+void cpu::impl::Op_CB27() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA B
+void cpu::impl::Op_CB20() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA C
+void cpu::impl::Op_CB21() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA D
+void cpu::impl::Op_CB22() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA E
+void cpu::impl::Op_CB23() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA H
+void cpu::impl::Op_CB24() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA L
+void cpu::impl::Op_CB25() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SLA (HL)
+void cpu::impl::Op_CB26() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SLA();
+}
+
+//! \brief SRA A
+void cpu::impl::Op_CB2F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA B
+void cpu::impl::Op_CB28() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA C
+void cpu::impl::Op_CB29() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA D
+void cpu::impl::Op_CB2A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA E
+void cpu::impl::Op_CB2B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA H
+void cpu::impl::Op_CB2C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA L
+void cpu::impl::Op_CB2D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRA (HL)
+void cpu::impl::Op_CB2E() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRA();
+}
+
+//! \brief SRL A
+void cpu::impl::Op_CB3F() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL B
+void cpu::impl::Op_CB38() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL C
+void cpu::impl::Op_CB39() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL D
+void cpu::impl::Op_CB3A() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL E
+void cpu::impl::Op_CB3B() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL H
+void cpu::impl::Op_CB3C() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL L
+void cpu::impl::Op_CB3D() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
+
+//! \brief SRL (HL)
+void cpu::impl::Op_CB3E() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SRL();
+}
 
 //-- Bit Opcodes ---------------------------------------------------------------
 
@@ -2813,6 +3379,10 @@ void cpu::impl::Op_00D9() {
         RETI();
 }
 
+//-----------------------------------------------------------------------------
+// Opcode Function Mapping
+//-----------------------------------------------------------------------------
+
 std::map<int,instruction> cpu::impl::instructionMap = {
         // 8-bit Load
         { 0x0006, { "LD B,n",    &cpu::impl::Op_0006, 8 } },
@@ -3137,7 +3707,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0xCBC5, { "SET b,L",    &cpu::impl::Op_CBC5, 8 } },
         { 0xCBC6, { "SET b,(HL)", &cpu::impl::Op_CBC6, 16 } },
 
-        { 0xCBC8, { "RES b,A",    &cpu::impl::Op_CBC8, 8 } },
+        { 0xCBC8, { "RES b,A",    &cpu::impl::Op_CB87, 8 } },
         { 0xCB80, { "RES b,B",    &cpu::impl::Op_CB80, 8 } },
         { 0xCB81, { "RES b,C",    &cpu::impl::Op_CB81, 8 } },
         { 0xCB82, { "RES b,D",    &cpu::impl::Op_CB82, 8 } },
@@ -3184,332 +3754,6 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00D8, { "RET C",  &cpu::impl::Op_00D8, 8 } },
         { 0x00D9, { "RETI",   &cpu::impl::Op_00D9,8 } },
 };
-
-// //------------------------------------------------------------------------------
-// // Addressing modes
-// //------------------------------------------------------------------------------
-
-// //! \brief Immediate Mode Addressing
-// //!
-// //! In the Immediate Addressing Mode, the byte following the op code in memory
-// //! contains the actual operand.
-// //!
-// //! An example of this type of instruction is to load the Accumulator with a
-// //! constant, in which the constant is the byte immediately following the op
-// //! code.
-// std::shared_ptr<operand> cpu::IMM() {
-//         auto result = std::make_shared<operand_value>();
-//         result->value = 0 | msgBus->Read(mCpu->PC++);
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! \brief Immediate Mode Extended Addressing
-// //!
-// //! This mode is an extension of immediate addressing in that the two bytes
-// //! following the op codes are the operand.
-// //!
-// //! An example of this type of instruction is to load the HL register pair
-// //! (16-bit register) with 16 bits (two bytes) of data.
-// std::shared_ptr<operand> cpu::IME() {
-//         auto result = std::make_shared<operand_value>();
-//         result->value = 0;
-//         result->value |= msgBus->Read(mCpu->PC++);
-//         result->value |= (msgBus->Read(mCpu->PC++) << 8);
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! \brief Modified Page Zero Addressing
-// //!
-// //! The Z80 contains a special single-byte CALL instruction to any of eight
-// //! locations in Page 0 of memory. This instruction, which is referred to as a
-// //! restart, sets the Program Counter to an effective address in Page 0. The
-// //! value of this instruction is that it allows a single byte to specify a
-// //! complete 16-bit address at which commonly-called subroutines are located,
-// //! thereby saving memory space.
-// std::shared_ptr<operand> cpu::MPZ() {
-//         // TODO
-//         return nullptr;
-// }
-
-// //! Relative Addressing
-// //!
-// //! Relative addressing uses one byte of data following the op code to specify a
-// //! displacement from the existing program to which a program jump can
-// //! occur. This displacement is a signed two’s complement number that is added
-// //! to the address of the op code of the follow-ing instruction.
-// //!
-// //! The value of relative addressing is that it allows jumps to nearby locations
-// //! while only requiring two bytes of memory space. For most programs, relative
-// //! jumps are by far the most prevalent type of jump due to the proximity of
-// //! related program segments. Therefore, these instructions can significantly
-// //! reduce memory space requirements. The signed dis-placement can range between
-// //! +127 and –128 from A+2. This range allows for a total dis-placement of +129
-// //! to –126 from the jump relative op code address. Another major advantage is
-// //! that it allows for relocatable code.
-// std::shared_ptr<operand> cpu::REL() {
-//         int8_t off = (int16_t)msgBus->Read(mCpu->PC++);
-//         auto result = std::make_shared<operand_address>();
-//         result->address = (int16_t)pc + (int16_t)off;
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Extended Addressing
-// //!
-// //! Extended Addressing provides for two bytes (16 bits) of address to be
-// //! included in the instruction. This data can be an address to which a program
-// //! can jump or it can be an address at which an operand is located.
-// //!
-// //! Extended addressing is required for a program to jump from any location in
-// //! memory to any other location, or load and store data in any memory location.
-// std::shared_ptr<operand> cpu::EXT() {
-//         auto result = std::make_shared<operand_address>();
-//         result->address = 0;
-//         result->address |= msgBus->Read(mCpu->PC++);
-//         result->address |= (msgBus->Read(mCpu->PC++) << 8);
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Indexed Addressing
-// //!
-// //! NOTE: Not implemented in the Sharp LR35902 used by the GameBoy.
-// //!
-// //! In the Indexed Addressing Mode, the byte of data following the op code
-// //! contains a dis-placement that is added to one of the two index registers
-// //! (the op code specifies which index register is used) to form a pointer to
-// //! memory. The contents of the index register are not altered by this
-// //! operation.
-// std::shared_ptr<operand> cpu::IDX() {
-//         // nop
-//         return nullptr;
-// }
-
-// //------------------------------------------------------------------------------
-// // Other
-// //------------------------------------------------------------------------------
-
-//! \brief Get the low or high nibble from byte
-//! \param byte value to get nibble from
-//! \param pos 0 for low nibble, 1 for high nibble.
-//! \return high or low nibble of byte as specified by pos
-uint8_t Nibble(uint8_t byte, uint8_t pos) {
-        uint8_t result;
-
-        if (pos) {
-                result = (byte & 0xF0) >> 4;
-        } else {
-                result = byte & 0x0F;
-        }
-
-        return result;
-}
-
-//! \return 1 if parity is even, otherwise 0
-//! \see https://stackoverflow.com/a/21618038
-int Parity(uint8_t byte) {
-        byte ^= byte >> 4;
-        byte ^= byte >> 2;
-        byte ^= byte >> 1;
-        return (~byte) & 1;
-}
-
-// //! Register Addressing
-// //!
-// //! Many of the Z80 op codes contain bits of information that specify which CPU
-// //! register is to be used for an operation. An example of register addressing
-// //! is to load the data in Register 6 into Register C.
-// std::shared_ptr<operand> cpu::REG() {
-//         auto result = std::make_shared<operand_reference>();
-//         result->ref = GetRegister(operandType.reg);
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Implied Addressing
-// //!
-// //! Implied addressing refers to operations in which the op code automatically
-// //! implies one or more CPU registers as containing the operands. An example is
-// //! the set of arithmetic opera-tions in which the Accumulator is always implied
-// //! to be the destination of the results.
-// //!
-// //! Generally, the register being used with IMP() is the Accumulator.
-// std::shared_ptr<operand> cpu::IMP() {
-//         // TODO: Treat 16-bit register specially?  Ie., DEC ss needs SP register...
-//         auto result = std::make_shared<operand_reference>();
-//         result->ref = GetRegister(reg8::A);
-//         return std::static_pointer_cast<operand>(result);
-// }
-
-// //! \brief Register Pair
-// std::shared_ptr<operand> cpu::RPR() {
-//         auto result = std::make_shared<operand_pair_reference>();
-
-//         switch (operandType.regPair) {
-//                 case reg16::BC:
-//                         result->ref1 = std::make_shared<uint8_t>(regB);
-//                         result->ref2 = std::make_shared<uint8_t>(regC);
-//                         break;
-//                 case reg16::DE:
-//                         result->ref1 = std::make_shared<uint8_t>(regD);
-//                         result->ref2 = std::make_shared<uint8_t>(regE);
-//                         break;
-//                 case reg16::HL:
-//                         result->ref1 = std::make_shared<uint8_t>(regH);
-//                         result->ref2 = std::make_shared<uint8_t>(regL);
-//                         break;
-//                 case reg16::AF:
-//                         result->ref1 = std::make_shared<uint8_t>(regA);
-//                         result->ref2 = std::make_shared<uint8_t>(regF);
-//                         break;
-//         }
-
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Register Indirect Addressing
-// //!
-// //! This type of addressing specifies a 16-bit CPU register pair (such as HL) to
-// //! be used as a pointer to any location in memory. This type of instruction is
-// //! powerful and it is used in a wide range of applications.
-// std::shared_ptr<operand> cpu::IND() {
-//         uint8_t byteLo, byteHi;
-
-//         switch (operandType.regPair) {
-//                 case reg16::BC:
-//                         byteLo = regB;
-//                         byteHi = regC;
-//                         break;
-//                 case reg16::DE:
-//                         byteLo = regD;
-//                         byteHi = regE;
-//                         break;
-//                 case reg16::HL:
-//                         byteLo = regH;
-//                         byteHi = regL;
-//                         break;
-//                 default:
-//                         byteLo = 0;
-//                         byteHi = 0;
-//                         break;
-//         }
-
-//         auto result = std::make_shared<operand_address>();
-//         result->address = (byteHi << 8) | byteLo;
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Bit Addressing
-// //!
-// //! The Z80 contains a large number of bit set, reset, and test
-// //! instructions. These instructions allow any memory location or CPU register
-// //! to be specified for a bit operation through one of three previous addressing
-// //! modes (register, Register Indirect, and indexed) while three bits in the op
-// //! code specify which of the eight bits is to be manipulated.
-// //!
-// //! NOTE: As a prerequisite, operand1 must have been fetched.
-// std::shared_ptr<operand> cpu::BTA() {
-//         uint8_t whichReg = operand1->Get() & 0x7; // bits 2,1,0
-
-//         auto result = std::make_shared<operand_reference>();
-//         result->ref = GetRegister(static_cast<reg8>(whichReg));
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// //! Bit addressing, but indirect
-// std::shared_ptr<operand> cpu::BTI() {
-//         uint8_t whichReg = operand1->Get() & 0x7; // bits 2,1,0
-//         assert(0x6 == whichReg);
-
-//         auto result = std::make_shared<operand_address>();
-//         result->address = ((uint16_t)regH << 8) | regL;
-//         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// uint8_t cpu::MaskForBitAt(uint8_t bitToSet) {
-//         if (bitToSet > 7)
-//                 return 0;
-
-//         return (1 << bitToSet);
-// }
-
-void cpu::FlagSet(char c, uint8_t onOrOff) {
-        uint8_t bit = 0;
-        switch (c) {
-                case 's':
-                case 'S':
-                        bit = 0x7;
-                        break;
-                case 'z':
-                case 'Z':
-                        bit = 0x6;
-                        break;
-                case 'h':
-                case'H':
-                        bit = 0x4;
-                        break;
-                case 'p':
-                case 'P':
-                case 'v':
-                case 'V':
-                        bit = 0x2;
-                        break;
-                case 'n':
-                case 'N':
-                        bit = 0x1;
-                        break;
-                case 'c':
-                case 'C':
-                        bit = 0x0;
-                        break;
-        }
-        FlagSet(bit, onOrOff);
-}
-
-void cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
-        uint8_t bitFlag = 1 << bit;
-
-        if (onOrOff) {
-                F |= bitFlag;
-        } else {
-                F &= (~bitFlag);
-        }
-}
-
-uint8_t cpu::FlagGet(char c) {
-        uint8_t bit = 0;
-        switch (c) {
-                case 's':
-                case 'S':
-                        bit = 0x7;
-                        break;
-                case 'z':
-                case 'Z':
-                        bit = 0x6;
-                        break;
-                case 'h':
-                case'H':
-                        bit = 0x4;
-                        break;
-                case 'p':
-                case 'P':
-                case 'v':
-                case 'V':
-                        bit = 0x2;
-                        break;
-                case 'n':
-                case 'N':
-                        bit = 0x1;
-                        break;
-                case 'c':
-                case 'C':
-                        bit = 0x0;
-                        break;
-        }
-        return FlagGet(bit);
-}
-
-uint8_t cpu::FlagGet(uint8_t bitToCheck) {
-        uint8_t bit = F & (1 << bitToCheck);
-        return bit >> bitToCheck;
-}
 
 //------------------------------------------------------------------------------
 // Operations
@@ -3753,7 +3997,7 @@ void cpu::impl::DAA() {
 
 //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
 void cpu::impl::CPL() {
-        uint8_t val = ~mCpu->A;
+        uint8_t val = ~(mCpu->A);
         operand2->Set(val);
 
         mCpu->FlagSet('h', 1);
@@ -3827,416 +4071,216 @@ void cpu::impl::EI() {
         interruptsEnabledRequested = true;
 }
 
-// //! \brief Rotate A left. Old bit 7 is copied to the carry flag.
-// //!
-// //! The contents of the Accumulator (Register A) are rotated left 1 bit
-// //! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
-// //! 0. Bit 0 is the least-significant bit.
-// void cpu::RLCA() {
-//         operandType.reg = reg8::A;
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-//         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
-//         operand2->Set(newValue);
+//! \brief Rotate A left. Old bit 7 is copied to the carry flag.
+//!
+//! The contents of the Accumulator (Register A) are rotated left 1 bit
+//! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
+//! 0. Bit 0 is the least-significant bit.
+void cpu::impl::RLCA() {
+        uint8_t oldValue = mCpu->A;
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
+        mCpu->A = newValue;
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate A left through the carry flag.
-// //!
-// //! The contents of the Accumulator (Register A) are rotated left 1 bit position
-// //! through the Carry flag. The previous contents of the Carry flag are copied
-// //! to bit 0. Bit 0 is the least-significant bit.
-// void cpu::RLA() {
-//         operandType.reg = reg8::A;
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-//         uint8_t oldCarry = FlagGet('c');
-//         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
-//         operand2->Set(newValue);
+//! \brief Rotate A left through the carry flag.
+//!
+//! The contents of the Accumulator (Register A) are rotated left 1 bit position
+//! through the Carry flag. The previous contents of the Carry flag are copied
+//! to bit 0. Bit 0 is the least-significant bit.
+void cpu::impl::RLA() {
+        uint16_t oldValue = mCpu->A;
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t oldCarry = mCpu->FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
+        mCpu->A = newValue;
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate A right. Old bit 0 is copied to the carry flag.
-// //!
-// //! The contents of the Accumulator (Register A) are rotated right 1 bit
-// //! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
-// //! least-significant bit.
-// void cpu::RRCA() {
-//         operandType.reg = reg8::A;
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = (uint8_t)oldValue & 0x1;
-//         uint8_t newValue = ((uint8_t)oldValue >> 1) | (carry << 0x7);
-//         operand2->Set(newValue);
+//! \brief Rotate A right. Old bit 0 is copied to the carry flag.
+//!
+//! The contents of the Accumulator (Register A) are rotated right 1 bit
+//! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::impl::RRCA() {
+        uint16_t oldValue = mCpu->A;
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | (carry << 0x7);
+        mCpu->A = newValue;
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate A right through the carry flag.
-// //!
-// //! The contents of the Accumulator (Register A) are rotated right 1 bit
-// //! position through the Carry flag. The previous contents of the Carry flag are
-// //! copied to bit 7. Bit 0 is the least-significant bit.
-// void cpu::RRA() {
-//         operandType.reg = reg8::A;
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = (uint8_t)oldValue & 0x1;
-//         uint8_t oldCarry = FlagGet('c');
-//         uint8_t newValue = ((uint8_t)oldValue >> 1) | (oldCarry << 0x7);
-//         operand2->Set(newValue);
+//! \brief Rotate A right through the carry flag.
+//!
+//! The contents of the Accumulator (Register A) are rotated right 1 bit
+//! position through the Carry flag. The previous contents of the Carry flag are
+//! copied to bit 7. Bit 0 is the least-significant bit.
+void cpu::impl::RRA() {
+        uint16_t oldValue = mCpu->A;
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t oldCarry = mCpu->FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | (oldCarry << 0x7);
+        mCpu->A = newValue;
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate left. Old bit 7 is copied to the carry flag.
-// //!
-// //! The contents of register r are rotated left 1 bit position. The contents of
-// //! bit 7 are copied to the Carry flag and also to bit 0. In the assembled
-// //! object code, operand r is specified as fol-lows:
-// //! B: 000
-// //! C: 001
-// //! D: 010
-// //! E: 011
-// //! H: 100
-// //! L: 101
-// //! A: 111
-// void cpu::RLC() {
-//         switch (opcode) {
-//                 case 0xCB07:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB00:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB01:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB02:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB03:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB04:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB05:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB06:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-//         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
-//         operand2->Set(newValue);
+//! \brief Rotate left. Old bit 7 is copied to the carry flag.
+//!
+//! The contents of register r are rotated left 1 bit position. The contents of
+//! bit 7 are copied to the Carry flag and also to bit 0. In the assembled
+//! object code, operand r is specified as fol-lows:
+//! B: 000
+//! C: 001
+//! D: 010
+//! E: 011
+//! H: 100
+//! L: 101
+//! A: 111
+void cpu::impl::RLC() {
+        uint16_t oldValue = operand1->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
+        operand1->Set(newValue);
 
-//         FlagSet('s', newValue & (0x1 << 0x7));
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('n', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('s', newValue & (0x1 << 0x7));
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate left through carry flag.
-// //!
-// //! The contents of the m operand are rotated left 1 bit position. The contents
-// //! of bit 7 are copied to the Carry flag, and the previous contents of the
-// //! Carry flag are copied to bit 0.
-// void cpu::RL() {
-//         switch (opcode) {
-//                 case 0xCB17:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB10:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB11:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB12:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB13:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB14:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB15:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB16:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-//         uint8_t oldCarry = FlagGet('c');
-//         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
-//         operand2->Set(newValue);
+//! \brief Rotate left through carry flag.
+//!
+//! The contents of the m operand are rotated left 1 bit position. The contents
+//! of bit 7 are copied to the Carry flag, and the previous contents of the
+//! Carry flag are copied to bit 0.
+void cpu::impl::RL() {
+        uint16_t oldValue = operand1->Get();
+        uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
+        uint8_t oldCarry = mCpu->FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
+        operand1->Set(newValue);
 
-//         FlagSet('s', newValue & (0x1 << 0x7));
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('n', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('s', newValue & (0x1 << 0x7));
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate right. Old bit 0 is set to the carry flag.
-// //!
-// //! The contents of the m operand are rotated right 1 bit position. The contents
-// //! of bit 0 are copied to the Carry flag and also to bit 7. Bit 0 is the
-// //! least-significant bit.
-// void cpu::RRC() {
-//         switch (opcode) {
-//                 case 0xCB0F:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB08:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB09:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB0A:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB0B:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB0C:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB0D:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB0E:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = (uint8_t)oldValue & 0x1;
-//         uint8_t newValue = ((uint8_t)oldValue >> 1) | carry;
-//         operand2->Set(newValue);
+//! \brief Rotate right. Old bit 0 is set to the carry flag.
+//!
+//! The contents of the m operand are rotated right 1 bit position. The contents
+//! of bit 0 are copied to the Carry flag and also to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::impl::RRC() {
+        uint16_t oldValue = operand1->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | carry;
+        operand1->Set(newValue);
 
-//         FlagSet('s', newValue & (0x1 << 0x7));
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('n', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('s', newValue & (0x1 << 0x7));
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Rotate n right through carry flag.
-// //!
-// //! The contents of operand m are rotated right 1 bit position through the carry
-// //! flag. The contents of bit 0 are copied to the carry flag and the previous
-// //! contents of the carry flag are copied to bit 7. Bit 0 is the
-// //! least-significant bit.
-// void cpu::RR() {
-//         switch (opcode) {
-//                 case 0xCB0F:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB08:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB09:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB0A:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB0B:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB0C:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB0D:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB0E:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint16_t oldValue = operand2->Get();
-//         uint8_t carry = (uint8_t)oldValue & 0x1;
-//         uint8_t oldCarry = FlagGet('c');
-//         uint8_t newValue = ((uint8_t)oldValue >> 1) | oldCarry;
-//         operand2->Set(newValue);
+//! \brief Rotate n right through carry flag.
+//!
+//! The contents of operand m are rotated right 1 bit position through the carry
+//! flag. The contents of bit 0 are copied to the carry flag and the previous
+//! contents of the carry flag are copied to bit 7. Bit 0 is the
+//! least-significant bit.
+void cpu::impl::RR() {
+        uint16_t oldValue = operand1->Get();
+        uint8_t carry = (uint8_t)oldValue & 0x1;
+        uint8_t oldCarry = mCpu->FlagGet('c');
+        uint8_t newValue = ((uint8_t)oldValue >> 1) | oldCarry;
+        operand1->Set(newValue);
 
-//         FlagSet('s', newValue & (0x1 << 0x7));
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('n', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('s', newValue & (0x1 << 0x7));
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-// //! \brief Shift left into carry. LSB is set to 0.
-// //!
-// //! An arithmetic shift left 1 bit position is performed on the contents of
-// //! operand m. The contents of bit 7 are copied to the Carry flag. Bit 0 is the
-// //! least-significant bit.
-// void cpu::SLA() {
-//         switch (opcode) {
-//                 case 0xCB27:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB20:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB21:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB22:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB23:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB24:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB25:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB26:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
+//! \brief Shift left into carry. LSB is set to 0.
+//!
+//! An arithmetic shift left 1 bit position is performed on the contents of
+//! operand m. The contents of bit 7 are copied to the Carry flag. Bit 0 is the
+//! least-significant bit.
+void cpu::impl::SLA() {
+        uint8_t oldValue = operand1->Get();
+        uint8_t carry = oldValue & (0x1 << 0x7);
+        uint8_t newValue = oldValue << 1;
+        operand1->Set(newValue);
 
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t oldValue = (uint8_t)operand2->Get();
-//         uint8_t carry = oldValue & (0x1 << 0x7);
-//         uint8_t newValue = oldValue << 1;
-//         operand2->Set(newValue);
+        mCpu->FlagSet('s', (newValue >> 0x7) & 0x1);
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-//         FlagSet('s', (newValue >> 0x7) & 0x1);
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('n', 0);
-//         FlagSet('c', carry);
-// }
+//! \brief Shift right into Carry. MSB doesn't change.
+//!
+//! An arithmetic shift right 1 bit position is performed on the contents of
+//! operand m. The contents of bit 0 are copied to the Carry flag and the
+//! previous contents of bit 7 remain unchanged. Bit 0 is the least-significant
+//! bit.
+void cpu::impl::SRA() {
+        uint8_t oldValue = operand1->Get();
+        uint8_t msb = (oldValue & 0x7);
+        uint8_t carry = oldValue & 0x1;
+        uint8_t newValue = (oldValue >> 1) | msb;
+        operand1->Set(newValue);
 
-// //! \brief Shift right into Carry. MSB doesn't change.
-// //!
-// //! An arithmetic shift right 1 bit position is performed on the contents of
-// //! operand m. The contents of bit 0 are copied to the Carry flag and the
-// //! previous contents of bit 7 remain unchanged. Bit 0 is the least-significant
-// //! bit.
-// void cpu::SRA() {
-//         switch (opcode) {
-//                 case 0xCB2F:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB28:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB29:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB2A:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB2B:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB2C:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB2D:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB2E:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t oldValue = (uint8_t)operand2->Get();
-//         uint8_t msb = (oldValue & 0x7);
-//         uint8_t carry = oldValue & 0x1;
-//         uint8_t newValue = (oldValue >> 1) | msb;
-//         operand2->Set(newValue);
+//! \brief Shift right into Carry. MSB is set to 0.
+//!
+//! The contents of operand m are shifted right 1 bit position. The contents of
+//! bit 0 are copied to the Carry flag, and bit 7 is reset. Bit 0 is the
+//! least-significant bit.
+void cpu::impl::SRL() {
+        uint8_t oldValue = operand1->Get();
+        uint8_t carry = oldValue & 0x1;
+        uint8_t newValue = oldValue >> 1;
+        operand1->Set(newValue);
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
-
-// //! \brief Shift right into Carry. MSB is set to 0.
-// //!
-// //! The contents of operand m are shifted right 1 bit position. The contents of
-// //! bit 0 are copied to the Carry flag, and bit 7 is reset. Bit 0 is the
-// //! least-significant bit.
-// void cpu::SRL() {
-//         switch (opcode) {
-//                 case 0xCB2F:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB28:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB29:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB2A:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB2B:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB2C:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB2D:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB2E:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t oldValue = (uint8_t)operand2->Get();
-//         uint8_t carry = oldValue & 0x1;
-//         uint8_t newValue = oldValue >> 1;
-//         operand2->Set(newValue);
-
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', carry);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', carry);
+}
 
 //! \brief Test bit in register
 //!
@@ -4245,7 +4289,6 @@ void cpu::impl::EI() {
 void cpu::impl::BIT() {
         uint8_t bit = operand1->Get();
         uint8_t byte = operand2->Get();
-
         uint8_t test = 0x1 << bit;
 
         mCpu->FlagSet('z', !(byte & test));
@@ -4259,7 +4302,6 @@ void cpu::impl::BIT() {
 void cpu::impl::SET() {
         uint8_t bit = operand1->Get();
         uint8_t byte = operand2->Get();
-
         uint8_t set = 0x1 << bit;
         operand2->Set(byte | set);
 }
@@ -4268,10 +4310,8 @@ void cpu::impl::SET() {
 void cpu::impl::RES() {
         uint8_t bit = operand1->Get();
         uint8_t byte = operand2->Get();
-
         uint8_t set = 0x1 << bit;
         set = ~set;
-
         operand2->Set(byte & set);
 }
 
