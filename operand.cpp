@@ -4,7 +4,7 @@
 
   File: operand.cpp
   Created: 2019-08-31
-  Updated: 2019-09-08
+  Updated: 2019-09-12
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -17,12 +17,20 @@
 
 namespace gs {
 
+operand_value::operand_value(uint8_t in) : value(in) {
+}
+
 uint16_t operand_value::Get() {
-        return value;
+        return static_cast<uint16_t>(value);
+}
+
+operand_address::operand_address(uint16_t in, bus *b) {
+        address = in;
+        msgBus = b;
 }
 
 uint16_t operand_address::Get() {
-        return msgBus->Read(address);
+        return static_cast<uint16_t>(msgBus->Read(address));
 }
 
 // TODO NOTE Only uses the lower 8 bits!
@@ -30,23 +38,26 @@ void operand_address::Set(uint16_t value) {
         msgBus->Write(address, static_cast<uint8_t>(value));
 }
 
+operand_reference::operand_reference(uint8_t &in) : ref(&in) {
+}
+
 uint16_t operand_reference::Get() {
-        return *ref;
+        return static_cast<uint8_t>(*ref);
 }
 
 void operand_reference::Set(uint16_t value) {
-        *ref = value;
+        *ref = static_cast<uint8_t>(value);
+}
+
+operand_pair_reference::operand_pair_reference(uint16_t &in) : ref(&in) {
 }
 
 uint16_t operand_pair_reference::Get() {
-        uint8_t hi = *ref1;
-        uint8_t lo = *ref2;
-        return (hi << 8) | lo;
+        return *ref;
 }
 
 void operand_pair_reference::Set(uint16_t value) {
-        *ref1 = static_cast<uint8_t>(value >> 8);
-        *ref2 = static_cast<uint8_t>(value);
+        *ref = value;
 }
 
 } // namespace gs

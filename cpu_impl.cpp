@@ -4,7 +4,7 @@
 
   File: cpu_impl.cpp
   Created: 2019-09-07
-  Updated: 2019-09-10
+  Updated: 2019-09-12
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -312,18 +312,21 @@ public:
         void Op_00C8();
         void Op_00C9();
         void Op_00CA();
+        void Op_00CC();
         void Op_00CD();
         void Op_00CE();
         void Op_00CF();
         void Op_00D0();
         void Op_00D1();
         void Op_00D2();
+        void Op_00D4();
         void Op_00D5();
         void Op_00D6();
         void Op_00D7();
         void Op_00D8();
         void Op_00D9();
         void Op_00DA();
+        void Op_00DC();
         void Op_00DF();
         void Op_00E0();
         void Op_00E1();
@@ -398,6 +401,14 @@ public:
         void Op_CB2D();
         void Op_CB2E();
         void Op_CB2F();
+        void Op_CB30();
+        void Op_CB31();
+        void Op_CB32();
+        void Op_CB33();
+        void Op_CB34();
+        void Op_CB35();
+        void Op_CB36();
+        void Op_CB37();
         void Op_CB38();
         void Op_CB39();
         void Op_CB3A();
@@ -421,6 +432,7 @@ public:
         void Op_CB84();
         void Op_CB85();
         void Op_CB86();
+        void Op_CB87();
         void Op_CBC0();
         void Op_CBC1();
         void Op_CBC2();

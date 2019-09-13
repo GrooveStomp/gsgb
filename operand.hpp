@@ -4,7 +4,7 @@
 
   File: operand.hpp
   Created: 2019-08-31
-  Updated: 2019-09-08
+  Updated: 2019-09-12
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -31,9 +31,9 @@ public:
 
 class operand_value : public operand {
 public:
-        uint16_t value;
+        uint8_t value;
 
-        operand_value(uint16_t);
+        operand_value(uint8_t);
         virtual uint16_t Get();
         virtual void Set(uint16_t value) {}; // nop for value types.
 };
@@ -52,28 +52,18 @@ class operand_reference : public operand {
 public:
         uint8_t *ref;
 
-        operand_reference(uint8_t);
+        operand_reference(uint8_t &);
         virtual uint16_t Get();
         virtual void Set(uint16_t value);
 };
 
 class operand_pair_reference : public operand {
 public:
-        uint8_t *ref1;
-        uint8_t *ref2;
-
-        operand_pair_reference(uint16_t);
-        virtual uint16_t Get();
-        void Set(uint16_t value);
-};
-
-class operand_sp_reference : public operand {
-public:
         uint16_t *ref;
 
-        operand_sp_reference(uint16_t);
+        operand_pair_reference(uint16_t &);
         virtual uint16_t Get();
-        virtual void Set(uint16_t value);
+        void Set(uint16_t value);
 };
 
 } // namespace gs

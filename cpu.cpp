@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-09-10
+  Updated: 2019-09-12
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -972,11 +972,11 @@ void cpu::impl::Op_00F0() {
 
 //-- 16-Bit Load Opcodes -------------------------------------------------------
 
-//! \brief LD BC,nn
+//! \brief LD BC,##
 //!
-//! Put 16-bit value nn into register pair BC.
+//! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0001() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -987,11 +987,11 @@ void cpu::impl::Op_0001() {
         LD();
 }
 
-//! \brief LD DE,nn
+//! \brief LD DE,##
 //!
-//! Put 16-bit value nn into register pair BC.
+//! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0011() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1002,11 +1002,11 @@ void cpu::impl::Op_0011() {
         LD();
 }
 
-//! \brief LD HL,nn
+//! \brief LD HL,##
 //!
-//! Put 16-bit value nn into register pair BC.
+//! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0021() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1017,11 +1017,11 @@ void cpu::impl::Op_0021() {
         LD();
 }
 
-//! \brief LD SP,nn
+//! \brief LD SP,##
 //!
-//! Put 16-bit value nn into Stack Pointer (SP).
+//! Put 16-bit value ## into Stack Pointer (SP).
 void cpu::impl::Op_0031() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1036,10 +1036,10 @@ void cpu::impl::Op_0031() {
 //!
 //! Put HL into Stack Pointer (SP).
 void cpu::impl::Op_00F9() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op2 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -1049,7 +1049,7 @@ void cpu::impl::Op_00F9() {
 //!
 //! Put SP + n effective address into HL.
 void cpu::impl::Op_00F8() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t value = mCpu->SP;
@@ -1068,16 +1068,16 @@ void cpu::impl::Op_00F8() {
         mCpu->FlagSet('c', carry);
 }
 
-//! \brief LD (nn),SP
+//! \brief LD (##),SP
 //!
-//! Put Stack Pointer (SP) at address nn.
+//! Put Stack Pointer (SP) at address ##.
 void cpu::impl::Op_0008() {
         uint16_t lo = mBus->Read(mCpu->PC++);
         uint16_t hi = mBus->Read(mCpu->PC++);
         auto op1 = std::make_shared<operand_address>((hi << 8) + lo, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op2 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -1087,7 +1087,7 @@ void cpu::impl::Op_0008() {
 //!
 //! Push register pair AF onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00F5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->AF);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->AF);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1097,7 +1097,7 @@ void cpu::impl::Op_00F5() {
 //!
 //! Push register pair BC onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00C5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1107,7 +1107,7 @@ void cpu::impl::Op_00C5() {
 //!
 //! Push register pair DE onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00D5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1117,7 +1117,7 @@ void cpu::impl::Op_00D5() {
 //!
 //! Push register pair HL onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00E5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1127,7 +1127,7 @@ void cpu::impl::Op_00E5() {
 //!
 //! Pop two bytes off of the stack into AF. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00F1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->AF);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->AF);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1137,7 +1137,7 @@ void cpu::impl::Op_00F1() {
 //!
 //! Pop two bytes off of the stack into BC. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00C1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1147,7 +1147,7 @@ void cpu::impl::Op_00C1() {
 //!
 //! Pop two bytes off of the stack into DE. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00D1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1157,7 +1157,7 @@ void cpu::impl::Op_00D1() {
 //!
 //! Pop two bytes off of the stack into HL. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00E1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1926,7 +1926,7 @@ void cpu::impl::Op_0035() {
 
 //! \brief ADD HL,BC
 void cpu::impl::Op_0009() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -1934,7 +1934,7 @@ void cpu::impl::Op_0009() {
 
 //! \brief ADD HL,DE
 void cpu::impl::Op_0019() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -1942,7 +1942,7 @@ void cpu::impl::Op_0019() {
 
 //! \brief ADD HL,HL
 void cpu::impl::Op_0029() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -1950,7 +1950,7 @@ void cpu::impl::Op_0029() {
 
 //! \brief ADD HL,SP
 void cpu::impl::Op_0039() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -1966,7 +1966,7 @@ void cpu::impl::Op_00E8() {
 
 //! \brief INC BC
 void cpu::impl::Op_0003() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -1974,7 +1974,7 @@ void cpu::impl::Op_0003() {
 
 //! \brief INC DE
 void cpu::impl::Op_0013() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -1982,7 +1982,7 @@ void cpu::impl::Op_0013() {
 
 //! \brief INC HL
 void cpu::impl::Op_0023() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -1990,7 +1990,7 @@ void cpu::impl::Op_0023() {
 
 //! \brief INC SP
 void cpu::impl::Op_0033() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -1998,7 +1998,7 @@ void cpu::impl::Op_0033() {
 
 //! \brief DEC BC
 void cpu::impl::Op_000B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2006,7 +2006,7 @@ void cpu::impl::Op_000B() {
 
 //! \brief DEC DE
 void cpu::impl::Op_001B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2014,7 +2014,7 @@ void cpu::impl::Op_001B() {
 
 //! \brief DEC HL
 void cpu::impl::Op_002B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2022,23 +2022,689 @@ void cpu::impl::Op_002B() {
 
 //! \brief DEC SP
 void cpu::impl::Op_003B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->SP);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
 }
 
-// TODO: HERE: Miscellaneous Opcodes: SWAP, DAA, CPL, CCF, SCF, NOP, HALT, STOP, DI, EI
+//-- Miscellaneous Opcodes ----------------------------------------------------
 
-// TODO: Rotate & Shift Opcodes: RLCA, RLA, RRCA, RRA, RLC, RL, RRC, RR, SLA, SRA, SRL
+//! \brief SWAP A
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB37() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        operand1 = std::static_pointer_cast<operand>(op1);
 
-// TODO: Bit Opcodes: BIT, SET, RES
+        SWAP();
+}
 
-// TODO: Jump Opcodes: JP, JR
+//! \brief SWAP B
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB30() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        operand1 = std::static_pointer_cast<operand>(op1);
 
-// TODO: Call Opcodes: CALL
+        SWAP();
+}
 
-//-- Restarts ------------------------------------------------------------------
+//! \brief SWAP C
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB31() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief SWAP D
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB32() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief SWAP E
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB33() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief SWAP H
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB34() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief SWAP L
+//!
+//! Swap upper and lower nibbles of specified register.
+void cpu::impl::Op_CB35() {
+        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief SWAP (HL)
+//!
+//! Swap upper and lower nibbles of value at address.
+void cpu::impl::Op_CB36() {
+        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        SWAP();
+}
+
+//! \brief DAA
+//!
+//! Decimal adjust register A.
+void cpu::impl::Op_0027() {
+        DAA();
+}
+
+//! \brief CPL
+//!
+//! Complement register A.
+void cpu::impl::Op_002F() {
+        CPL();
+}
+
+//! \brief CCF
+//!
+//! Complement carry flag.
+void cpu::impl::Op_003F() {
+        CCF();
+}
+
+//! \brief SCF
+//!
+//! Set carry flag.
+void cpu::impl::Op_0037() {
+        SCF();
+}
+
+//! \brief NOP
+void cpu::impl::Op_0000() {
+        NOP();
+}
+
+//! \brief HALT
+//!
+//! Power down the CPU until an interrupt occurs.
+void cpu::impl::Op_0076() {
+        HALT();
+}
+
+//! \brief STOP
+//!
+//! Halt CPU & LCD display until a button is pressed.
+void cpu::impl::Op_1000() {
+        STOP();
+}
+
+//! \brief DI
+//!
+//! Disable interrupts.
+void cpu::impl::Op_00F3() {
+        DI();
+}
+
+//! \brief EI
+//!
+//! Enable interrupts.
+void cpu::impl::Op_00FB() {
+        EI();
+}
+
+//-- Rotate & Shift Opcodes ---------------------------------------------------
+
+// TODO RLCA
+// TODO RLA
+// TODO RRCA
+// TODO RRA
+// TODO RLC
+// TODO RL
+// TODO RRC
+// TODO RR
+// TODO SLA
+// TODO SRA
+// TODO SRL
+
+//-- Bit Opcodes ---------------------------------------------------------------
+
+//! \brief BIT #,A
+void cpu::impl::Op_CB47() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,B
+void cpu::impl::Op_CB40() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,C
+void cpu::impl::Op_CB41() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,D
+void cpu::impl::Op_CB42() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,E
+void cpu::impl::Op_CB43() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,H
+void cpu::impl::Op_CB44() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,L
+void cpu::impl::Op_CB45() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief BIT #,(HL)
+void cpu::impl::Op_CB46() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        BIT();
+}
+
+//! \brief SET #,A
+void cpu::impl::Op_CBC7() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,B
+void cpu::impl::Op_CBC0() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,C
+void cpu::impl::Op_CBC1() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,D
+void cpu::impl::Op_CBC2() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,E
+void cpu::impl::Op_CBC3() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,H
+void cpu::impl::Op_CBC4() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,L
+void cpu::impl::Op_CBC5() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief SET #,(HL)
+void cpu::impl::Op_CBC6() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        SET();
+}
+
+//! \brief RES #,A
+void cpu::impl::Op_CB87() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,B
+void cpu::impl::Op_CB80() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,C
+void cpu::impl::Op_CB81() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,D
+void cpu::impl::Op_CB82() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,E
+void cpu::impl::Op_CB83() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,H
+void cpu::impl::Op_CB84() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,L
+void cpu::impl::Op_CB85() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//! \brief RES #,(HL)
+void cpu::impl::Op_CB86() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        uint8_t bit = (byte >> 3) & 0x7;
+
+        auto op1 = std::make_shared<operand_value>(bit);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        operand2 = std::static_pointer_cast<operand>(op2);
+
+        RES();
+}
+
+//-- Jump Opcodes --------------------------------------------------------------
+
+//! \brief JP ##
+void cpu::impl::Op_00C3() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        JP();
+}
+
+//! \brief JP NZ,##
+void cpu::impl::Op_00C2() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('z')) {
+                JP();
+        }
+}
+
+//! \brief JP Z,##
+void cpu::impl::Op_00CA() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('z')) {
+                JP();
+        }
+}
+
+//! \brief JP NC,##
+void cpu::impl::Op_00D2() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('c')) {
+                JP();
+        }
+}
+
+//! \brief JP C,##
+void cpu::impl::Op_00DA() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('c')) {
+                JP();
+        }
+}
+
+//! \brief JP (HL)
+void cpu::impl::Op_00E9() {
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        JP();
+}
+
+//! \brief JR #
+void cpu::impl::Op_0018() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        JR();
+}
+
+//! \brief JR NZ,#
+void cpu::impl::Op_0020() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('z')) {
+                JR();
+        }
+}
+
+//! \brief JR Z,#
+void cpu::impl::Op_0028() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('z')) {
+                JR();
+        }
+}
+
+//! \brief JR NC,#
+void cpu::impl::Op_0030() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('c')) {
+                JR();
+        }
+}
+
+//! \brief JR C,#
+void cpu::impl::Op_0038() {
+        uint8_t byte = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>(byte);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('c')) {
+                JR();
+        }
+}
+
+//-- Call Opcodes --------------------------------------------------------------
+
+//! \brief CALL ##
+void cpu::impl::Op_00CD() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        CALL();
+}
+
+//! \brief CALL NZ,##
+void cpu::impl::Op_00C4() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('z')) {
+                CALL();
+        }
+}
+
+//! \brief CALL Z,##
+void cpu::impl::Op_00CC() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('z')) {
+                CALL();
+        }
+}
+
+//! \brief CALL NC,##
+void cpu::impl::Op_00D4() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (!mCpu->FlagGet('c')) {
+                CALL();
+        }
+}
+
+//! \brief CALL C,##
+void cpu::impl::Op_00DC() {
+        uint8_t lo = mBus->Read(mCpu->PC++);
+        uint8_t hi = mBus->Read(mCpu->PC++);
+        auto op1 = std::make_shared<operand_value>((hi << 8) | lo);
+        operand1 = std::static_pointer_cast<operand>(op1);
+
+        if (mCpu->FlagGet('c')) {
+                CALL();
+        }
+}
+
+//-- Restart Opcodes -----------------------------------------------------------
 
 // These instructions are of the form RST n where the current address is pushed
 // onto the stack, then n specifies which address to jump to.
@@ -2142,7 +2808,10 @@ void cpu::impl::Op_00D8() {
         }
 }
 
-// TODO: RETI
+//! \brief RETI
+void cpu::impl::Op_00D9() {
+        RETI();
+}
 
 std::map<int,instruction> cpu::impl::instructionMap = {
         // 8-bit Load
@@ -2212,7 +2881,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x007F, { "LD A,A",    &cpu::impl::Op_007F, 4 } },
         { 0x000A, { "LD A,(BC)", &cpu::impl::Op_000A, 8 } },
         { 0x001A, { "LD A,(DE)", &cpu::impl::Op_001A, 8 } },
-        { 0x00FA, { "LD A,(nn)", &cpu::impl::Op_00FA, 16 } },
+        { 0x00FA, { "LD A,(##)", &cpu::impl::Op_00FA, 16 } },
         { 0x003E, { "LD A,n",    &cpu::impl::Op_003E, 8 } },
         { 0x0047, { "LD A,B",    &cpu::impl::Op_0047, 4 } },
         { 0x004F, { "LD A,C",    &cpu::impl::Op_004F, 4 } },
@@ -2223,7 +2892,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x0002, { "LD (BC),A", &cpu::impl::Op_0002, 8 } },
         { 0x0012, { "LD (DE),A", &cpu::impl::Op_0002, 8 } },
         { 0x007E, { "LD (HL),A", &cpu::impl::Op_007E, 8 } },
-        { 0x00FA, { "LD (nn),A", &cpu::impl::Op_00FA, 16 } },
+        { 0x00FA, { "LD (##),A", &cpu::impl::Op_00FA, 16 } },
         { 0x00F2, { "LDH A,(0x00FF00+C)", &cpu::impl::Op_00F2, 8 } },
         { 0x00E2, { "LDH (0x00FF00+C),A", &cpu::impl::Op_00E2, 8 } },
         { 0x003A, { "LDD A,(HL)", &cpu::impl::Op_003A, 8 } },
@@ -2234,13 +2903,13 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x0022, { "LDH A,(0x00FF00+n)", &cpu::impl::Op_0022, 12 } },
 
         // 16-bit Load
-        { 0x0001, { "LD BC,nn", &cpu::impl::Op_0001, 12 } },
-        { 0x0011, { "LD DE,nn", &cpu::impl::Op_0011, 12 } },
-        { 0x0021, { "LD HL,nn", &cpu::impl::Op_0021, 12 } },
-        { 0x0031, { "LD SP,nn", &cpu::impl::Op_0031, 12 } },
+        { 0x0001, { "LD BC,##", &cpu::impl::Op_0001, 12 } },
+        { 0x0011, { "LD DE,##", &cpu::impl::Op_0011, 12 } },
+        { 0x0021, { "LD HL,##", &cpu::impl::Op_0021, 12 } },
+        { 0x0031, { "LD SP,##", &cpu::impl::Op_0031, 12 } },
         { 0x00F9, { "LD SP,HL", &cpu::impl::Op_00F9, 8 } },
         { 0x00F8, { "LDHL SP,n", &cpu::impl::Op_00F8, 12 } },
-        { 0x0008, { "LD (nn),SP", &cpu::impl::Op_0008, 20 } },
+        { 0x0008, { "LD (##),SP", &cpu::impl::Op_0008, 20 } },
         { 0x00F5, { "PUSH AF", &cpu::impl::Op_00F5, 16 } },
         { 0x00C5, { "PUSH BC", &cpu::impl::Op_00C5, 16 } },
         { 0x00D5, { "PUSH DE", &cpu::impl::Op_00D5, 16 } },
@@ -2259,7 +2928,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x0084, { "ADD A,H", &cpu::impl::Op_0084, 4 } },
         { 0x0085, { "ADD A,L", &cpu::impl::Op_0085, 4 } },
         { 0x0086, { "ADD A,(HL)", &cpu::impl::Op_0086, 8 } },
-        { 0x00C6, { "ADD A,nn", &cpu::impl::Op_00C6, 8 } },
+        { 0x00C6, { "ADD A,##", &cpu::impl::Op_00C6, 8 } },
 
         { 0x008F, { "ADC A,A", &cpu::impl::Op_008F, 4 } },
         { 0x0088, { "ADC A,B", &cpu::impl::Op_0088, 4 } },
@@ -2269,7 +2938,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x008C, { "ADC A,H", &cpu::impl::Op_008C, 4 } },
         { 0x008D, { "ADC A,L", &cpu::impl::Op_008D, 4 } },
         { 0x008E, { "ADC A,(HL)", &cpu::impl::Op_008E, 8 } },
-        { 0x00CE, { "ADC A,nn", &cpu::impl::Op_00CE, 8 } },
+        { 0x00CE, { "ADC A,##", &cpu::impl::Op_00CE, 8 } },
 
         { 0x0097, { "SUB A", &cpu::impl::Op_0097, 4 } },
         { 0x0090, { "SUB B", &cpu::impl::Op_0090, 4 } },
@@ -2279,7 +2948,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x0094, { "SUB H", &cpu::impl::Op_0094, 4 } },
         { 0x0095, { "SUB L", &cpu::impl::Op_0095, 4 } },
         { 0x0096, { "SUB (HL)", &cpu::impl::Op_0096, 8 } },
-        { 0x00D6, { "SUB nn", &cpu::impl::Op_00D6, 8 } },
+        { 0x00D6, { "SUB ##", &cpu::impl::Op_00D6, 8 } },
 
         { 0x009F, { "SBC A,A", &cpu::impl::Op_009F, 4 } },
         { 0x0098, { "SBC A,B", &cpu::impl::Op_0098, 4 } },
@@ -2298,7 +2967,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00A4, { "AND H", &cpu::impl::Op_00A4, 4 } },
         { 0x00A5, { "AND L", &cpu::impl::Op_00A5, 4 } },
         { 0x00A6, { "AND (HL)", &cpu::impl::Op_00A6, 8 } },
-        { 0x00E6, { "AND nn", &cpu::impl::Op_00E6, 8 } },
+        { 0x00E6, { "AND ##", &cpu::impl::Op_00E6, 8 } },
 
         { 0x00B7, { "OR A", &cpu::impl::Op_00B7, 4 } },
         { 0x00B0, { "OR B", &cpu::impl::Op_00B0, 4 } },
@@ -2308,7 +2977,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00B4, { "OR H", &cpu::impl::Op_00B4, 4 } },
         { 0x00B5, { "OR L", &cpu::impl::Op_00B5, 4 } },
         { 0x00B6, { "OR (HL)", &cpu::impl::Op_00B6, 8 } },
-        { 0x00F6, { "OR nn", &cpu::impl::Op_00F6, 8 } },
+        { 0x00F6, { "OR ##", &cpu::impl::Op_00F6, 8 } },
 
         { 0x00AF, { "XOR A", &cpu::impl::Op_00AF, 4 } },
         { 0x00A8, { "XOR B", &cpu::impl::Op_00A8, 4 } },
@@ -2318,7 +2987,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00AC, { "XOR H", &cpu::impl::Op_00AC, 4 } },
         { 0x00AD, { "XOR L", &cpu::impl::Op_00AD, 4 } },
         { 0x00AE, { "XOR (HL)", &cpu::impl::Op_00AE, 8 } },
-        { 0x00EE, { "XOR nn", &cpu::impl::Op_00EE, 8 } },
+        { 0x00EE, { "XOR ##", &cpu::impl::Op_00EE, 8 } },
 
         { 0x00BF, { "CP A", &cpu::impl::Op_00BF, 4 } },
         { 0x00B8, { "CP B", &cpu::impl::Op_00B8, 4 } },
@@ -2328,7 +2997,7 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0x00BC, { "CP H", &cpu::impl::Op_00BC, 4 } },
         { 0x00BD, { "CP L", &cpu::impl::Op_00BD, 4 } },
         { 0x00BE, { "CP (HL)", &cpu::impl::Op_00BE, 8 } },
-        { 0x00FE, { "CP nn", &cpu::impl::Op_00FE, 8 } },
+        { 0x00FE, { "CP ##", &cpu::impl::Op_00FE, 8 } },
 
         { 0x003C, { "INC A", &cpu::impl::Op_003C, 4 } },
         { 0x0004, { "INC B", &cpu::impl::Op_0004, 4 } },
@@ -2478,24 +3147,24 @@ std::map<int,instruction> cpu::impl::instructionMap = {
         { 0xCB86, { "RES b,(HL)", &cpu::impl::Op_CB86, 16 } },
 
         // Jumps
-        { 0x00C3, { "JP nn",    &cpu::impl::Op_00C3, 12 } },
-        { 0x00C2, { "JP NZ,nn", &cpu::impl::Op_00C2, 12 } },
-        { 0x00CA, { "JP Z,nn",  &cpu::impl::Op_00CA, 12 } },
-        { 0x00D2, { "JP NC,nn", &cpu::impl::Op_00D2, 12 } },
-        { 0x00DA, { "JP C,nn",  &cpu::impl::Op_00DA, 12 } },
+        { 0x00C3, { "JP ##",    &cpu::impl::Op_00C3, 12 } },
+        { 0x00C2, { "JP NZ,##", &cpu::impl::Op_00C2, 12 } },
+        { 0x00CA, { "JP Z,##",  &cpu::impl::Op_00CA, 12 } },
+        { 0x00D2, { "JP NC,##", &cpu::impl::Op_00D2, 12 } },
+        { 0x00DA, { "JP C,##",  &cpu::impl::Op_00DA, 12 } },
         { 0x00E9, { "JP (HL)",  &cpu::impl::Op_00E9, 4 } },
-        { 0x0018, { "JR n",     &cpu::impl::Op_0018, 8 } },
-        { 0x0020, { "JR NZ,n",  &cpu::impl::Op_0020, 8 } },
-        { 0x0028, { "JR Z,n",   &cpu::impl::Op_0028, 8 } },
-        { 0x0030, { "JR NC,n",  &cpu::impl::Op_0030, 8 } },
-        { 0x0038, { "JR C,n" ,  &cpu::impl::Op_0038, 8 } },
+        { 0x0018, { "JR #",     &cpu::impl::Op_0018, 8 } },
+        { 0x0020, { "JR NZ,#",  &cpu::impl::Op_0020, 8 } },
+        { 0x0028, { "JR Z,#",   &cpu::impl::Op_0028, 8 } },
+        { 0x0030, { "JR NC,#",  &cpu::impl::Op_0030, 8 } },
+        { 0x0038, { "JR C,#" ,  &cpu::impl::Op_0038, 8 } },
 
         // Calls
-        { 0x00CD, { "CALL nn",    &cpu::impl::Op_00CD, 12 } },
-        { 0x00C4, { "CALL NZ,nn", &cpu::impl::Op_00C4, 12 } },
-        { 0x00C4, { "CALL Z,nn",  &cpu::impl::Op_00C4, 12 } },
-        { 0x00C4, { "CALL NC,nn", &cpu::impl::Op_00C4, 12 } },
-        { 0x00C4, { "CALL C,nn",  &cpu::impl::Op_00C4, 12 } },
+        { 0x00CD, { "CALL ##",    &cpu::impl::Op_00CD, 12 } },
+        { 0x00C4, { "CALL NZ,##", &cpu::impl::Op_00C4, 12 } },
+        { 0x00C4, { "CALL Z,##",  &cpu::impl::Op_00C4, 12 } },
+        { 0x00C4, { "CALL NC,##", &cpu::impl::Op_00C4, 12 } },
+        { 0x00C4, { "CALL C,##",  &cpu::impl::Op_00C4, 12 } },
 
         // Restarts
         { 0x00C7, { "RST 0x00", &cpu::impl::Op_00C7, 32 } },
@@ -2618,30 +3287,30 @@ std::map<int,instruction> cpu::impl::instructionMap = {
 // // Other
 // //------------------------------------------------------------------------------
 
-// //! \brief Get the low or high nibble from byte
-// //! \param byte value to get nibble from
-// //! \param pos 0 for low nibble, 1 for high nibble.
-// //! \return high or low nibble of byte as specified by pos
-// uint8_t Nibble(uint8_t byte, uint8_t pos) {
-//         uint8_t result;
+//! \brief Get the low or high nibble from byte
+//! \param byte value to get nibble from
+//! \param pos 0 for low nibble, 1 for high nibble.
+//! \return high or low nibble of byte as specified by pos
+uint8_t Nibble(uint8_t byte, uint8_t pos) {
+        uint8_t result;
 
-//         if (pos) {
-//                 result = (byte & 0xF0) >> 4;
-//         } else {
-//                 result = byte & 0x0F;
-//         }
+        if (pos) {
+                result = (byte & 0xF0) >> 4;
+        } else {
+                result = byte & 0x0F;
+        }
 
-//         return result;
-// }
+        return result;
+}
 
-// //! \return 1 if parity is even, otherwise 0
-// //! \see https://stackoverflow.com/a/21618038
-// int Parity(uint8_t byte) {
-//         byte ^= byte >> 4;
-//         byte ^= byte >> 2;
-//         byte ^= byte >> 1;
-//         return (~byte) & 1;
-// }
+//! \return 1 if parity is even, otherwise 0
+//! \see https://stackoverflow.com/a/21618038
+int Parity(uint8_t byte) {
+        byte ^= byte >> 4;
+        byte ^= byte >> 2;
+        byte ^= byte >> 1;
+        return (~byte) & 1;
+}
 
 // //! Register Addressing
 // //!
@@ -2752,30 +3421,6 @@ std::map<int,instruction> cpu::impl::instructionMap = {
 //         auto result = std::make_shared<operand_address>();
 //         result->address = ((uint16_t)regH << 8) | regL;
 //         return std::dynamic_pointer_cast<operand>(result);
-// }
-
-// std::shared_ptr<uint8_t> cpu::GetRegister(reg8 reg) {
-//         switch (reg) {
-//                 case reg8::B:
-//                         return std::make_shared<uint8_t>(regB);
-//                 case reg8::C:
-//                         return std::make_shared<uint8_t>(regC);
-//                 case reg8::D:
-//                         return std::make_shared<uint8_t>(regD);
-//                 case reg8::E:
-//                         return std::make_shared<uint8_t>(regE);
-//                 case reg8::H:
-//                         return std::make_shared<uint8_t>(regH);
-//                 case reg8::L:
-//                         return std::make_shared<uint8_t>(regL);
-//                 case reg8::A:
-//                         return std::make_shared<uint8_t>(regA);
-//                 case reg8::F:
-//                         return std::make_shared<uint8_t>(regF);
-//                 default:
-//                         return nullptr;
-//         }
-//         return nullptr;
 // }
 
 // uint8_t cpu::MaskForBitAt(uint8_t bitToSet) {
@@ -3046,163 +3691,74 @@ void cpu::impl::DEC16() {
         operand1->Set(value--);
 }
 
-// //! \brief Increment wide register
-// //!
-// //! The contents of register pair ss (any of register pairs BC, DE, HL, or SP)
-// //! are incremented.
-// void cpu::INC() {
-//         switch (opcode) {
-//                 case 0x03:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::BC;
-//                         break;
-//                 case 0x13:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::DE;
-//                         break;
-//                 case 0x23:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//                 case 0x33:
-//                         operandType.tag = reg_tag::regSP;
-//                         operandType.regSP = reg_sp::SP;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         auto oldValue = operand2->Get();
-//         auto newValue = oldValue + 1;
-//         operand2->Set(newValue);
-// }
+//! \brief Swap upper & lower nibbles of operand.
+void cpu::impl::SWAP() {
+        uint8_t oldValue = operand1->Get();
+        uint8_t nibbleHi = Nibble(oldValue, 1);
+        uint8_t nibbleLo = Nibble(oldValue, 0);
+        uint8_t newValue = (nibbleLo << 4) | nibbleHi;
+        operand2->Set(newValue);
 
-// //! \brief Decrement wide register
-// //!
-// //! The contents of register pair ss (any of the register pairs BC, DE, HL, or
-// //! SP) are decremented.
-// void cpu::DEC() {
-//         switch (opcode) {
-//                 case 0x0B:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::BC;
-//                         break;
-//                 case 0x1B:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::DE;
-//                         break;
-//                 case 0x2B:
-//                         operandType.tag = reg_tag::reg16;
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//                 case 0x3B:
-//                         operandType.tag = reg_tag::regSP;
-//                         operandType.regSP = reg_sp::SP;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         auto oldValue = operand2->Get();
-//         auto newValue = oldValue - 1;
-//         operand2->Set(newValue);
-// }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('c', 0);
+}
 
-// //! \brief Swap upper & lower nibbles of operand.
-// void cpu::SWAP() {
-//         switch (opcode) {
-//                 case 0xCB37:
-//                         operandType.reg = reg8::A;
-//                         break;
-//                 case 0xCB30:
-//                         operandType.reg = reg8::B;
-//                         break;
-//                 case 0xCB31:
-//                         operandType.reg = reg8::C;
-//                         break;
-//                 case 0xCB32:
-//                         operandType.reg = reg8::D;
-//                         break;
-//                 case 0xCB33:
-//                         operandType.reg = reg8::E;
-//                         break;
-//                 case 0xCB34:
-//                         operandType.reg = reg8::H;
-//                         break;
-//                 case 0xCB35:
-//                         operandType.reg = reg8::L;
-//                         break;
-//                 case 0xCB36:
-//                         operandType.regPair = reg16::HL;
-//                         break;
-//         }
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t oldValue = static_cast<uint8_t>(operand2->Get());
-//         uint8_t nibbleHi = Nibble(oldValue, 1);
-//         uint8_t nibbleLo = Nibble(oldValue, 0);
-//         uint8_t newValue = (nibbleLo << 4) | nibbleHi;
-//         operand2->Set(newValue);
+//! \brief Decimal adjust register A.
+//!
+//! This instruction adjusts register A so that the correct representation of
+//! Binary Coded Decimal (BCD) is obtained.
+//!
+//! DAA is intended to be run immediately after an addition or subtraction
+//! operation, where the operands were BCD encoded. It then makes the
+//! corrections described above, so the result (stored in the A register) is the
+//! BCD encoded result of the previous operation.
+//!
+//! \see https://ehaskins.com/2018-01-30%20Z80%20DAA/
+void cpu::impl::DAA() {
+        uint8_t val = mCpu->A;
 
-//         FlagSet('z', !newValue);
-//         FlagSet('n', 0);
-//         FlagSet('h', 0);
-//         FlagSet('c', 0);
-// }
+        uint8_t wasCarryHalf = mCpu->FlagGet('h');
+        uint8_t wasCarry = mCpu->FlagGet('c');
+        uint8_t wasSubtraction = mCpu->FlagGet('n');
 
-// //! \brief Decimal adjust register A.
-// //!
-// //! This instruction adjusts register A so that the correct representation of
-// //! Binary Coded Decimal (BCD) is obtained.
-// //!
-// //! DAA is intended to be run immediately after an addition or subtraction
-// //! operation, where the operands were BCD encoded. It then makes the
-// //! corrections described above, so the result (stored in the A register) is the
-// //! BCD encoded result of the previous operation.
-// //!
-// //! \see https://ehaskins.com/2018-01-30%20Z80%20DAA/
-// void cpu::DAA() {
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t val = static_cast<uint8_t>(operand2->Get());
+        uint8_t nibbleLo = Nibble(val, 0);
+        uint8_t nibbleHi = Nibble(val, 1);
 
-//         uint8_t wasCarryHalf = FlagGet('h');
-//         uint8_t wasCarry = FlagGet('c');
-//         uint8_t wasSubtraction = FlagGet('n');
+        if (wasSubtraction) {
+                if (nibbleLo > 9 || wasCarryHalf) {
+                        nibbleLo -= 6;
+                }
+                if (nibbleHi > 9 || wasCarry) {
+                        nibbleHi -= 6;
+                }
+        } else {
+                if (nibbleLo > 9 || wasCarryHalf) {
+                        nibbleLo += 6;
+                }
+                if (nibbleHi > 9 || wasCarry) {
+                        nibbleHi += 6;
+                }
+        }
 
-//         uint8_t nibbleLo = Nibble(val, 0);
-//         uint8_t nibbleHi = Nibble(val, 1);
+        uint8_t newValue = (nibbleHi << 4) | nibbleLo;
+        mCpu->A = newValue;
 
-//         if (wasSubtraction) {
-//                 if (nibbleLo > 9 || wasCarryHalf) {
-//                         nibbleLo -= 6;
-//                 }
-//                 if (nibbleHi > 9 || wasCarry) {
-//                         nibbleHi -= 6;
-//                 }
-//         } else {
-//                 if (nibbleLo > 9 || wasCarryHalf) {
-//                         nibbleLo += 6;
-//                 }
-//                 if (nibbleHi > 9 || wasCarry) {
-//                         nibbleHi += 6;
-//                 }
-//         }
+        mCpu->FlagSet('z', !newValue);
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('p', Parity(newValue));
+        mCpu->FlagSet('c', newValue > 0x99); // TODO verify against table in Z80 manual
+}
 
-//         uint8_t newValue = (nibbleHi << 4) | nibbleLo;
-//         operand2->Set(newValue);
+//! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
+void cpu::impl::CPL() {
+        uint8_t val = ~mCpu->A;
+        operand2->Set(val);
 
-//         FlagSet('z', !newValue);
-//         FlagSet('h', 0);
-//         FlagSet('p', Parity(newValue));
-//         FlagSet('c', newValue > 0x99); // TODO verify against table in Z80 manual
-// }
-
-// //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
-// void cpu::CPL() {
-//         operandType.reg = reg8::A;
-//         operand2 = ((*this).*(instruction->getOperand2))();
-//         uint8_t val = static_cast<uint8_t>(operand2->Get());
-//         val = ~val;
-//         operand2->Set(val);
-
-//         FlagSet('h', 1);
-//         FlagSet('n', 1);
-// }
+        mCpu->FlagSet('h', 1);
+        mCpu->FlagSet('n', 1);
+}
 
 // // TODO: Not used in GB?
 // //! \brief Perform two's complement negation on A.
@@ -3224,52 +3780,52 @@ void cpu::impl::DEC16() {
 // //         FlagSet('c', !(0x00 == val));
 // // }
 
-// //! \brief The carry flag is inverted in the F register.
-// void cpu::CCF() {
-//         FlagSet('h', 0);
-//         FlagSet('n', 0);
-//         FlagSet('c', !FlagGet('c'));
-// }
+//! \brief The carry flag is inverted in the F register.
+void cpu::impl::CCF() {
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', !mCpu->FlagGet('c'));
+}
 
-// //! \brief the carry flag is set in the F register.
-// void cpu::SCF() {
-//         FlagSet('h', 0);
-//         FlagSet('n', 0);
-//         FlagSet('c', 1);
-// }
+//! \brief the carry flag is set in the F register.
+void cpu::impl::SCF() {
+        mCpu->FlagSet('h', 0);
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('c', 1);
+}
 
-// void cpu::NOP() {
-// }
+void cpu::impl::NOP() {
+}
 
-// //! \brief Power down CPU until an interrupt occurs.
-// //!
-// //! The HALT instruction suspends CPU operation until a subsequent interrupt or
-// //! reset is received. While in the HALT state, the processor executes NOPs to
-// //! maintain memory refresh logic.
-// void cpu::HALT() {
-//         halted = true;
-//         waitForButtonPress = false;
-// }
+//! \brief Power down CPU until an interrupt occurs.
+//!
+//! The HALT instruction suspends CPU operation until a subsequent interrupt or
+//! reset is received. While in the HALT state, the processor executes NOPs to
+//! maintain memory refresh logic.
+void cpu::impl::HALT() {
+        halted = true;
+        waitForButtonPress = false;
+}
 
-// //! \brief Halt CPU & LCD display until button press.
-// void cpu::STOP() {
-//         halted = true;
-//         waitForButtonPress = true;
-// }
+//! \brief Halt CPU & LCD display until button press.
+void cpu::impl::STOP() {
+        halted = true;
+        waitForButtonPress = true;
+}
 
-// //! \brief Disable interrupts after next instruction.
-// //!
-// //! When the CPU executes the instruction DI the maskable interrupt is disabled
-// //! until it is subsequently re-enabled by an EI instruction. The CPU does not
-// //! respond to an Interrupt Request (INT) signal.
-// void cpu::DI() {
-//         interruptsDisabledRequested = true;
-// }
+//! \brief Disable interrupts after next instruction.
+//!
+//! When the CPU executes the instruction DI the maskable interrupt is disabled
+//! until it is subsequently re-enabled by an EI instruction. The CPU does not
+//! respond to an Interrupt Request (INT) signal.
+void cpu::impl::DI() {
+        interruptsDisabledRequested = true;
+}
 
-// //! \brief Enable interrupts after next instruction.
-// void cpu::EI() {
-//         interruptsEnabledRequested = true;
-// }
+//! \brief Enable interrupts after next instruction.
+void cpu::impl::EI() {
+        interruptsEnabledRequested = true;
+}
 
 // //! \brief Rotate A left. Old bit 7 is copied to the carry flag.
 // //!
@@ -3682,243 +4238,96 @@ void cpu::impl::DEC16() {
 //         FlagSet('c', carry);
 // }
 
-// //! \brief Test bit in register
-// //!
-// //! This instruction tests bit b in register r and sets the Z flag
-// //! accordingly.
-// void cpu::BIT() {
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
+//! \brief Test bit in register
+//!
+//! This instruction tests bit b in register r and sets the Z flag
+//! accordingly.
+void cpu::impl::BIT() {
+        uint8_t bit = operand1->Get();
+        uint8_t byte = operand2->Get();
 
-//         uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
-//         uint8_t mask = MaskForBitAt(bit);
+        uint8_t test = 0x1 << bit;
 
-//         FlagSet('n', 0);
-//         FlagSet('h', 1);
-//         FlagSet('z', operand2->Get() & mask);
-// }
+        mCpu->FlagSet('z', !(byte & test));
+        mCpu->FlagSet('n', 0);
+        mCpu->FlagSet('h', 1);
+}
 
-// //! \brief Set bit in register
-// //!
-// //! Bit b in register r (any of registers B, C, D, E, H, L, or A) is set.
-// void cpu::SET() {
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
+//! \brief Set bit in register
+//!
+//! Bit b in register r (any of registers B, C, D, E, H, L, or A) is set.
+void cpu::impl::SET() {
+        uint8_t bit = operand1->Get();
+        uint8_t byte = operand2->Get();
 
-//         uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
-//         uint8_t mask = MaskForBitAt(bit);
+        uint8_t set = 0x1 << bit;
+        operand2->Set(byte | set);
+}
 
-//         operand2->Set(operand2->Get() | mask);
-// }
+//! Reset bit in register.
+void cpu::impl::RES() {
+        uint8_t bit = operand1->Get();
+        uint8_t byte = operand2->Get();
 
-// //! Reset bit in register.
-// void cpu::RES() {
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
+        uint8_t set = 0x1 << bit;
+        set = ~set;
 
-//         uint8_t bit = (operand1->Get() >> 3) & 0x7; // bits 3,4,5
-//         uint8_t mask = MaskForBitAt(bit);
-//         mask = ~mask;
+        operand2->Set(byte & set);
+}
 
-//         uint8_t current = operand2->Get();
+void cpu::impl::JP() {
+        mCpu->PC = operand1->Get();
+}
 
-//         operand2->Set(current & mask);
-// }
+//! \brief Add n to current address and jump to it
+void cpu::impl::JR() {
+        uint16_t address = mCpu->PC + operand1->Get();
+        mCpu->PC = address;
+}
 
-// //! Jump to the specified address
-// //! 0xC3: JP    nn
-// //! 0xC2: JP NZ,nn
-// //! 0xCA: JP  Z,nn
-// //! 0xD2: JP NC,nn
-// //! 0xDA: JP  C,nn
-// //! 0xE9: JP  (HL)
-// void cpu::JP() {
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
+//! \brief Push address of next instruction onto the stack and then jump to address nn
+void cpu::impl::CALL() {
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(mCpu->PC & 0xFF));
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(mCpu->PC >> 8));
+        mCpu->PC = operand1->Get();
+}
 
-//         auto jump = [this](uint16_t address) { pc = address; };
+//! Push present address onto stack. Jump to address $0000 + n.
+void cpu::impl::RST() {
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(mCpu->PC & 0xFF));
+        mBus->Write(--mCpu->SP, static_cast<uint8_t>(mCpu->PC >> 8));
+        mCpu->PC = operand1->Get();
+}
 
-//         uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
-//         auto zero = FlagGet('z');
-//         auto carry = FlagGet('c');
+void cpu::impl::RET() {
+        uint16_t address;
+        uint8_t byte = mBus->Read(mCpu->SP++);
+        address = byte << 8;
+        byte = mBus->Read(mCpu->SP++);
+        address = address | byte;
+        mCpu->PC = address;
+}
 
-//         switch (opcode) {
-//                 case 0xE9:
-//                 case 0xC3:
-//                         jump(address);
-//                         break;
-//                 case 0xC2:
-//                         if (0 == zero)
-//                                 jump(address);
-//                         break;
-//                 case 0xCA:
-//                         if (0 != zero)
-//                                 jump(address);
-//                         break;
-//                 case 0xD2:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//                 case 0xDA:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//         }
-// }
-
-// //! \brief Add n to current address and jump to it
-// //!
-// //! This instruction provides for conditional and uncoditional branching to
-// //! other segments of a program depending on the results of a test on the Carry
-// //! Flag. If the flag = 1, the value of displace-ment e is added to the Program
-// //! Counter (PC) and the next instruction is fetched from the location
-// //! designated by the new contents of the PC. The jump is measured from the
-// //! address of the instruction op code and contains a range of –126 to +129
-// //! bytes. The assembler auto-matically adjusts for the twice incremented PC.
-// //!
-// //! If the flag = 0, the next instruction executed is taken from the location
-// //! following this instruction.
-// //! If condition is met: 3 cycles
-// //! If conditions is not met: 2 cycles
-// //!
-// //! 0x18: JR    n
-// //! 0x20: JR NZ,n
-// //! 0x28: JR  Z,n
-// //! 0x30: JR NC,n
-// //! 0x38: JR  C,n
-// void cpu::JR() {
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
-
-//         auto jump = [this](uint16_t address) { pc = address; };
-
-//         int16_t value = (int16_t)std::static_pointer_cast<operand_value>(operand2)->value;
-//         uint16_t address = pc + value;
-
-//         auto zero = FlagGet('z');
-//         auto carry = FlagGet('c');
-
-//         switch (opcode) {
-//                 case 0x18:
-//                         jump(address);
-//                         break;
-//                 case 0x20:
-//                         if (0 == zero)
-//                                 jump(address);
-//                         break;
-//                 case 0x28:
-//                         if (0 != zero)
-//                                 jump(address);
-//                         break;
-//                 case 0x30:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//                 case 0x38:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//         }
-// }
-
-// //! \brief Push address of next instruction onto the stack and then jump to address nn
-// //!
-// //! If condition cc is true, this instruction pushes the current contents of the
-// //! Program Counter (PC) are pushed onto the top of the external memory
-// //! stack. The operands nn are then loaded to the PC to point to the address in
-// //! mem-ory at which the first op code of a subroutine is to be fetched. At the
-// //! end of the subroutine, a RETurn instruction can be used to return to the
-// //! original program flow by popping the top of the stack back to the PC.
-// //!
-// //! Condition cc is programmed as one of eight statuses that corresponds to
-// //! condition bits in the Flag Register (Register F). These eight statuses are
-// //! defined in the following table, which also specifies the corresponding cc
-// //! bit fields in the assembled object code.
-// //!
-// //! cc  | Condition         | Flag
-// //!-----+-------------------+----
-// //! 000 | Non-Zero (NZ)     | Z
-// //! 001 | Zero (Z)          | Z
-// //! 010 | Non-Carry (NC)    | C
-// //! 011 | Carry (C)         | C
-// //! 100 | Parity-Odd (PO)   | P/V
-// //! 101 | Parity-Even (PE)  | P/V
-// //! 110 | Sign-Positive (P) | S
-// //! 111 | Sign-Negative (M) | S
-// void cpu::CALL() {
-//         operandType.reg = reg8::F;
-//         operand1 = ((*this).*(instruction->getOperand1))();
-//         operand2 = ((*this).*(instruction->getOperand2))();
-
-//         auto jump = [this](uint16_t address) {
-//                             msgBus->Write(--sp, static_cast<uint8_t>(pc & 0xFF));
-//                             msgBus->Write(--sp, static_cast<uint8_t>(pc >> 8));
-//                             pc = address;
-//                     };
-
-//         uint16_t address = std::static_pointer_cast<operand_address>(operand2)->address;
-//         auto zero = FlagGet('z');
-//         auto carry = FlagGet('c');
-
-//         switch (opcode) {
-//                 case 0xCD:
-//                         jump(address);
-//                         break;
-//                 case 0xC4:
-//                         if (0 == zero)
-//                                 jump(address);
-//                         break;
-//                 case 0xCC:
-//                         if (0 != zero)
-//                                 jump(address);
-//                         break;
-//                 case 0xD4:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//                 case 0xDC:
-//                         if (0 == carry)
-//                                 jump(address);
-//                         break;
-//         }
-// }
-
-// //! Push present address onto stack. Jump to address $0000 + n.
-// void cpu::RST() {
-//         msgBus->Write(--sp, static_cast<uint8_t>(pc & 0xFF));
-//         msgBus->Write(--sp, static_cast<uint8_t>(pc >> 8));
-//         pc = operand1->Get();
-// }
-
-// void cpu::RET() {
-//         uint16_t address;
-//         uint8_t byte = msgBus->Read(sp++);
-//         address = byte << 8;
-//         byte = msgBus->Read(sp++);
-//         address = address | byte;
-//         pc = address;
-// }
-
-// //! This instruction is used at the end of a maskable interrupt service routine
-// //! to:
-// //!
-// //! • Restore the contents of the Program Counter (analogous to the RET
-// //!   instruction)
-// //!
-// //! • Signal an I/O device that the interrupt routine is
-// //!   completed. The RETI instruction also facilitates the nesting of interrupts,
-// //!   allowing higher priority devices to temporarily suspend service of lower
-// //!   priority service routines. However, this instruction does not enable
-// //!   interrupts that were disabled when the interrupt routine was entered. Before
-// //!   doing the RETI instruction, the enable interrupt instruction (EI) should be
-// //!   executed to allow recognition of interrupts after completion of the current
-// //!   service routine.
-// void cpu::RETI() {
-//         RET();
-//         interruptsDisabled = false;
-//         interruptsDisabledRequested = false;
-//         interruptsEnabledRequested = false;
-// }
+//! This instruction is used at the end of a maskable interrupt service routine
+//! to:
+//!
+//! • Restore the contents of the Program Counter (analogous to the RET
+//!   instruction)
+//!
+//! • Signal an I/O device that the interrupt routine is
+//!   completed. The RETI instruction also facilitates the nesting of interrupts,
+//!   allowing higher priority devices to temporarily suspend service of lower
+//!   priority service routines. However, this instruction does not enable
+//!   interrupts that were disabled when the interrupt routine was entered. Before
+//!   doing the RETI instruction, the enable interrupt instruction (EI) should be
+//!   executed to allow recognition of interrupts after completion of the current
+//!   service routine.
+void cpu::impl::RETI() {
+        RET();
+        interruptsDisabled = false;
+        interruptsDisabledRequested = false;
+        interruptsEnabledRequested = false;
+}
 
 //------------------------------------------------------------------------------
 // Public interface
