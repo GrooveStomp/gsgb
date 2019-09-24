@@ -33,16 +33,21 @@ char *bootRom = {}; //!< Boot rom and DRM check.
 
 
 gb::gb() {
-        memory = new char[1];
-        videoMemory = new uint8_t[1];
+        // RAM starts at 0xC000
+        memory = new char[8 * 1024];
+        // Video memory starts at 0x8000
+        videoMemory = new uint8_t[8 * 1024];
+
+        // Alternatively, 0x8800-0x97FF
+        bgTileMap = &videoMemory[0x8000]; //!< Up to 0x8FFF
 
         mBus = new bus;
         mCpu = new cpu(mBus);
 }
 
 gb::~gb() {
-        delete[] memory;
         delete[] videoMemory;
+        delete[] memory;
 
         delete mCpu;
         delete mBus;

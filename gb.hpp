@@ -27,14 +27,18 @@ class bus;
 class cpu;
 
 class gb {
+private:
         char *memory;
-        uint8_t *videoMemory;
+        uint8_t *videoMemory; //!< 256x256
+        uint8_t *videoDisplay; //!< 160x144
         bus *mBus;
         cpu *mCpu;
 
         static char *bootRom;
 
 public:
+        uint8_t *bgTileMap; //!< Tiles to be displayed.
+
         gb();
         ~gb();
 
