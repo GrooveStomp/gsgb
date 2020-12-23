@@ -1,16 +1,12 @@
 /******************************************************************************
-  GrooveStomp's GB Emulator
-  Copyright (c) 2019 Aaron Oman (GrooveStomp)
-
-  File: cartridge.cpp
-  Created: 2019-09-24
-  Updated: 2019-09-24
-  Author: Aaron Oman
-  Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
-
-  This program comes with ABSOLUTELY NO WARRANTY. This is free software, and
-  you are welcome to redistribute it under certain conditions; See LICENSE for
-  details.
+ * File: cartridge.cpp
+ * Created: 2019-09-24
+ * Updated: 2020-12-23
+ * Package: gsgb
+ * Creator: Aaron Oman (GrooveStomp)
+ * Homepage: https://git.sr.ht/~groovestomp/gsgb/
+ * Copyright 2019 - 2020, Aaron Oman and the gsgb contributors
+ * SPDX-License-Identifier: AGPL-3.0-only
  ******************************************************************************/
 #include "cartridge.hpp"
 
