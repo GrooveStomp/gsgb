@@ -19,28 +19,28 @@
 
 namespace gs {
 
-class bus;
-class cpu;
+class Bus;
+class Cpu;
 
-class gb {
+class GB {
 private:
         char *memory;
         uint8_t *videoMemory; //!< 256x256
         uint8_t *videoDisplay; //!< 160x144
-        bus *mBus;
-        cpu *mCpu;
+        Bus *bus;
+        Cpu *cpu;
 
         static char *bootRom;
 
 public:
         uint8_t *bgTileMap; //!< Tiles to be displayed.
 
-        gb();
-        ~gb();
+        GB();
+        ~GB();
 
-        void Boot();
-        void RomLoad(char *rom, size_t size);
-        void RomExecute();
+        void boot();
+        void romLoad(char *rom, size_t size);
+        void romExecute();
 };
 
 #endif // GB_VERSION

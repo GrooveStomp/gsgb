@@ -15,10 +15,10 @@
 
 namespace gs {
 
-class bus {
+class Bus {
 public:
-        void Write(uint16_t ptr, uint8_t value);
-        uint8_t Read(uint16_t ptr);
+        void write(uint16_t ptr, uint8_t value);
+        uint8_t read(uint16_t ptr);
 };
 
 } // namespace gs

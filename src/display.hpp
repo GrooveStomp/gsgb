@@ -25,7 +25,7 @@ public:
         Display(Ram *r);
         ~Display();
 
-        void Render();
+        void render();
 };
 
 } // namespace gs

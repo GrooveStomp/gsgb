@@ -17,49 +17,49 @@
 
 namespace gs {
 
-class bus;
+class Bus;
 
-class operand {
+class Operand {
 public:
-        virtual uint16_t Get() = 0;
-        virtual void Set(uint16_t) = 0;
+        virtual uint16_t get() = 0;
+        virtual void set(uint16_t) = 0;
 };
 
-class operand_value : public operand {
+class OperandValue : public Operand {
 public:
         uint8_t value;
 
-        operand_value(uint8_t);
-        virtual uint16_t Get();
-        virtual void Set(uint16_t value) {}; // nop for value types.
+        OperandValue(uint8_t);
+        virtual uint16_t get();
+        virtual void set(uint16_t value) {}; // nop for value types.
 };
 
-class operand_address : public operand {
+class OperandAddress : public Operand {
 public:
-        bus *msgBus;
+        Bus *bus;
         uint16_t address;
 
-        operand_address(uint16_t, bus *);
-        virtual uint16_t Get();
-        virtual void Set(uint16_t value);
+        OperandAddress(uint16_t, Bus *);
+        virtual uint16_t get();
+        virtual void set(uint16_t value);
 };
 
-class operand_reference : public operand {
+class OperandReference : public Operand {
 public:
         uint8_t *ref;
 
-        operand_reference(uint8_t &);
-        virtual uint16_t Get();
-        virtual void Set(uint16_t value);
+        OperandReference(uint8_t &);
+        virtual uint16_t get();
+        virtual void set(uint16_t value);
 };
 
-class operand_pair_reference : public operand {
+class OperandPairReference : public Operand {
 public:
         uint16_t *ref;
 
-        operand_pair_reference(uint16_t &);
-        virtual uint16_t Get();
-        void Set(uint16_t value);
+        OperandPairReference(uint16_t &);
+        virtual uint16_t get();
+        void set(uint16_t value);
 };
 
 } // namespace gs

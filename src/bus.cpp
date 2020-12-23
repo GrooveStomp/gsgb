@@ -12,10 +12,10 @@
 
 namespace gs {
 
-void bus::Write(uint16_t ptr, uint8_t value) {
+void Bus::write(uint16_t ptr, uint8_t value) {
 }
 
-uint8_t bus::Read(uint16_t ptr) {
+uint8_t Bus::read(uint16_t ptr) {
         // TODO implement me!
         return 0;
 }

@@ -27,7 +27,7 @@ namespace gs {
 char *bootRom = {}; //!< Boot rom and DRM check.
 
 
-gb::gb() {
+GB::GB() {
         // RAM starts at 0xC000
         memory = new char[8 * 1024];
         // Video memory starts at 0x8000
@@ -36,37 +36,37 @@ gb::gb() {
         // Alternatively, 0x8800-0x97FF
         bgTileMap = &videoMemory[0x8000]; //!< Up to 0x8FFF
 
-        mBus = new bus;
-        mCpu = new cpu(mBus);
+        bus = new Bus;
+        cpu = new Cpu(bus);
 }
 
-gb::~gb() {
+GB::~GB() {
         delete[] videoMemory;
         delete[] memory;
 
-        delete mCpu;
-        delete mBus;
+        delete cpu;
+        delete bus;
 }
 
-void gb::Boot() {
+void GB::boot() {
         // TODO Run bootRom first.
 }
 
-void gb::RomLoad(char *rom, size_t size) {
+void GB::romLoad(char *rom, size_t size) {
         // TODO: Assert size is less than available size in memory for GB system.
         size_t j = 0x100;
         for (size_t i = 0; i < size; i++) {
                 memory[j++] = rom[i];
         }
 
-        mCpu->registers.r16.AF = 0x0001;
-        mCpu->registers.r16.BC = 0x0013;
-        mCpu->registers.r16.DE = 0x00D8;
-        mCpu->registers.r16.HL = 0x014D;
-        mCpu->SP = 0xFFFE;
+        cpu->registers.r16.AF = 0x0001;
+        cpu->registers.r16.BC = 0x0013;
+        cpu->registers.r16.DE = 0x00D8;
+        cpu->registers.r16.HL = 0x014D;
+        cpu->SP = 0xFFFE;
 }
 
-void gb::RomExecute() {
+void GB::romExecute() {
         // TODO main loop here.
 }
 

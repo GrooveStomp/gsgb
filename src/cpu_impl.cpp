@@ -19,14 +19,14 @@
 
 namespace gs {
 
-class bus;
-class operand;
-class instruction;
+class Bus;
+class Operand;
+class Instruction;
 
-class cpu::impl {
+class Cpu::Impl {
 public:
-        impl(cpu *cpuIn, bus *busIn);
-        ~impl();
+        Impl(Cpu *cpu, Bus *bus);
+        ~Impl();
 
         void InitInstructionMap();
 
@@ -92,8 +92,8 @@ public:
         void RETI(); // Return, enabling interrupts
 
         // Instance variables
-        cpu *mCpu;
-        bus *mBus;
+        Cpu *cpu;
+        Bus *bus;
         bool halted = false;
         bool waitForButtonPress = false;
         bool interruptsDisabled = false;
@@ -101,10 +101,10 @@ public:
         bool interruptsEnabledRequested = false;
 
         // Variables and functions to assist in emulation
-        std::shared_ptr<operand> operand1;
-        std::shared_ptr<operand> operand2;
-        std::shared_ptr<instruction> mInstruction = nullptr;
-        std::map<int,instruction> instructionMap;
+        std::shared_ptr<Operand> operand1;
+        std::shared_ptr<Operand> operand2;
+        std::shared_ptr<Instruction> instruction = nullptr;
+        std::map<int,Instruction> instructionMap;
 
         // Opcodes
         void Op_0000();

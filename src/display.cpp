@@ -20,7 +20,7 @@ Display::Display(Ram *r) {
 Display::~Display() {
 }
 
-void Display::Render() {
+void Display::render() {
         /*
           SCY: Scroll Y-coord
           SCX: Scroll X-coord

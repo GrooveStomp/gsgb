@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
                 exit(1);
         }
 
-        gs::gb system;
-        system.Boot();
-        system.RomLoad(fileMem, size);
-        system.RomExecute();
+        gs::GB gb;
+        gb.boot();
+        gb.romLoad(fileMem, size);
+        gb.romExecute();
 
         if (fileMem != nullptr) delete[] fileMem;
         return 0;
