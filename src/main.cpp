@@ -18,6 +18,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
         streampos size = 0;
         char *fileMem = nullptr;
+
         ifstream rom("data/sample.gb", ios::in | ios::binary | ios::ate);
         if (rom.is_open()) {
                 size = rom.tellg();
@@ -27,7 +28,8 @@ int main(int argc, char *argv[]) {
                 rom.read(fileMem, size);
                 rom.close();
         } else {
-                // TODO handle not being able to open file.
+                fputs("Couldn't open rom.\n", stderr);
+                exit(1);
         }
 
         gs::gb system;
