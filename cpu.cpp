@@ -4,7 +4,7 @@
 
   File: cpu.cpp
   Created: 2019-08-29
-  Updated: 2019-09-13
+  Updated: 2020-12-23
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -34,10 +34,10 @@ struct instruction {
 };
 
 cpu::cpu(bus *messageBus) {
-        BC = 0;
-        DE = 0;
-        HL = 0;
-        AF = 0;
+        registers.r16.BC = 0;
+        registers.r16.DE = 0;
+        registers.r16.HL = 0;
+        registers.r16.AF = 0;
         R = 0;
         PC = 0x100;
         SP = 0;
@@ -89,9 +89,9 @@ void cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
         uint8_t bitFlag = 1 << bit;
 
         if (onOrOff) {
-                F |= bitFlag;
+                registers.r8.F |= bitFlag;
         } else {
-                F &= (~bitFlag);
+                registers.r8.F &= (~bitFlag);
         }
 }
 
@@ -129,7 +129,7 @@ uint8_t cpu::FlagGet(char c) {
 }
 
 uint8_t cpu::FlagGet(uint8_t bitToCheck) {
-        uint8_t bit = F & (1 << bitToCheck);
+        uint8_t bit = registers.r8.F & (1 << bitToCheck);
         return bit >> bitToCheck;
 }
 
@@ -182,7 +182,7 @@ int Parity(uint8_t byte) {
 // 8-bit immediate value that is loaded into R.
 
 void cpu::impl::Op_0006() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -192,7 +192,7 @@ void cpu::impl::Op_0006() {
 }
 
 void cpu::impl::Op_000E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -202,7 +202,7 @@ void cpu::impl::Op_000E() {
 }
 
 void cpu::impl::Op_0016() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -212,7 +212,7 @@ void cpu::impl::Op_0016() {
 }
 
 void cpu::impl::Op_001E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -222,7 +222,7 @@ void cpu::impl::Op_001E() {
 }
 
 void cpu::impl::Op_0026() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -232,7 +232,7 @@ void cpu::impl::Op_0026() {
 }
 
 void cpu::impl::Op_002E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -245,567 +245,567 @@ void cpu::impl::Op_002E() {
 // loaded into the register r1.
 
 void cpu::impl::Op_007F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0078() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0079() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_007A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_007B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_007C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_007D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_007E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0040() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0041() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0042() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0043() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0044() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0045() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0046() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0048() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0049() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0050() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0051() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0052() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0053() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0054() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0055() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0056() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0058() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0059() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0060() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0061() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0062() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0063() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0064() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0065() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0066() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0068() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0069() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0070() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0071() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0072() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0073() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0074() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0075() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0036() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -818,27 +818,27 @@ void cpu::impl::Op_0036() {
 // a register, immediate value or indirect value.
 
 void cpu::impl::Op_000A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->BC, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.BC, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_001A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->DE, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.DE, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_00FA() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint8_t lsb = mBus->Read(mCpu->PC++);
@@ -852,7 +852,7 @@ void cpu::impl::Op_00FA() {
 }
 
 void cpu::impl::Op_003E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         auto op2 = std::make_shared<operand_value>(mBus->Read(mCpu->PC++));
@@ -865,90 +865,90 @@ void cpu::impl::Op_003E() {
 // address and the contents of the accumulator are copied into that.
 
 void cpu::impl::Op_0047() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_004F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0057() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_005F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0067() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_006F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0002() {
-        auto op1 = std::make_shared<operand_address>(mCpu->BC, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.BC, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0012() {
-        auto op1 = std::make_shared<operand_address>(mCpu->DE, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.DE, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 }
 
 void cpu::impl::Op_0077() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -961,7 +961,7 @@ void cpu::impl::Op_00EA() {
         auto op1 = std::make_shared<operand_address>(address, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -971,10 +971,10 @@ void cpu::impl::Op_00EA() {
 //!
 //! Put value at address $FF00 + register C into A. Same as: LD A,($FF00+C)
 void cpu::impl::Op_00F2() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        uint16_t address = static_cast<uint16_t>(mCpu->C) + 0xFF00;
+        uint16_t address = static_cast<uint16_t>(mCpu->registers.r8.C) + 0xFF00;
         auto op2 = std::make_shared<operand_address>(address, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
@@ -985,11 +985,11 @@ void cpu::impl::Op_00F2() {
 //!
 //! Put A into address $FF00 + register C.
 void cpu::impl::Op_00E2() {
-        uint16_t address = static_cast<uint16_t>(mCpu->C) + 0xFF00;
+        uint16_t address = static_cast<uint16_t>(mCpu->registers.r8.C) + 0xFF00;
         auto op1 = std::make_shared<operand_address>(address, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -999,60 +999,60 @@ void cpu::impl::Op_00E2() {
 //!
 //! Put value at address HL into A. Decrement HL. Same as: LD A,(HL) - DEC HL
 void cpu::impl::Op_003A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 
-        mCpu->HL--;
+        mCpu->registers.r16.HL--;
 }
 
 //! \brief LDD (HL),A
 //!
 //! Put A into memory address HL. Decrement HL. Same as: LD (HL),A - DEC HL
 void cpu::impl::Op_0032() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 
-        mCpu->HL--;
+        mCpu->registers.r16.HL--;
 }
 
 //! \brief LDI A,(HL)
 //!
 //! Put value at address HL into A. Increment HL. Same as: LD A,(HL) - INC HL
 void cpu::impl::Op_002A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 
-        mCpu->HL++;
+        mCpu->registers.r16.HL++;
 }
 
 //! \brief LDI (HL),A
 //!
 //! Put A into memory address HL. Increment HL. Same as: LD (HL),A - INC HL
 void cpu::impl::Op_0022() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
 
-        mCpu->HL++;
+        mCpu->registers.r16.HL++;
 }
 
 //! \brief LDH (n),A
@@ -1063,7 +1063,7 @@ void cpu::impl::Op_00E0() {
         auto op1 = std::make_shared<operand_address>(address, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -1073,7 +1073,7 @@ void cpu::impl::Op_00E0() {
 //!
 //! Put memory address $FF00+n into A.
 void cpu::impl::Op_00F0() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t address = mBus->Read(mCpu->PC++) + 0xFF00;
@@ -1089,7 +1089,7 @@ void cpu::impl::Op_00F0() {
 //!
 //! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0001() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1104,7 +1104,7 @@ void cpu::impl::Op_0001() {
 //!
 //! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0011() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1119,7 +1119,7 @@ void cpu::impl::Op_0011() {
 //!
 //! Put 16-bit value ## into register pair BC.
 void cpu::impl::Op_0021() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t lo = mBus->Read(mCpu->PC++);
@@ -1152,7 +1152,7 @@ void cpu::impl::Op_00F9() {
         auto op1 = std::make_shared<operand_pair_reference>(mCpu->SP);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op2 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         LD();
@@ -1162,7 +1162,7 @@ void cpu::impl::Op_00F9() {
 //!
 //! Put SP + n effective address into HL.
 void cpu::impl::Op_00F8() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint16_t value = mCpu->SP;
@@ -1200,7 +1200,7 @@ void cpu::impl::Op_0008() {
 //!
 //! Push register pair AF onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00F5() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->AF);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.AF);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1210,7 +1210,7 @@ void cpu::impl::Op_00F5() {
 //!
 //! Push register pair BC onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00C5() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1220,7 +1220,7 @@ void cpu::impl::Op_00C5() {
 //!
 //! Push register pair DE onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00D5() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1230,7 +1230,7 @@ void cpu::impl::Op_00D5() {
 //!
 //! Push register pair HL onto stack.  Decrement Stack Pointer (SP) twice.
 void cpu::impl::Op_00E5() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         PUSH();
@@ -1240,7 +1240,7 @@ void cpu::impl::Op_00E5() {
 //!
 //! Pop two bytes off of the stack into AF. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00F1() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->AF);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.AF);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1250,7 +1250,7 @@ void cpu::impl::Op_00F1() {
 //!
 //! Pop two bytes off of the stack into BC. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00C1() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1260,7 +1260,7 @@ void cpu::impl::Op_00C1() {
 //!
 //! Pop two bytes off of the stack into DE. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00D1() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1270,7 +1270,7 @@ void cpu::impl::Op_00D1() {
 //!
 //! Pop two bytes off of the stack into HL. Increment Stack Pointer (SP) twice.
 void cpu::impl::Op_00E1() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         POP();
@@ -1280,10 +1280,10 @@ void cpu::impl::Op_00E1() {
 
 //! \brief ADD A,A
 void cpu::impl::Op_0087() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1291,10 +1291,10 @@ void cpu::impl::Op_0087() {
 
 //! \brief ADD A,B
 void cpu::impl::Op_0080() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1302,10 +1302,10 @@ void cpu::impl::Op_0080() {
 
 //! \brief ADD A,C
 void cpu::impl::Op_0081() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1313,10 +1313,10 @@ void cpu::impl::Op_0081() {
 
 //! \brief ADD A,D
 void cpu::impl::Op_0082() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1324,10 +1324,10 @@ void cpu::impl::Op_0082() {
 
 //! \brief ADD A,E
 void cpu::impl::Op_0083() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1335,10 +1335,10 @@ void cpu::impl::Op_0083() {
 
 //! \brief ADD A,H
 void cpu::impl::Op_0084() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1346,10 +1346,10 @@ void cpu::impl::Op_0084() {
 
 //! \brief ADD A,L
 void cpu::impl::Op_0085() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1357,10 +1357,10 @@ void cpu::impl::Op_0085() {
 
 //! \brief ADD A,(HL)
 void cpu::impl::Op_0086() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADD8();
@@ -1368,7 +1368,7 @@ void cpu::impl::Op_0086() {
 
 //! \brief ADD A,#
 void cpu::impl::Op_00C6() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint8_t byte = mBus->Read(mCpu->PC++);
@@ -1380,10 +1380,10 @@ void cpu::impl::Op_00C6() {
 
 //! \brief ADC A,A
 void cpu::impl::Op_008F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1391,10 +1391,10 @@ void cpu::impl::Op_008F() {
 
 //! \brief ADC A,B
 void cpu::impl::Op_0088() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1402,10 +1402,10 @@ void cpu::impl::Op_0088() {
 
 //! \brief ADC A,C
 void cpu::impl::Op_0089() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1413,10 +1413,10 @@ void cpu::impl::Op_0089() {
 
 //! \brief ADC A,D
 void cpu::impl::Op_008A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1424,10 +1424,10 @@ void cpu::impl::Op_008A() {
 
 //! \brief ADC A,E
 void cpu::impl::Op_008B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1435,10 +1435,10 @@ void cpu::impl::Op_008B() {
 
 //! \brief ADC A,H
 void cpu::impl::Op_008C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1446,10 +1446,10 @@ void cpu::impl::Op_008C() {
 
 //! \brief ADC A,L
 void cpu::impl::Op_008D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1457,10 +1457,10 @@ void cpu::impl::Op_008D() {
 
 //! \brief ADC A,(HL)
 void cpu::impl::Op_008E() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         ADC8();
@@ -1468,7 +1468,7 @@ void cpu::impl::Op_008E() {
 
 //! \brief ADC A,#
 void cpu::impl::Op_00CE() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         uint8_t byte = mBus->Read(mCpu->PC++);
@@ -1480,7 +1480,7 @@ void cpu::impl::Op_00CE() {
 
 //! \brief SUB A
 void cpu::impl::Op_0097() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1488,7 +1488,7 @@ void cpu::impl::Op_0097() {
 
 //! \brief SUB B
 void cpu::impl::Op_0090() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1496,7 +1496,7 @@ void cpu::impl::Op_0090() {
 
 //! \brief SUB C
 void cpu::impl::Op_0091() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1504,7 +1504,7 @@ void cpu::impl::Op_0091() {
 
 //! \brief SUB D
 void cpu::impl::Op_0092() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1512,7 +1512,7 @@ void cpu::impl::Op_0092() {
 
 //! \brief SUB E
 void cpu::impl::Op_0093() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1520,7 +1520,7 @@ void cpu::impl::Op_0093() {
 
 //! \brief SUB H
 void cpu::impl::Op_0094() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1528,7 +1528,7 @@ void cpu::impl::Op_0094() {
 
 //! \brief SUB L
 void cpu::impl::Op_0095() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1536,7 +1536,7 @@ void cpu::impl::Op_0095() {
 
 //! \brief SUB (HL)
 void cpu::impl::Op_0096() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SUB8();
@@ -1553,7 +1553,7 @@ void cpu::impl::Op_00D6() {
 
 //! \brief SBC A
 void cpu::impl::Op_009F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1561,7 +1561,7 @@ void cpu::impl::Op_009F() {
 
 //! \brief SBC B
 void cpu::impl::Op_0098() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1569,7 +1569,7 @@ void cpu::impl::Op_0098() {
 
 //! \brief SBC C
 void cpu::impl::Op_0099() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1577,7 +1577,7 @@ void cpu::impl::Op_0099() {
 
 //! \brief SBC D
 void cpu::impl::Op_009A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1585,7 +1585,7 @@ void cpu::impl::Op_009A() {
 
 //! \brief SBC E
 void cpu::impl::Op_009B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1593,7 +1593,7 @@ void cpu::impl::Op_009B() {
 
 //! \brief SBC H
 void cpu::impl::Op_009C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1601,7 +1601,7 @@ void cpu::impl::Op_009C() {
 
 //! \brief SBC L
 void cpu::impl::Op_009D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1609,7 +1609,7 @@ void cpu::impl::Op_009D() {
 
 //! \brief SBC (HL)
 void cpu::impl::Op_009E() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SBC8();
@@ -1617,7 +1617,7 @@ void cpu::impl::Op_009E() {
 
 //! \brief AND A
 void cpu::impl::Op_00A7() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1625,7 +1625,7 @@ void cpu::impl::Op_00A7() {
 
 //! \brief AND B
 void cpu::impl::Op_00A0() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1633,7 +1633,7 @@ void cpu::impl::Op_00A0() {
 
 //! \brief AND C
 void cpu::impl::Op_00A1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1641,7 +1641,7 @@ void cpu::impl::Op_00A1() {
 
 //! \brief AND D
 void cpu::impl::Op_00A2() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1649,7 +1649,7 @@ void cpu::impl::Op_00A2() {
 
 //! \brief AND E
 void cpu::impl::Op_00A3() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1657,7 +1657,7 @@ void cpu::impl::Op_00A3() {
 
 //! \brief AND H
 void cpu::impl::Op_00A4() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1665,7 +1665,7 @@ void cpu::impl::Op_00A4() {
 
 //! \brief AND L
 void cpu::impl::Op_00A5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1673,7 +1673,7 @@ void cpu::impl::Op_00A5() {
 
 //! \brief AND (HL)
 void cpu::impl::Op_00A6() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         AND();
@@ -1690,7 +1690,7 @@ void cpu::impl::Op_00E6() {
 
 //! \brief OR A
 void cpu::impl::Op_00B7() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1698,7 +1698,7 @@ void cpu::impl::Op_00B7() {
 
 //! \brief OR B
 void cpu::impl::Op_00B0() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1706,7 +1706,7 @@ void cpu::impl::Op_00B0() {
 
 //! \brief OR C
 void cpu::impl::Op_00B1() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1714,7 +1714,7 @@ void cpu::impl::Op_00B1() {
 
 //! \brief OR D
 void cpu::impl::Op_00B2() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1722,7 +1722,7 @@ void cpu::impl::Op_00B2() {
 
 //! \brief OR E
 void cpu::impl::Op_00B3() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1730,7 +1730,7 @@ void cpu::impl::Op_00B3() {
 
 //! \brief OR H
 void cpu::impl::Op_00B4() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1738,7 +1738,7 @@ void cpu::impl::Op_00B4() {
 
 //! \brief OR L
 void cpu::impl::Op_00B5() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1746,7 +1746,7 @@ void cpu::impl::Op_00B5() {
 
 //! \brief OR (HL)
 void cpu::impl::Op_00B6() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         OR();
@@ -1763,7 +1763,7 @@ void cpu::impl::Op_00F6() {
 
 //! \brief XOR A
 void cpu::impl::Op_00AF() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1771,7 +1771,7 @@ void cpu::impl::Op_00AF() {
 
 //! \brief XOR B
 void cpu::impl::Op_00A8() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1779,7 +1779,7 @@ void cpu::impl::Op_00A8() {
 
 //! \brief XOR C
 void cpu::impl::Op_00A9() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1787,7 +1787,7 @@ void cpu::impl::Op_00A9() {
 
 //! \brief XOR D
 void cpu::impl::Op_00AA() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1795,7 +1795,7 @@ void cpu::impl::Op_00AA() {
 
 //! \brief XOR E
 void cpu::impl::Op_00AB() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1803,7 +1803,7 @@ void cpu::impl::Op_00AB() {
 
 //! \brief XOR H
 void cpu::impl::Op_00AC() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1811,7 +1811,7 @@ void cpu::impl::Op_00AC() {
 
 //! \brief XOR L
 void cpu::impl::Op_00AD() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1819,7 +1819,7 @@ void cpu::impl::Op_00AD() {
 
 //! \brief XOR (HL)
 void cpu::impl::Op_00AE() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         XOR();
@@ -1836,7 +1836,7 @@ void cpu::impl::Op_00EE() {
 
 //! \brief CP A
 void cpu::impl::Op_00BF() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1844,7 +1844,7 @@ void cpu::impl::Op_00BF() {
 
 //! \brief CP B
 void cpu::impl::Op_00B8() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1852,7 +1852,7 @@ void cpu::impl::Op_00B8() {
 
 //! \brief CP C
 void cpu::impl::Op_00B9() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1860,7 +1860,7 @@ void cpu::impl::Op_00B9() {
 
 //! \brief CP D
 void cpu::impl::Op_00BA() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1868,7 +1868,7 @@ void cpu::impl::Op_00BA() {
 
 //! \brief CP E
 void cpu::impl::Op_00BB() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1876,7 +1876,7 @@ void cpu::impl::Op_00BB() {
 
 //! \brief CP H
 void cpu::impl::Op_00BC() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1884,7 +1884,7 @@ void cpu::impl::Op_00BC() {
 
 //! \brief CP L
 void cpu::impl::Op_00BD() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1892,7 +1892,7 @@ void cpu::impl::Op_00BD() {
 
 //! \brief CP (HL)
 void cpu::impl::Op_00BE() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         CP();
@@ -1909,7 +1909,7 @@ void cpu::impl::Op_00FE() {
 
 //! \brief INC A
 void cpu::impl::Op_003C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1917,7 +1917,7 @@ void cpu::impl::Op_003C() {
 
 //! \brief INC B
 void cpu::impl::Op_0004() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1925,7 +1925,7 @@ void cpu::impl::Op_0004() {
 
 //! \brief INC C
 void cpu::impl::Op_000C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1933,7 +1933,7 @@ void cpu::impl::Op_000C() {
 
 //! \brief INC D
 void cpu::impl::Op_0014() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1941,7 +1941,7 @@ void cpu::impl::Op_0014() {
 
 //! \brief INC E
 void cpu::impl::Op_001C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1949,7 +1949,7 @@ void cpu::impl::Op_001C() {
 
 //! \brief INC H
 void cpu::impl::Op_0024() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1957,7 +1957,7 @@ void cpu::impl::Op_0024() {
 
 //! \brief INC L
 void cpu::impl::Op_002C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1965,7 +1965,7 @@ void cpu::impl::Op_002C() {
 
 //! \brief INC (HL)
 void cpu::impl::Op_0034() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC8();
@@ -1973,7 +1973,7 @@ void cpu::impl::Op_0034() {
 
 //! \brief DEC A
 void cpu::impl::Op_003D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -1981,7 +1981,7 @@ void cpu::impl::Op_003D() {
 
 //! \brief DEC B
 void cpu::impl::Op_0005() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -1989,7 +1989,7 @@ void cpu::impl::Op_0005() {
 
 //! \brief DEC C
 void cpu::impl::Op_000D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -1997,7 +1997,7 @@ void cpu::impl::Op_000D() {
 
 //! \brief DEC D
 void cpu::impl::Op_0015() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -2005,7 +2005,7 @@ void cpu::impl::Op_0015() {
 
 //! \brief DEC E
 void cpu::impl::Op_001D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -2013,7 +2013,7 @@ void cpu::impl::Op_001D() {
 
 //! \brief DEC H
 void cpu::impl::Op_0025() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -2021,7 +2021,7 @@ void cpu::impl::Op_0025() {
 
 //! \brief DEC L
 void cpu::impl::Op_002D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -2029,7 +2029,7 @@ void cpu::impl::Op_002D() {
 
 //! \brief DEC (HL)
 void cpu::impl::Op_0035() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC8();
@@ -2039,7 +2039,7 @@ void cpu::impl::Op_0035() {
 
 //! \brief ADD HL,BC
 void cpu::impl::Op_0009() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -2047,7 +2047,7 @@ void cpu::impl::Op_0009() {
 
 //! \brief ADD HL,DE
 void cpu::impl::Op_0019() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -2055,7 +2055,7 @@ void cpu::impl::Op_0019() {
 
 //! \brief ADD HL,HL
 void cpu::impl::Op_0029() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         ADD16();
@@ -2079,7 +2079,7 @@ void cpu::impl::Op_00E8() {
 
 //! \brief INC BC
 void cpu::impl::Op_0003() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -2087,7 +2087,7 @@ void cpu::impl::Op_0003() {
 
 //! \brief INC DE
 void cpu::impl::Op_0013() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -2095,7 +2095,7 @@ void cpu::impl::Op_0013() {
 
 //! \brief INC HL
 void cpu::impl::Op_0023() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         INC16();
@@ -2111,7 +2111,7 @@ void cpu::impl::Op_0033() {
 
 //! \brief DEC BC
 void cpu::impl::Op_000B() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->BC);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.BC);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2119,7 +2119,7 @@ void cpu::impl::Op_000B() {
 
 //! \brief DEC DE
 void cpu::impl::Op_001B() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->DE);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2127,7 +2127,7 @@ void cpu::impl::Op_001B() {
 
 //! \brief DEC HL
 void cpu::impl::Op_002B() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         DEC16();
@@ -2147,7 +2147,7 @@ void cpu::impl::Op_003B() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB37() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2157,7 +2157,7 @@ void cpu::impl::Op_CB37() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB30() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2167,7 +2167,7 @@ void cpu::impl::Op_CB30() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB31() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2177,7 +2177,7 @@ void cpu::impl::Op_CB31() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB32() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2187,7 +2187,7 @@ void cpu::impl::Op_CB32() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB33() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2197,7 +2197,7 @@ void cpu::impl::Op_CB33() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB34() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2207,7 +2207,7 @@ void cpu::impl::Op_CB34() {
 //!
 //! Swap upper and lower nibbles of specified register.
 void cpu::impl::Op_CB35() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2217,7 +2217,7 @@ void cpu::impl::Op_CB35() {
 //!
 //! Swap upper and lower nibbles of value at address.
 void cpu::impl::Op_CB36() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SWAP();
@@ -2308,7 +2308,7 @@ void cpu::impl::Op_001F() {
 
 //! \brief RLC A
 void cpu::impl::Op_CB07() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2316,7 +2316,7 @@ void cpu::impl::Op_CB07() {
 
 //! \brief RLC B
 void cpu::impl::Op_CB00() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2324,7 +2324,7 @@ void cpu::impl::Op_CB00() {
 
 //! \brief RLC C
 void cpu::impl::Op_CB01() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2332,7 +2332,7 @@ void cpu::impl::Op_CB01() {
 
 //! \brief RLC D
 void cpu::impl::Op_CB02() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2340,7 +2340,7 @@ void cpu::impl::Op_CB02() {
 
 //! \brief RLC E
 void cpu::impl::Op_CB03() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2348,7 +2348,7 @@ void cpu::impl::Op_CB03() {
 
 //! \brief RLC H
 void cpu::impl::Op_CB04() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2356,7 +2356,7 @@ void cpu::impl::Op_CB04() {
 
 //! \brief RLC L
 void cpu::impl::Op_CB05() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2364,7 +2364,7 @@ void cpu::impl::Op_CB05() {
 
 //! \brief RLC (HL)
 void cpu::impl::Op_CB06() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RLC();
@@ -2372,7 +2372,7 @@ void cpu::impl::Op_CB06() {
 
 //! \brief RL A
 void cpu::impl::Op_CB17() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2380,7 +2380,7 @@ void cpu::impl::Op_CB17() {
 
 //! \brief RL B
 void cpu::impl::Op_CB10() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2388,7 +2388,7 @@ void cpu::impl::Op_CB10() {
 
 //! \brief RL C
 void cpu::impl::Op_CB11() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2396,7 +2396,7 @@ void cpu::impl::Op_CB11() {
 
 //! \brief RL D
 void cpu::impl::Op_CB12() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2404,7 +2404,7 @@ void cpu::impl::Op_CB12() {
 
 //! \brief RL E
 void cpu::impl::Op_CB13() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2412,7 +2412,7 @@ void cpu::impl::Op_CB13() {
 
 //! \brief RL H
 void cpu::impl::Op_CB14() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2420,7 +2420,7 @@ void cpu::impl::Op_CB14() {
 
 //! \brief RL L
 void cpu::impl::Op_CB15() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2428,7 +2428,7 @@ void cpu::impl::Op_CB15() {
 
 //! \brief RL (HL)
 void cpu::impl::Op_CB16() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RL();
@@ -2436,7 +2436,7 @@ void cpu::impl::Op_CB16() {
 
 //! \brief RRC A
 void cpu::impl::Op_CB0F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2444,7 +2444,7 @@ void cpu::impl::Op_CB0F() {
 
 //! \brief RRC B
 void cpu::impl::Op_CB08() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2452,7 +2452,7 @@ void cpu::impl::Op_CB08() {
 
 //! \brief RRC C
 void cpu::impl::Op_CB09() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2460,7 +2460,7 @@ void cpu::impl::Op_CB09() {
 
 //! \brief RRC D
 void cpu::impl::Op_CB0A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2468,7 +2468,7 @@ void cpu::impl::Op_CB0A() {
 
 //! \brief RRC E
 void cpu::impl::Op_CB0B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2476,7 +2476,7 @@ void cpu::impl::Op_CB0B() {
 
 //! \brief RRC H
 void cpu::impl::Op_CB0C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2484,7 +2484,7 @@ void cpu::impl::Op_CB0C() {
 
 //! \brief RRC L
 void cpu::impl::Op_CB0D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2492,7 +2492,7 @@ void cpu::impl::Op_CB0D() {
 
 //! \brief RRC (HL)
 void cpu::impl::Op_CB0E() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RRC();
@@ -2500,7 +2500,7 @@ void cpu::impl::Op_CB0E() {
 
 //! \brief RR A
 void cpu::impl::Op_CB1F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2508,7 +2508,7 @@ void cpu::impl::Op_CB1F() {
 
 //! \brief RR B
 void cpu::impl::Op_CB18() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2516,7 +2516,7 @@ void cpu::impl::Op_CB18() {
 
 //! \brief RR C
 void cpu::impl::Op_CB19() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2524,7 +2524,7 @@ void cpu::impl::Op_CB19() {
 
 //! \brief RR D
 void cpu::impl::Op_CB1A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2532,7 +2532,7 @@ void cpu::impl::Op_CB1A() {
 
 //! \brief RR E
 void cpu::impl::Op_CB1B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2540,7 +2540,7 @@ void cpu::impl::Op_CB1B() {
 
 //! \brief RR H
 void cpu::impl::Op_CB1C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2548,7 +2548,7 @@ void cpu::impl::Op_CB1C() {
 
 //! \brief RR L
 void cpu::impl::Op_CB1D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2556,7 +2556,7 @@ void cpu::impl::Op_CB1D() {
 
 //! \brief RR (HL)
 void cpu::impl::Op_CB1E() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         RR();
@@ -2564,7 +2564,7 @@ void cpu::impl::Op_CB1E() {
 
 //! \brief SLA A
 void cpu::impl::Op_CB27() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2572,7 +2572,7 @@ void cpu::impl::Op_CB27() {
 
 //! \brief SLA B
 void cpu::impl::Op_CB20() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2580,7 +2580,7 @@ void cpu::impl::Op_CB20() {
 
 //! \brief SLA C
 void cpu::impl::Op_CB21() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2588,7 +2588,7 @@ void cpu::impl::Op_CB21() {
 
 //! \brief SLA D
 void cpu::impl::Op_CB22() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2596,7 +2596,7 @@ void cpu::impl::Op_CB22() {
 
 //! \brief SLA E
 void cpu::impl::Op_CB23() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2604,7 +2604,7 @@ void cpu::impl::Op_CB23() {
 
 //! \brief SLA H
 void cpu::impl::Op_CB24() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2612,7 +2612,7 @@ void cpu::impl::Op_CB24() {
 
 //! \brief SLA L
 void cpu::impl::Op_CB25() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2620,7 +2620,7 @@ void cpu::impl::Op_CB25() {
 
 //! \brief SLA (HL)
 void cpu::impl::Op_CB26() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SLA();
@@ -2628,7 +2628,7 @@ void cpu::impl::Op_CB26() {
 
 //! \brief SRA A
 void cpu::impl::Op_CB2F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2636,7 +2636,7 @@ void cpu::impl::Op_CB2F() {
 
 //! \brief SRA B
 void cpu::impl::Op_CB28() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2644,7 +2644,7 @@ void cpu::impl::Op_CB28() {
 
 //! \brief SRA C
 void cpu::impl::Op_CB29() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2652,7 +2652,7 @@ void cpu::impl::Op_CB29() {
 
 //! \brief SRA D
 void cpu::impl::Op_CB2A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2660,7 +2660,7 @@ void cpu::impl::Op_CB2A() {
 
 //! \brief SRA E
 void cpu::impl::Op_CB2B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2668,7 +2668,7 @@ void cpu::impl::Op_CB2B() {
 
 //! \brief SRA H
 void cpu::impl::Op_CB2C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2676,7 +2676,7 @@ void cpu::impl::Op_CB2C() {
 
 //! \brief SRA L
 void cpu::impl::Op_CB2D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2684,7 +2684,7 @@ void cpu::impl::Op_CB2D() {
 
 //! \brief SRA (HL)
 void cpu::impl::Op_CB2E() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRA();
@@ -2692,7 +2692,7 @@ void cpu::impl::Op_CB2E() {
 
 //! \brief SRL A
 void cpu::impl::Op_CB3F() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->A);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2700,7 +2700,7 @@ void cpu::impl::Op_CB3F() {
 
 //! \brief SRL B
 void cpu::impl::Op_CB38() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->B);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2708,7 +2708,7 @@ void cpu::impl::Op_CB38() {
 
 //! \brief SRL C
 void cpu::impl::Op_CB39() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->C);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2716,7 +2716,7 @@ void cpu::impl::Op_CB39() {
 
 //! \brief SRL D
 void cpu::impl::Op_CB3A() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->D);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2724,7 +2724,7 @@ void cpu::impl::Op_CB3A() {
 
 //! \brief SRL E
 void cpu::impl::Op_CB3B() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->E);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2732,7 +2732,7 @@ void cpu::impl::Op_CB3B() {
 
 //! \brief SRL H
 void cpu::impl::Op_CB3C() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->H);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2740,7 +2740,7 @@ void cpu::impl::Op_CB3C() {
 
 //! \brief SRL L
 void cpu::impl::Op_CB3D() {
-        auto op1 = std::make_shared<operand_reference>(mCpu->L);
+        auto op1 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2748,7 +2748,7 @@ void cpu::impl::Op_CB3D() {
 
 //! \brief SRL (HL)
 void cpu::impl::Op_CB3E() {
-        auto op1 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op1 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         SRL();
@@ -2764,7 +2764,7 @@ void cpu::impl::Op_CB47() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2778,7 +2778,7 @@ void cpu::impl::Op_CB40() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2792,7 +2792,7 @@ void cpu::impl::Op_CB41() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2806,7 +2806,7 @@ void cpu::impl::Op_CB42() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2820,7 +2820,7 @@ void cpu::impl::Op_CB43() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2834,7 +2834,7 @@ void cpu::impl::Op_CB44() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2848,7 +2848,7 @@ void cpu::impl::Op_CB45() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2862,7 +2862,7 @@ void cpu::impl::Op_CB46() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         BIT();
@@ -2876,7 +2876,7 @@ void cpu::impl::Op_CBC7() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2890,7 +2890,7 @@ void cpu::impl::Op_CBC0() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2904,7 +2904,7 @@ void cpu::impl::Op_CBC1() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2918,7 +2918,7 @@ void cpu::impl::Op_CBC2() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2932,7 +2932,7 @@ void cpu::impl::Op_CBC3() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2946,7 +2946,7 @@ void cpu::impl::Op_CBC4() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2960,7 +2960,7 @@ void cpu::impl::Op_CBC5() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2974,7 +2974,7 @@ void cpu::impl::Op_CBC6() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         SET();
@@ -2988,7 +2988,7 @@ void cpu::impl::Op_CB87() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->A);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.A);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3002,7 +3002,7 @@ void cpu::impl::Op_CB80() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->B);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.B);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3016,7 +3016,7 @@ void cpu::impl::Op_CB81() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->C);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.C);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3030,7 +3030,7 @@ void cpu::impl::Op_CB82() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->D);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.D);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3044,7 +3044,7 @@ void cpu::impl::Op_CB83() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->E);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.E);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3058,7 +3058,7 @@ void cpu::impl::Op_CB84() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->H);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.H);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3072,7 +3072,7 @@ void cpu::impl::Op_CB85() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_reference>(mCpu->L);
+        auto op2 = std::make_shared<operand_reference>(mCpu->registers.r8.L);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3086,7 +3086,7 @@ void cpu::impl::Op_CB86() {
         auto op1 = std::make_shared<operand_value>(bit);
         operand1 = std::static_pointer_cast<operand>(op1);
 
-        auto op2 = std::make_shared<operand_address>(mCpu->HL, mBus);
+        auto op2 = std::make_shared<operand_address>(mCpu->registers.r16.HL, mBus);
         operand2 = std::static_pointer_cast<operand>(op2);
 
         RES();
@@ -3154,7 +3154,7 @@ void cpu::impl::Op_00DA() {
 
 //! \brief JP (HL)
 void cpu::impl::Op_00E9() {
-        auto op1 = std::make_shared<operand_pair_reference>(mCpu->HL);
+        auto op1 = std::make_shared<operand_pair_reference>(mCpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<operand>(op1);
 
         JP();
@@ -3839,7 +3839,7 @@ void cpu::impl::ADC8() {
 }
 
 void cpu::impl::SUB8() {
-        int16_t minuend = mCpu->A;
+        int16_t minuend = mCpu->registers.r8.A;
         int16_t subtrahend = operand1->Get();
 
         int16_t difference = minuend - subtrahend;
@@ -3855,7 +3855,7 @@ void cpu::impl::SUB8() {
 }
 
 void cpu::impl::SBC8() {
-        int16_t minuend = mCpu->A;
+        int16_t minuend = mCpu->registers.r8.A;
         uint8_t prevCarry = mCpu->FlagGet('c') ? 1 : 0;
         int16_t subtrahend = operand1->Get() + prevCarry;
 
@@ -3872,34 +3872,34 @@ void cpu::impl::SBC8() {
 }
 
 void cpu::impl::AND() {
-        mCpu->A &= operand1->Get();
+        mCpu->registers.r8.A &= operand1->Get();
 
-        mCpu->FlagSet('z', 0 == mCpu->A);
+        mCpu->FlagSet('z', 0 == mCpu->registers.r8.A);
         mCpu->FlagSet('n', 0);
         mCpu->FlagSet('h', 0);
         mCpu->FlagSet('c', 0);
 }
 
 void cpu::impl::OR() {
-        mCpu->A |= operand1->Get();
+        mCpu->registers.r8.A |= operand1->Get();
 
-        mCpu->FlagSet('z', 0 == mCpu->A);
+        mCpu->FlagSet('z', 0 == mCpu->registers.r8.A);
         mCpu->FlagSet('n', 0);
         mCpu->FlagSet('h', 0);
         mCpu->FlagSet('c', 0);
 }
 
 void cpu::impl::XOR() {
-        mCpu->A ^= operand1->Get();
+        mCpu->registers.r8.A ^= operand1->Get();
 
-        mCpu->FlagSet('z', 0 == mCpu->A);
+        mCpu->FlagSet('z', 0 == mCpu->registers.r8.A);
         mCpu->FlagSet('n', 0);
         mCpu->FlagSet('h', 0);
         mCpu->FlagSet('c', 0);
 }
 
 void cpu::impl::CP() {
-        int16_t minuend = mCpu->A;
+        int16_t minuend = mCpu->registers.r8.A;
         int16_t subtrahend = operand1->Get();
         int16_t result = minuend - subtrahend;
         bool halfCarry = (minuend & 0xF) < (subtrahend & 0xF);
@@ -3966,7 +3966,7 @@ void cpu::impl::SWAP() {
 //!
 //! \see https://ehaskins.com/2018-01-30%20Z80%20DAA/
 void cpu::impl::DAA() {
-        uint8_t val = mCpu->A;
+        uint8_t val = mCpu->registers.r8.A;
 
         uint8_t wasCarryHalf = mCpu->FlagGet('h');
         uint8_t wasCarry = mCpu->FlagGet('c');
@@ -3992,7 +3992,7 @@ void cpu::impl::DAA() {
         }
 
         uint8_t newValue = (nibbleHi << 4) | nibbleLo;
-        mCpu->A = newValue;
+        mCpu->registers.r8.A = newValue;
 
         mCpu->FlagSet('z', !newValue);
         mCpu->FlagSet('h', 0);
@@ -4002,7 +4002,7 @@ void cpu::impl::DAA() {
 
 //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
 void cpu::impl::CPL() {
-        uint8_t val = ~(mCpu->A);
+        uint8_t val = ~(mCpu->registers.r8.A);
         operand2->Set(val);
 
         mCpu->FlagSet('h', 1);
@@ -4014,7 +4014,7 @@ void cpu::impl::CPL() {
 // //!
 // //! The contents of the Accumulator are negated (two’s complement). This method
 // //! is the same as subtracting the contents of the Accumulator from zero.
-// // void cpu::NEG() {
+// // void NEG() {
 // //         operand2 = ((*this).*(instruction->getOperand2))();
 // //         uint16_t val = static_cast<uint8_t>(operand2->Get());
 // //         uint16_t onesComplement = ~val;
@@ -4082,10 +4082,10 @@ void cpu::impl::EI() {
 //! position. The sign bit (bit 7) is copied to the Carry flag and also to bit
 //! 0. Bit 0 is the least-significant bit.
 void cpu::impl::RLCA() {
-        uint8_t oldValue = mCpu->A;
+        uint8_t oldValue = mCpu->registers.r8.A;
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
-        mCpu->A = newValue;
+        mCpu->registers.r8.A = newValue;
 
         mCpu->FlagSet('z', !newValue);
         mCpu->FlagSet('n', 0);
@@ -4099,11 +4099,11 @@ void cpu::impl::RLCA() {
 //! through the Carry flag. The previous contents of the Carry flag are copied
 //! to bit 0. Bit 0 is the least-significant bit.
 void cpu::impl::RLA() {
-        uint16_t oldValue = mCpu->A;
+        uint16_t oldValue = mCpu->registers.r8.A;
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
         uint8_t oldCarry = mCpu->FlagGet('c');
         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
-        mCpu->A = newValue;
+        mCpu->registers.r8.A = newValue;
 
         mCpu->FlagSet('z', !newValue);
         mCpu->FlagSet('n', 0);
@@ -4117,10 +4117,10 @@ void cpu::impl::RLA() {
 //! position. Bit 0 is cop-ied to the Carry flag and also to bit 7. Bit 0 is the
 //! least-significant bit.
 void cpu::impl::RRCA() {
-        uint16_t oldValue = mCpu->A;
+        uint16_t oldValue = mCpu->registers.r8.A;
         uint8_t carry = (uint8_t)oldValue & 0x1;
         uint8_t newValue = ((uint8_t)oldValue >> 1) | (carry << 0x7);
-        mCpu->A = newValue;
+        mCpu->registers.r8.A = newValue;
 
         mCpu->FlagSet('z', !newValue);
         mCpu->FlagSet('n', 0);
@@ -4134,11 +4134,11 @@ void cpu::impl::RRCA() {
 //! position through the Carry flag. The previous contents of the Carry flag are
 //! copied to bit 7. Bit 0 is the least-significant bit.
 void cpu::impl::RRA() {
-        uint16_t oldValue = mCpu->A;
+        uint16_t oldValue = mCpu->registers.r8.A;
         uint8_t carry = (uint8_t)oldValue & 0x1;
         uint8_t oldCarry = mCpu->FlagGet('c');
         uint8_t newValue = ((uint8_t)oldValue >> 1) | (oldCarry << 0x7);
-        mCpu->A = newValue;
+        mCpu->registers.r8.A = newValue;
 
         mCpu->FlagSet('z', !newValue);
         mCpu->FlagSet('n', 0);
@@ -4386,8 +4386,8 @@ void cpu::InstructionFetch() {
 
         // Some opcodes are two-bytes long; these are prefixed with the byte
         // 0x10 or 0xCB.
-        // TODO: I'm not sure if these are ordered B1|B2 or B2|B1.
-        //       I'm assuming B1|B2 in this implementationementation but may need to
+        // NOTE: I'm not sure if these are ordered B1|B2 or B2|B1.
+        //       I'm assuming B1|B2 in this implementation but may need to
         //       follow up on that.
         if (0x10 == opcodeByte || 0xCB == opcodeByte) {
                 opcode = (opcodeByte << 8);

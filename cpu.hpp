@@ -80,37 +80,26 @@ public:
         uint8_t FlagGet(char);
         uint8_t FlagGet(uint8_t);
 
-        // General purpose registers
         union {
-                uint16_t BC;
-                struct {
+                struct r8_type {
                         uint8_t B;
                         uint8_t C;
-                };
-        };
-        union {
-                uint16_t DE;
-                struct {
                         uint8_t D;
                         uint8_t E;
-                };
-        };
-        union {
-                uint16_t HL;
-                struct {
                         uint8_t H;
                         uint8_t L;
-                };
-        };
 
-        // Accumulator and Flag registers
-        union {
-                uint16_t AF;
-                struct {
+                        // Special purpose accumulator and flag.
                         uint8_t A;
                         uint8_t F;
-                };
-        };
+                } r8;
+                struct r16_type {
+                        uint16_t BC;
+                        uint16_t DE;
+                        uint16_t HL;
+                        uint16_t AF; // Special purpose accumulator and flag.
+                } r16;
+        } registers;
 
         // Special purpose registers
         uint8_t R; //!< memory refresh

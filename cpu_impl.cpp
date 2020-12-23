@@ -4,7 +4,7 @@
 
   File: cpu_impl.cpp
   Created: 2019-09-07
-  Updated: 2019-09-12
+  Updated: 2020-12-23
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 

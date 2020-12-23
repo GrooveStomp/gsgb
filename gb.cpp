@@ -4,7 +4,7 @@
 
   File: gb.cpp
   Created: 2019-09-13
-  Updated: 2019-09-13
+  Updated: 2020-12-23
   Author: Aaron Oman
   Notice: Creative Commons Attribution 4.0 International License (CC-BY 4.0)
 
@@ -64,10 +64,10 @@ void gb::RomLoad(char *rom, size_t size) {
                 memory[j++] = rom[i];
         }
 
-        mCpu->AF = 0x0001;
-        mCpu->BC = 0x0013;
-        mCpu->DE = 0x00D8;
-        mCpu->HL = 0x014D;
+        mCpu->registers.r16.AF = 0x0001;
+        mCpu->registers.r16.BC = 0x0013;
+        mCpu->registers.r16.DE = 0x00D8;
+        mCpu->registers.r16.HL = 0x014D;
         mCpu->SP = 0xFFFE;
 }
 
