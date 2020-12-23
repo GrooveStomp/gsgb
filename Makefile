@@ -8,16 +8,16 @@
 # Copyright 2019 - 2020, Aaron Oman and the gsgb contributors
 # SPDX-License-Identifier: AGPL-3.0-only
 #******************************************************************************
-CC       = /usr/bin/g++
-INC     += $(shell sdl2-config --cflags)
-HEADERS  = $(wildcard *.hpp)
-LIBS    += $(shell sdl2-config --libs) -lSDL2main
-CFLAGS  += -std=c++11 -pedantic -Wall -D_GNU_SOURCE
+CC      = /usr/bin/g++
+INC     = $(shell sdl2-config --cflags)
+HEADERS = $(wildcard src/*.hpp)
+LIBS    = $(shell sdl2-config --libs) -lSDL2main
+CFLAGS  = -std=c++17 -fno-exceptions -pedantic -Wall
 
-SRC_DEP  =
-SRC      = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/gb.cpp src/ram.cpp src/cartridge.cpp src/display.cpp
-OBJFILES = $(patsubst %.cpp,%.o,$(SRC))
-LINTFILES= $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
+SRC_DEP   =
+SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/gb.cpp src/ram.cpp src/cartridge.cpp src/display.cpp
+OBJFILES  = $(patsubst %.cpp,%.o,$(SRC))
+LINTFILES = $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
 
 RELDIR = release
 RELOBJ = $(addprefix $(RELDIR)/,$(OBJFILES))
@@ -27,7 +27,7 @@ RELFLG = -O3
 DBGDIR = debug
 DBGOBJ = $(addprefix $(DBGDIR)/,$(OBJFILES))
 DBGEXE = $(DBGDIR)/gb
-DBGFLG = -g -Og
+DBGFLG = -gdwarf-4 -g3 -fno-eliminate-unused-debug-symbols -fvar-tracking -fvar-tracking-assignments
 
 TSTDIR = test
 TSTSRC = $(wildcard $(TSTDIR)/*.cpp)
