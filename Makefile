@@ -19,7 +19,7 @@ LIBS    += $(shell sdl2-config --libs) -lSDL2main
 CFLAGS  += -std=c++11 -pedantic -Wall -D_GNU_SOURCE
 
 SRC_DEP  =
-SRC      = main.cpp cpu.cpp bus.cpp operand.cpp gb.cpp ram.cpp cartridge.cpp display.cpp
+SRC      = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/gb.cpp src/ram.cpp src/cartridge.cpp src/display.cpp
 OBJFILES = $(patsubst %.cpp,%.o,$(SRC))
 LINTFILES= $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
 
