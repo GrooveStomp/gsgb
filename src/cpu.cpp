@@ -3760,13 +3760,13 @@ void Cpu::Impl::InitInstructionMap() {
 //------------------------------------------------------------------------------
 
 void Cpu::Impl::LD() {
-       operand1->set(operand2->get());
+        operand1->set(operand2->get());
 }
 
 //! Push register pair nn onto stack. Decrement Stack Pointer (SP) twice.
 //! Write Little-Endian, so the LSB occurs first in memory.
 void Cpu::Impl::PUSH() {
-        uint16_t word =operand1->get();
+        uint16_t word = operand1->get();
         bus->write(--cpu->SP, static_cast<uint8_t>(word >> 8));
         bus->write(--cpu->SP, static_cast<uint8_t>(word | 0xFF));
 }
@@ -3780,18 +3780,18 @@ void Cpu::Impl::POP() {
         byte = bus->read(cpu->SP++);
         word |= byte;
 
-       operand1->set(word);
+        operand1->set(word);
 }
 
 void Cpu::Impl::ADD8() {
-        uint8_t left =operand1->get();
-        uint8_t right =operand2->get();
+        uint8_t left = operand1->get();
+        uint8_t right = operand2->get();
 
         uint8_t sum = left + right;
         bool halfCarry = ((left & 0xF) + (right & 0xF)) & 0x10;
         bool carry = ((uint16_t)left + (uint16_t)right) & 0x100;
 
-       operand1->set(sum);
+        operand1->set(sum);
 
         cpu->FlagSet('z', 0 == sum);
         cpu->FlagSet('n', 0);
@@ -3800,14 +3800,14 @@ void Cpu::Impl::ADD8() {
 }
 
 void Cpu::Impl::ADD16() {
-        uint16_t left =operand1->get();
-        uint16_t right =operand2->get();
+        uint16_t left = operand1->get();
+        uint16_t right = operand2->get();
 
         uint16_t sum = left + right;
         bool halfCarry = ((left & 0xFFF) + (right & 0xFFF)) & 0x1000;
         bool carry = ((uint32_t)left + (uint32_t)right) & 0x10000;
 
-       operand1->set(sum);
+        operand1->set(sum);
 
         cpu->FlagSet('n', 0);
         cpu->FlagSet('h', halfCarry);
@@ -3817,15 +3817,15 @@ void Cpu::Impl::ADD16() {
 //! The operand, along with the Carry Flag (C in the F Register) is added to the
 //! contents of the Accumulator, and the result is stored in the Accumulator.
 void Cpu::Impl::ADC8() {
-        uint8_t left =operand1->get();
-        uint8_t right =operand2->get();
+        uint8_t left = operand1->get();
+        uint8_t right = operand2->get();
 
         uint8_t prevCarry = cpu->FlagGet('c') ? 1 : 0;
         uint8_t sum = left + right + prevCarry;
         bool halfCarry = ((left & 0xF) + (right & 0xF) + prevCarry) & 0x10;
         bool carry = ((uint16_t)left + (uint16_t)right + prevCarry) & 0x100;
 
-       operand1->set(sum);
+        operand1->set(sum);
 
         cpu->FlagSet('z', 0 == sum);
         cpu->FlagSet('n', 0);
@@ -3835,13 +3835,13 @@ void Cpu::Impl::ADC8() {
 
 void Cpu::Impl::SUB8() {
         int16_t minuend = cpu->registers.r8.A;
-        int16_t subtrahend =operand1->get();
+        int16_t subtrahend = operand1->get();
 
         int16_t difference = minuend - subtrahend;
         bool halfCarry = (minuend & 0xF) < (subtrahend & 0xF);
         bool carry = minuend < subtrahend;
 
-       operand1->set(static_cast<uint8_t>(difference));
+        operand1->set(static_cast<uint8_t>(difference));
 
         cpu->FlagSet('z', 0 == difference);
         cpu->FlagSet('n', 0);
@@ -3852,13 +3852,13 @@ void Cpu::Impl::SUB8() {
 void Cpu::Impl::SBC8() {
         int16_t minuend = cpu->registers.r8.A;
         uint8_t prevCarry = cpu->FlagGet('c') ? 1 : 0;
-        int16_t subtrahend =operand1->get() + prevCarry;
+        int16_t subtrahend = operand1->get() + prevCarry;
 
         uint16_t difference = minuend - subtrahend;
         bool halfCarry = (minuend & 0xF) < (subtrahend & 0xF);
         bool carry = minuend < subtrahend;
 
-       operand1->set(static_cast<uint8_t>(difference));
+        operand1->set(static_cast<uint8_t>(difference));
 
         cpu->FlagSet('z', 0 == difference);
         cpu->FlagSet('n', 0);
@@ -3867,7 +3867,7 @@ void Cpu::Impl::SBC8() {
 }
 
 void Cpu::Impl::AND() {
-        cpu->registers.r8.A &=operand1->get();
+        cpu->registers.r8.A &= operand1->get();
 
         cpu->FlagSet('z', 0 == cpu->registers.r8.A);
         cpu->FlagSet('n', 0);
@@ -3876,7 +3876,7 @@ void Cpu::Impl::AND() {
 }
 
 void Cpu::Impl::OR() {
-        cpu->registers.r8.A |=operand1->get();
+        cpu->registers.r8.A |= operand1->get();
 
         cpu->FlagSet('z', 0 == cpu->registers.r8.A);
         cpu->FlagSet('n', 0);
@@ -3885,7 +3885,7 @@ void Cpu::Impl::OR() {
 }
 
 void Cpu::Impl::XOR() {
-        cpu->registers.r8.A ^=operand1->get();
+        cpu->registers.r8.A ^= operand1->get();
 
         cpu->FlagSet('z', 0 == cpu->registers.r8.A);
         cpu->FlagSet('n', 0);
@@ -3895,7 +3895,7 @@ void Cpu::Impl::XOR() {
 
 void Cpu::Impl::CP() {
         int16_t minuend = cpu->registers.r8.A;
-        int16_t subtrahend =operand1->get();
+        int16_t subtrahend = operand1->get();
         int16_t result = minuend - subtrahend;
         bool halfCarry = (minuend & 0xF) < (subtrahend & 0xF);
 
@@ -3906,9 +3906,9 @@ void Cpu::Impl::CP() {
 }
 
 void Cpu::Impl::INC8() {
-        auto val =operand1->get();
+        auto val = operand1->get();
         bool halfCarry = ((val & 0xF) + 1) & 0x10;
-       operand1->set(++val);
+        operand1->set(++val);
 
         cpu->FlagSet('z', 0 == val);
         cpu->FlagSet('n', 0);
@@ -3916,9 +3916,9 @@ void Cpu::Impl::INC8() {
 }
 
 void Cpu::Impl::DEC8() {
-        auto val =operand1->get();
+        auto val = operand1->get();
         bool halfCarry = (val & 0xF) < 1;
-       operand1->set(--val);
+        operand1->set(--val);
 
         cpu->FlagSet('z', 0 == val);
         cpu->FlagSet('n', 0);
@@ -3926,18 +3926,18 @@ void Cpu::Impl::DEC8() {
 }
 
 void Cpu::Impl::INC16() {
-        auto value =operand1->get();
-       operand1->set(value++);
+        auto value = operand1->get();
+        operand1->set(value++);
 }
 
 void Cpu::Impl::DEC16() {
-        auto value =operand1->get();
-       operand1->set(value--);
+        auto value = operand1->get();
+        operand1->set(value--);
 }
 
 //! \brief Swap upper & lower nibbles of operand.
 void Cpu::Impl::SWAP() {
-        uint8_t oldValue =operand1->get();
+        uint8_t oldValue = operand1->get();
         uint8_t nibbleHi = Nibble(oldValue, 1);
         uint8_t nibbleLo = Nibble(oldValue, 0);
         uint8_t newValue = (nibbleLo << 4) | nibbleHi;
@@ -4154,10 +4154,10 @@ void Cpu::Impl::RRA() {
 //! L: 101
 //! A: 111
 void Cpu::Impl::RLC() {
-        uint16_t oldValue =operand1->get();
+        uint16_t oldValue = operand1->get();
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('s', newValue & (0x1 << 0x7));
         cpu->FlagSet('z', !newValue);
@@ -4173,11 +4173,11 @@ void Cpu::Impl::RLC() {
 //! of bit 7 are copied to the Carry flag, and the previous contents of the
 //! Carry flag are copied to bit 0.
 void Cpu::Impl::RL() {
-        uint16_t oldValue =operand1->get();
+        uint16_t oldValue = operand1->get();
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
         uint8_t oldCarry = cpu->FlagGet('c');
         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('s', newValue & (0x1 << 0x7));
         cpu->FlagSet('z', !newValue);
@@ -4193,10 +4193,10 @@ void Cpu::Impl::RL() {
 //! of bit 0 are copied to the Carry flag and also to bit 7. Bit 0 is the
 //! least-significant bit.
 void Cpu::Impl::RRC() {
-        uint16_t oldValue =operand1->get();
+        uint16_t oldValue = operand1->get();
         uint8_t carry = (uint8_t)oldValue & 0x1;
         uint8_t newValue = ((uint8_t)oldValue >> 1) | carry;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('s', newValue & (0x1 << 0x7));
         cpu->FlagSet('z', !newValue);
@@ -4213,11 +4213,11 @@ void Cpu::Impl::RRC() {
 //! contents of the carry flag are copied to bit 7. Bit 0 is the
 //! least-significant bit.
 void Cpu::Impl::RR() {
-        uint16_t oldValue =operand1->get();
+        uint16_t oldValue = operand1->get();
         uint8_t carry = (uint8_t)oldValue & 0x1;
         uint8_t oldCarry = cpu->FlagGet('c');
         uint8_t newValue = ((uint8_t)oldValue >> 1) | oldCarry;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('s', newValue & (0x1 << 0x7));
         cpu->FlagSet('z', !newValue);
@@ -4233,10 +4233,10 @@ void Cpu::Impl::RR() {
 //! operand m. The contents of bit 7 are copied to the Carry flag. Bit 0 is the
 //! least-significant bit.
 void Cpu::Impl::SLA() {
-        uint8_t oldValue =operand1->get();
+        uint8_t oldValue = operand1->get();
         uint8_t carry = oldValue & (0x1 << 0x7);
         uint8_t newValue = oldValue << 1;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('s', (newValue >> 0x7) & 0x1);
         cpu->FlagSet('z', !newValue);
@@ -4253,11 +4253,11 @@ void Cpu::Impl::SLA() {
 //! previous contents of bit 7 remain unchanged. Bit 0 is the least-significant
 //! bit.
 void Cpu::Impl::SRA() {
-        uint8_t oldValue =operand1->get();
+        uint8_t oldValue = operand1->get();
         uint8_t msb = (oldValue & 0x7);
         uint8_t carry = oldValue & 0x1;
         uint8_t newValue = (oldValue >> 1) | msb;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('z', !newValue);
         cpu->FlagSet('n', 0);
@@ -4271,10 +4271,10 @@ void Cpu::Impl::SRA() {
 //! bit 0 are copied to the Carry flag, and bit 7 is reset. Bit 0 is the
 //! least-significant bit.
 void Cpu::Impl::SRL() {
-        uint8_t oldValue =operand1->get();
+        uint8_t oldValue = operand1->get();
         uint8_t carry = oldValue & 0x1;
         uint8_t newValue = oldValue >> 1;
-       operand1->set(newValue);
+        operand1->set(newValue);
 
         cpu->FlagSet('z', !newValue);
         cpu->FlagSet('n', 0);
@@ -4287,8 +4287,8 @@ void Cpu::Impl::SRL() {
 //! This Instruction tests bit b in register r and sets the Z flag
 //! accordingly.
 void Cpu::Impl::BIT() {
-        uint8_t bit =operand1->get();
-        uint8_t byte =operand2->get();
+        uint8_t bit = operand1->get();
+        uint8_t byte = operand2->get();
         uint8_t test = 0x1 << bit;
 
         cpu->FlagSet('z', !(byte & test));
@@ -4300,28 +4300,28 @@ void Cpu::Impl::BIT() {
 //!
 //! Bit b in register r (any of registers B, C, D, E, H, L, or A) is set.
 void Cpu::Impl::SET() {
-        uint8_t bit =operand1->get();
-        uint8_t byte =operand2->get();
+        uint8_t bit = operand1->get();
+        uint8_t byte = operand2->get();
         uint8_t set = 0x1 << bit;
-       operand2->set(byte | set);
+        operand2->set(byte | set);
 }
 
 //! Reset bit in register.
 void Cpu::Impl::RES() {
-        uint8_t bit =operand1->get();
-        uint8_t byte =operand2->get();
+        uint8_t bit = operand1->get();
+        uint8_t byte = operand2->get();
         uint8_t set = 0x1 << bit;
         set = ~set;
-       operand2->set(byte & set);
+        operand2->set(byte & set);
 }
 
 void Cpu::Impl::JP() {
-        cpu->PC =operand1->get();
+        cpu->PC = operand1->get();
 }
 
 //! \brief Add n to current address and jump to it
 void Cpu::Impl::JR() {
-        uint16_t address = cpu->PC +operand1->get();
+        uint16_t address = cpu->PC + operand1->get();
         cpu->PC = address;
 }
 
@@ -4329,14 +4329,14 @@ void Cpu::Impl::JR() {
 void Cpu::Impl::CALL() {
         bus->write(--cpu->SP, static_cast<uint8_t>(cpu->PC & 0xFF));
         bus->write(--cpu->SP, static_cast<uint8_t>(cpu->PC >> 8));
-        cpu->PC =operand1->get();
+        cpu->PC = operand1->get();
 }
 
 //! Push present address onto stack. Jump to address $0000 + n.
 void Cpu::Impl::RST() {
         bus->write(--cpu->SP, static_cast<uint8_t>(cpu->PC & 0xFF));
         bus->write(--cpu->SP, static_cast<uint8_t>(cpu->PC >> 8));
-        cpu->PC =operand1->get();
+        cpu->PC = operand1->get();
 }
 
 void Cpu::Impl::RET() {
