@@ -13,30 +13,42 @@
 
 using namespace std;
 
-#include "gb.hpp"
+#include "bus.hpp"
 
 int main(int argc, char *argv[]) {
-        streampos size = 0;
-        char *fileMem = nullptr;
+        gs::Bus gb;
+        ifstream stream;
+        streampos size;
 
-        ifstream rom("data/sample.gb", ios::in | ios::binary | ios::ate);
-        if (rom.is_open()) {
-                size = rom.tellg();
-                fileMem = new char[size];
+        stream.open("data/DMG_ROM.bin", ios::in | ios::binary | ios::ate);
+        if (stream.is_open()) {
+                size = stream.tellg();
+                char *buf = new char[size];
+                stream.seekg(0, ios::beg);
+                stream.read(buf, size);
+                stream.close();
+                gb.setBootRom(buf, size);
+                delete[] buf;
+        } else {
+                fputs("Couldn't open boot rom.\n", stderr);
+                exit(1);
+        }
 
-                rom.seekg(0, ios::beg);
-                rom.read(fileMem, size);
-                rom.close();
+        stream.open("data/sample.gb", ios::in | ios::binary | ios::ate);
+        if (stream.is_open()) {
+                size = stream.tellg();
+                char *buf = new char[size];
+                stream.seekg(0, ios::beg);
+                stream.read(buf, size);
+                stream.close();
+                gb.attachCart(buf, size);
+                delete[] buf;
         } else {
                 fputs("Couldn't open rom.\n", stderr);
                 exit(1);
         }
 
-        gs::GB gb;
-        gb.boot();
-        gb.romLoad(fileMem, size);
-        gb.romExecute();
+        // TODO: CPU fetch/decode/execute loop
 
-        if (fileMem != nullptr) delete[] fileMem;
         return 0;
 }
