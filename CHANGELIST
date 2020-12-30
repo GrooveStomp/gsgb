@@ -2,6 +2,7 @@
 - MBC1 implemented.
 - Cartridge now loads MBC memory from ROM data.
 - Implemented extremely basic cpu instruction fetch/decode/execute loop.
+- Added cartridge read/write interception of bus read/write.
 
 2020-12-29
 - Cartridge header checksumming.

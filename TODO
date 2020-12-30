@@ -5,3 +5,5 @@
   (system input interface)
 - Test rom execution
 - Simulate frequency of cpu execution
+- Bus read/write should handle all peripherals (only carts and some memory
+  registers are currently supported)

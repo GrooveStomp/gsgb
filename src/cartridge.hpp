@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: cartridge.hpp
  * Created: 2019-09-24
- * Updated: 2020-12-28
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -29,8 +29,8 @@ namespace gs {
                 Cartridge(uint8_t *rom, unsigned int size);
                 ~Cartridge();
 
-                void write(uint16_t ptr, uint8_t value);
-                uint8_t read(uint16_t ptr);
+                bool write(uint16_t ptr, uint8_t value);
+                bool read(uint16_t ptr, uint8_t &value);
         };
 } // namespace gs
 

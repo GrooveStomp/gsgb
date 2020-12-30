@@ -1,19 +1,20 @@
 /******************************************************************************
  * File: bus.cpp
  * Created: 2019-09-07
- * Updated: 2020-12-28
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
  * Copyright 2019 - 2020, Aaron Oman and the gsgb contributors
  * SPDX-License-Identifier: AGPL-3.0-only
  ******************************************************************************/
-
+//! \file bus.cpp
 // See: https://gbdev.io/pandocs/
 #include <cassert>
 
 #include "bus.hpp"
 #include "cpu.hpp"
+#include "cartridge.hpp"
 
 namespace gs {
 
@@ -70,8 +71,11 @@ namespace gs {
                 // Alternatively, 0x8800-0x97FF
                 bgTileMap = &videoMemory[0x8000]; //!< Up to 0x8FFF
 
-                // TODO: Figure out how memory works...
-                write(AddrMemRegEnum::RegBOOT, 0x0);
+                // Set boot state.
+                write(RegBOOT, 0x0);
+
+                cart = nullptr;
+                cpu = nullptr;
         }
 
         Bus::~Bus() {
@@ -80,6 +84,10 @@ namespace gs {
         }
 
         void Bus::write(uint16_t ptr, uint8_t value) {
+                if (cart != nullptr && cart->write(ptr, value)) {
+                        return;
+                }
+
                 switch (ptr) {
                         case AddrMemRegEnum::RegBOOT:
                                 HwRegBoot = value;
@@ -90,6 +98,11 @@ namespace gs {
         }
 
         uint8_t Bus::read(uint16_t ptr) {
+                uint8_t value;
+                if (cart != nullptr && cart->read(ptr, value)) {
+                        return value;
+                }
+
                 switch (ptr) {
                         case AddrMemRegEnum::RegBOOT:
                                 return HwRegBoot;

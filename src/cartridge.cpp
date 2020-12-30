@@ -179,16 +179,12 @@ namespace gs {
                 delete mbc;
         }
 
-        void Cartridge::write(uint16_t addr, uint8_t value) {
-                bool was_written = mbc->write(addr, value);
-                // TODO: Handle was_written.
+        bool Cartridge::write(uint16_t addr, uint8_t value) {
+                return mbc->write(addr, value);
         }
 
-        uint8_t Cartridge::read(uint16_t addr) {
-                uint8_t value;
-                bool was_read = mbc->read(addr, value);
-                // TODO: Handle was_read.
-                return value;
+        bool Cartridge::read(uint16_t addr, uint8_t &value) {
+                return mbc->read(addr, value);
         }
 
 } // namespace gs
