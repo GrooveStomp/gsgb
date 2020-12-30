@@ -51,7 +51,7 @@ void Cpu::attach(Bus *bus) {
         impl->bus = bus;
 }
 
-void Cpu::FlagSet(char c, uint8_t onOrOff) {
+void Cpu::flagSet(char c, uint8_t onOrOff) {
         uint8_t bit = 0;
         switch (c) {
                 case 's':
@@ -81,10 +81,10 @@ void Cpu::FlagSet(char c, uint8_t onOrOff) {
                         bit = 0x0;
                         break;
         }
-        FlagSet(bit, onOrOff);
+        flagSet(bit, onOrOff);
 }
 
-void Cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
+void Cpu::flagSet(uint8_t bit, uint8_t onOrOff) {
         uint8_t bitFlag = 1 << bit;
 
         if (onOrOff) {
@@ -94,7 +94,7 @@ void Cpu::FlagSet(uint8_t bit, uint8_t onOrOff) {
         }
 }
 
-uint8_t Cpu::FlagGet(char c) {
+uint8_t Cpu::flagGet(char c) {
         uint8_t bit = 0;
         switch (c) {
                 case 's':
@@ -124,10 +124,10 @@ uint8_t Cpu::FlagGet(char c) {
                         bit = 0x0;
                         break;
         }
-        return FlagGet(bit);
+        return flagGet(bit);
 }
 
-uint8_t Cpu::FlagGet(uint8_t bitToCheck) {
+uint8_t Cpu::flagGet(uint8_t bitToCheck) {
         uint8_t bit = registers.r8.F & (1 << bitToCheck);
         return bit >> bitToCheck;
 }
@@ -1172,10 +1172,10 @@ void Cpu::Impl::Op_00F8() {
         bool halfCarry = ((value & 0xFFF) + (byte & 0xFFF)) & 0x1000;
         bool carry = ((uint32_t)value + (uint32_t)byte) & 0x10000;
 
-        cpu->FlagSet('z', 0);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', 0);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief LD (##),SP
@@ -3108,7 +3108,7 @@ void Cpu::Impl::Op_00C2() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('z')) {
+        if (!cpu->flagGet('z')) {
                 JP();
         }
 }
@@ -3120,7 +3120,7 @@ void Cpu::Impl::Op_00CA() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('z')) {
+        if (cpu->flagGet('z')) {
                 JP();
         }
 }
@@ -3132,7 +3132,7 @@ void Cpu::Impl::Op_00D2() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('c')) {
+        if (!cpu->flagGet('c')) {
                 JP();
         }
 }
@@ -3144,7 +3144,7 @@ void Cpu::Impl::Op_00DA() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('c')) {
+        if (cpu->flagGet('c')) {
                 JP();
         }
 }
@@ -3172,7 +3172,7 @@ void Cpu::Impl::Op_0020() {
         auto op1 = std::make_shared<OperandValue>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('z')) {
+        if (!cpu->flagGet('z')) {
                 JR();
         }
 }
@@ -3183,7 +3183,7 @@ void Cpu::Impl::Op_0028() {
         auto op1 = std::make_shared<OperandValue>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('z')) {
+        if (cpu->flagGet('z')) {
                 JR();
         }
 }
@@ -3194,7 +3194,7 @@ void Cpu::Impl::Op_0030() {
         auto op1 = std::make_shared<OperandValue>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('c')) {
+        if (!cpu->flagGet('c')) {
                 JR();
         }
 }
@@ -3205,7 +3205,7 @@ void Cpu::Impl::Op_0038() {
         auto op1 = std::make_shared<OperandValue>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('c')) {
+        if (cpu->flagGet('c')) {
                 JR();
         }
 }
@@ -3229,7 +3229,7 @@ void Cpu::Impl::Op_00C4() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('z')) {
+        if (!cpu->flagGet('z')) {
                 CALL();
         }
 }
@@ -3241,7 +3241,7 @@ void Cpu::Impl::Op_00CC() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('z')) {
+        if (cpu->flagGet('z')) {
                 CALL();
         }
 }
@@ -3253,7 +3253,7 @@ void Cpu::Impl::Op_00D4() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (!cpu->FlagGet('c')) {
+        if (!cpu->flagGet('c')) {
                 CALL();
         }
 }
@@ -3265,7 +3265,7 @@ void Cpu::Impl::Op_00DC() {
         auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        if (cpu->FlagGet('c')) {
+        if (cpu->flagGet('c')) {
                 CALL();
         }
 }
@@ -3348,28 +3348,28 @@ void Cpu::Impl::Op_00C9() {
 
 //! \brief RET NZ
 void Cpu::Impl::Op_00C0() {
-        if (0 == cpu->FlagGet('z')) {
+        if (0 == cpu->flagGet('z')) {
                 RET();
         }
 }
 
 //! \brief RET Z
 void Cpu::Impl::Op_00C8() {
-        if (0 != cpu->FlagGet('z')) {
+        if (0 != cpu->flagGet('z')) {
                 RET();
         }
 }
 
 //! \brief RET NC
 void Cpu::Impl::Op_00D0() {
-        if (0 == cpu->FlagGet('c')) {
+        if (0 == cpu->flagGet('c')) {
                 RET();
         }
 }
 
 //! \brief RET C
 void Cpu::Impl::Op_00D8() {
-        if (0 != cpu->FlagGet('c')) {
+        if (0 != cpu->flagGet('c')) {
                 RET();
         }
 }
@@ -3795,10 +3795,10 @@ void Cpu::Impl::ADD8() {
 
         operand1->set(sum);
 
-        cpu->FlagSet('z', 0 == sum);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', 0 == sum);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
+        cpu->flagSet('c', carry);
 }
 
 void Cpu::Impl::ADD16() {
@@ -3811,9 +3811,9 @@ void Cpu::Impl::ADD16() {
 
         operand1->set(sum);
 
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
+        cpu->flagSet('c', carry);
 }
 
 //! The operand, along with the Carry Flag (C in the F Register) is added to the
@@ -3822,17 +3822,17 @@ void Cpu::Impl::ADC8() {
         uint8_t left = operand1->get();
         uint8_t right = operand2->get();
 
-        uint8_t prevCarry = cpu->FlagGet('c') ? 1 : 0;
+        uint8_t prevCarry = cpu->flagGet('c') ? 1 : 0;
         uint8_t sum = left + right + prevCarry;
         bool halfCarry = ((left & 0xF) + (right & 0xF) + prevCarry) & 0x10;
         bool carry = ((uint16_t)left + (uint16_t)right + prevCarry) & 0x100;
 
         operand1->set(sum);
 
-        cpu->FlagSet('z', 0 == sum);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', 0 == sum);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
+        cpu->flagSet('c', carry);
 }
 
 void Cpu::Impl::SUB8() {
@@ -3845,15 +3845,15 @@ void Cpu::Impl::SUB8() {
 
         operand1->set(static_cast<uint8_t>(difference));
 
-        cpu->FlagSet('z', 0 == difference);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry); // TODO: invert logic?
-        cpu->FlagSet('c', carry); // TODO: invert logic?
+        cpu->flagSet('z', 0 == difference);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry); // TODO: invert logic?
+        cpu->flagSet('c', carry); // TODO: invert logic?
 }
 
 void Cpu::Impl::SBC8() {
         int16_t minuend = cpu->registers.r8.A;
-        uint8_t prevCarry = cpu->FlagGet('c') ? 1 : 0;
+        uint8_t prevCarry = cpu->flagGet('c') ? 1 : 0;
         int16_t subtrahend = operand1->get() + prevCarry;
 
         uint16_t difference = minuend - subtrahend;
@@ -3862,37 +3862,37 @@ void Cpu::Impl::SBC8() {
 
         operand1->set(static_cast<uint8_t>(difference));
 
-        cpu->FlagSet('z', 0 == difference);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry); // TODO: invert logic?
-        cpu->FlagSet('c', carry); // TODO: invert logic?
+        cpu->flagSet('z', 0 == difference);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry); // TODO: invert logic?
+        cpu->flagSet('c', carry); // TODO: invert logic?
 }
 
 void Cpu::Impl::AND() {
         cpu->registers.r8.A &= operand1->get();
 
-        cpu->FlagSet('z', 0 == cpu->registers.r8.A);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', 0);
+        cpu->flagSet('z', 0 == cpu->registers.r8.A);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', 0);
 }
 
 void Cpu::Impl::OR() {
         cpu->registers.r8.A |= operand1->get();
 
-        cpu->FlagSet('z', 0 == cpu->registers.r8.A);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', 0);
+        cpu->flagSet('z', 0 == cpu->registers.r8.A);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', 0);
 }
 
 void Cpu::Impl::XOR() {
         cpu->registers.r8.A ^= operand1->get();
 
-        cpu->FlagSet('z', 0 == cpu->registers.r8.A);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', 0);
+        cpu->flagSet('z', 0 == cpu->registers.r8.A);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', 0);
 }
 
 void Cpu::Impl::CP() {
@@ -3901,10 +3901,10 @@ void Cpu::Impl::CP() {
         int16_t result = minuend - subtrahend;
         bool halfCarry = (minuend & 0xF) < (subtrahend & 0xF);
 
-        cpu->FlagSet('z', 0 == result);
-        cpu->FlagSet('n', 1);
-        cpu->FlagSet('h', halfCarry);
-        cpu->FlagSet('c', minuend < subtrahend);
+        cpu->flagSet('z', 0 == result);
+        cpu->flagSet('n', 1);
+        cpu->flagSet('h', halfCarry);
+        cpu->flagSet('c', minuend < subtrahend);
 }
 
 void Cpu::Impl::INC8() {
@@ -3912,9 +3912,9 @@ void Cpu::Impl::INC8() {
         bool halfCarry = ((val & 0xF) + 1) & 0x10;
         operand1->set(++val);
 
-        cpu->FlagSet('z', 0 == val);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
+        cpu->flagSet('z', 0 == val);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
 }
 
 void Cpu::Impl::DEC8() {
@@ -3922,9 +3922,9 @@ void Cpu::Impl::DEC8() {
         bool halfCarry = (val & 0xF) < 1;
         operand1->set(--val);
 
-        cpu->FlagSet('z', 0 == val);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', halfCarry);
+        cpu->flagSet('z', 0 == val);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', halfCarry);
 }
 
 void Cpu::Impl::INC16() {
@@ -3945,10 +3945,10 @@ void Cpu::Impl::SWAP() {
         uint8_t newValue = (nibbleLo << 4) | nibbleHi;
        operand2->set(newValue);
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', 0);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', 0);
 }
 
 //! \brief Decimal adjust register A.
@@ -3965,9 +3965,9 @@ void Cpu::Impl::SWAP() {
 void Cpu::Impl::DAA() {
         uint8_t val = cpu->registers.r8.A;
 
-        uint8_t wasCarryHalf = cpu->FlagGet('h');
-        uint8_t wasCarry = cpu->FlagGet('c');
-        uint8_t wasSubtraction = cpu->FlagGet('n');
+        uint8_t wasCarryHalf = cpu->flagGet('h');
+        uint8_t wasCarry = cpu->flagGet('c');
+        uint8_t wasSubtraction = cpu->flagGet('n');
 
         uint8_t nibbleLo = Nibble(val, 0);
         uint8_t nibbleHi = Nibble(val, 1);
@@ -3991,10 +3991,10 @@ void Cpu::Impl::DAA() {
         uint8_t newValue = (nibbleHi << 4) | nibbleLo;
         cpu->registers.r8.A = newValue;
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('c', newValue > 0x99); // TODO verify against table in Z80 manual
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('c', newValue > 0x99); // TODO verify against table in Z80 manual
 }
 
 //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
@@ -4002,8 +4002,8 @@ void Cpu::Impl::CPL() {
         uint8_t val = ~(cpu->registers.r8.A);
        operand2->set(val);
 
-        cpu->FlagSet('h', 1);
-        cpu->FlagSet('n', 1);
+        cpu->flagSet('h', 1);
+        cpu->flagSet('n', 1);
 }
 
 // // TODO: Not used in GB?
@@ -4018,26 +4018,26 @@ void Cpu::Impl::CPL() {
 // //         uint16_t twosComplement = onesComplement + 1;
 // //        operand2->set(static_cast<uint8_t>(twosComplement));
 
-// //         FlagSet('s', twosComplement & 0x7);
-// //         FlagSet('z', !twosComplement);
-// //         // TODO: set if borrow from bit 4. // FlagSet('h', (twosComplement >> 0x4)
-// //         FlagSet('p', 0x80 == val);
-// //         FlagSet('n', 0);
-// //         FlagSet('c', !(0x00 == val));
+// //         flagSet('s', twosComplement & 0x7);
+// //         flagSet('z', !twosComplement);
+// //         // TODO: set if borrow from bit 4. // flagSet('h', (twosComplement >> 0x4)
+// //         flagSet('p', 0x80 == val);
+// //         flagSet('n', 0);
+// //         flagSet('c', !(0x00 == val));
 // // }
 
 //! \brief The carry flag is inverted in the F register.
 void Cpu::Impl::CCF() {
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', !cpu->FlagGet('c'));
+        cpu->flagSet('h', 0);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', !cpu->flagGet('c'));
 }
 
 //! \brief the carry flag is set in the F register.
 void Cpu::Impl::SCF() {
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', 1);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', 1);
 }
 
 void Cpu::Impl::NOP() {
@@ -4084,10 +4084,10 @@ void Cpu::Impl::RLCA() {
         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
         cpu->registers.r8.A = newValue;
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate A left through the carry flag.
@@ -4098,14 +4098,14 @@ void Cpu::Impl::RLCA() {
 void Cpu::Impl::RLA() {
         uint16_t oldValue = cpu->registers.r8.A;
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-        uint8_t oldCarry = cpu->FlagGet('c');
+        uint8_t oldCarry = cpu->flagGet('c');
         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
         cpu->registers.r8.A = newValue;
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate A right. Old bit 0 is copied to the carry flag.
@@ -4119,10 +4119,10 @@ void Cpu::Impl::RRCA() {
         uint8_t newValue = ((uint8_t)oldValue >> 1) | (carry << 0x7);
         cpu->registers.r8.A = newValue;
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate A right through the carry flag.
@@ -4133,14 +4133,14 @@ void Cpu::Impl::RRCA() {
 void Cpu::Impl::RRA() {
         uint16_t oldValue = cpu->registers.r8.A;
         uint8_t carry = (uint8_t)oldValue & 0x1;
-        uint8_t oldCarry = cpu->FlagGet('c');
+        uint8_t oldCarry = cpu->flagGet('c');
         uint8_t newValue = ((uint8_t)oldValue >> 1) | (oldCarry << 0x7);
         cpu->registers.r8.A = newValue;
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate left. Old bit 7 is copied to the carry flag.
@@ -4161,12 +4161,12 @@ void Cpu::Impl::RLC() {
         uint8_t newValue = ((uint8_t)oldValue << 1) | carry;
         operand1->set(newValue);
 
-        cpu->FlagSet('s', newValue & (0x1 << 0x7));
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('s', newValue & (0x1 << 0x7));
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate left through carry flag.
@@ -4177,16 +4177,16 @@ void Cpu::Impl::RLC() {
 void Cpu::Impl::RL() {
         uint16_t oldValue = operand1->get();
         uint8_t carry = ((uint8_t)oldValue >> 0x7) & 0x1;
-        uint8_t oldCarry = cpu->FlagGet('c');
+        uint8_t oldCarry = cpu->flagGet('c');
         uint8_t newValue = ((uint8_t)oldValue << 1) | oldCarry;
         operand1->set(newValue);
 
-        cpu->FlagSet('s', newValue & (0x1 << 0x7));
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('s', newValue & (0x1 << 0x7));
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate right. Old bit 0 is set to the carry flag.
@@ -4200,12 +4200,12 @@ void Cpu::Impl::RRC() {
         uint8_t newValue = ((uint8_t)oldValue >> 1) | carry;
         operand1->set(newValue);
 
-        cpu->FlagSet('s', newValue & (0x1 << 0x7));
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('s', newValue & (0x1 << 0x7));
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Rotate n right through carry flag.
@@ -4217,16 +4217,16 @@ void Cpu::Impl::RRC() {
 void Cpu::Impl::RR() {
         uint16_t oldValue = operand1->get();
         uint8_t carry = (uint8_t)oldValue & 0x1;
-        uint8_t oldCarry = cpu->FlagGet('c');
+        uint8_t oldCarry = cpu->flagGet('c');
         uint8_t newValue = ((uint8_t)oldValue >> 1) | oldCarry;
         operand1->set(newValue);
 
-        cpu->FlagSet('s', newValue & (0x1 << 0x7));
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('s', newValue & (0x1 << 0x7));
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Shift left into carry. LSB is set to 0.
@@ -4240,12 +4240,12 @@ void Cpu::Impl::SLA() {
         uint8_t newValue = oldValue << 1;
         operand1->set(newValue);
 
-        cpu->FlagSet('s', (newValue >> 0x7) & 0x1);
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('p', Parity(newValue));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('s', (newValue >> 0x7) & 0x1);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('p', Parity(newValue));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Shift right into Carry. MSB doesn't change.
@@ -4261,10 +4261,10 @@ void Cpu::Impl::SRA() {
         uint8_t newValue = (oldValue >> 1) | msb;
         operand1->set(newValue);
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Shift right into Carry. MSB is set to 0.
@@ -4278,10 +4278,10 @@ void Cpu::Impl::SRL() {
         uint8_t newValue = oldValue >> 1;
         operand1->set(newValue);
 
-        cpu->FlagSet('z', !newValue);
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 0);
-        cpu->FlagSet('c', carry);
+        cpu->flagSet('z', !newValue);
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 0);
+        cpu->flagSet('c', carry);
 }
 
 //! \brief Test bit in register
@@ -4293,9 +4293,9 @@ void Cpu::Impl::BIT() {
         uint8_t byte = operand2->get();
         uint8_t test = 0x1 << bit;
 
-        cpu->FlagSet('z', !(byte & test));
-        cpu->FlagSet('n', 0);
-        cpu->FlagSet('h', 1);
+        cpu->flagSet('z', !(byte & test));
+        cpu->flagSet('n', 0);
+        cpu->flagSet('h', 1);
 }
 
 //! \brief Set bit in register
@@ -4375,7 +4375,7 @@ void Cpu::Impl::RETI() {
 // Public interface
 //------------------------------------------------------------------------------
 
-void Cpu::InstructionFetch() {
+void Cpu::instructionFetch() {
         uint8_t opcodeByte;
         opcode = 0;
 
@@ -4395,7 +4395,7 @@ void Cpu::InstructionFetch() {
         impl->instruction = std::make_shared<Instruction>(impl->instructionMap[opcode]);
 }
 
-void Cpu::InstructionExecute() {
+void Cpu::instructionExecute() {
         ((*impl).*(impl->instruction->op))();
 }
 

@@ -1,4 +1,9 @@
-2020-12-29 19:18 PST
+2020-12-30
+- MBC1 implemented.
+- Cartridge now loads MBC memory from ROM data.
+- Implemented extremely basic cpu instruction fetch/decode/execute loop.
+
+2020-12-29
 - Cartridge header checksumming.
 - Proper cartridge data loading.
 - Memory register initialization via Bus::reset().

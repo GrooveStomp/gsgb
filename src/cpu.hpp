@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: cpu.hpp
  * Created: 2019-08-29
- * Updated: 2020-12-28
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -67,14 +67,14 @@ public:
         Cpu();
         ~Cpu();
 
-        void InstructionFetch();
-        void InstructionExecute();
-        char *InstructionDesc();
+        void instructionFetch();
+        void instructionExecute();
+        char *instructionDesc();
 
-        void FlagSet(uint8_t, uint8_t);
-        void FlagSet(char, uint8_t);
-        uint8_t FlagGet(char);
-        uint8_t FlagGet(uint8_t);
+        void flagSet(uint8_t, uint8_t);
+        void flagSet(char, uint8_t);
+        uint8_t flagGet(char);
+        uint8_t flagGet(uint8_t);
 
         void attach(Bus *bus);
 

@@ -24,7 +24,6 @@ namespace gs {
 
         class Cartridge {
         private:
-                uint8_t *blocks;
                 Mbc *mbc;
         public:
                 Cartridge(uint8_t *rom, unsigned int size);

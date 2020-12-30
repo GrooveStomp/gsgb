@@ -3,6 +3,5 @@
   (system rendering interface)
 - memory mapped IO for reading input state
   (system input interface)
-- MBC1 support
 - Test rom execution
-- More MBC support
+- Simulate frequency of cpu execution

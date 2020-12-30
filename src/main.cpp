@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: main.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-23
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -42,7 +42,11 @@ int main(int argc, char *argv[]) {
         gb.attach(cart);
         gb.reset();
 
-        // TODO: CPU fetch/decode/execute loop
+        while (true) {
+                // TODO: Simulate frequency
+                cpu.instructionFetch();
+                cpu.instructionExecute();
+        }
 
         return 0;
 }

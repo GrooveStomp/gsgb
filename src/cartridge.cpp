@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: cartridge.cpp
  * Created: 2019-09-24
- * Updated: 2020-12-28
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -12,11 +12,21 @@
 
 #include <iostream> // TODO: Remove me
 #include <iomanip> // TODO: Remove me
+#include <cmath>
 
 #include "cartridge.hpp"
 #include "mbc.hpp"
 
 namespace gs {
+
+        enum CartRamSizeEnum {
+                CartRam0Kb = 0x00,   // None
+                CartRam2Kb = 0x01,   // 2 KBytes
+                CartRam8Kb = 0x02,   // 8 KBytes
+                CartRam32Kb = 0x03,  // 32 KBytes (4 banks of 8KBytes each)
+                CartRam128Kb = 0x04, // 128 KBytes (16 banks of 8KBytes each)
+                CartRam64KB = 0x05,  // 64 KBytes (8 banks of 8KBytes each)
+        };
 
         enum CartTypeEnum {
                 CartTypeRomOnly = 0x00,
@@ -49,6 +59,7 @@ namespace gs {
                 CartTypeHuC1RamBattery = 0xFF,
         };
 
+        //! \see https://gbdev.io/pandocs/#the-cartridge-header
 #pragma pack(push, 1)
         struct CartHeader {
                 uint8_t entrypoint[4];
@@ -84,10 +95,7 @@ namespace gs {
         };
 #pragma pack(pop)
 
-        //! \see https://gbdev.io/pandocs/#the-cartridge-header
         Cartridge::Cartridge(uint8_t *rom, unsigned int size) {
-                blocks = new uint8_t[16 * 1024]; // TODO: Variable size depending on MPC?
-
                 CartHeader header = *reinterpret_cast<CartHeader*>(&rom[0x100]);
 
                 std::cout << header;
@@ -115,29 +123,60 @@ namespace gs {
                         }
                 }
 
+                uint32_t ram_size = 0;
+                switch (header.ram_size) {
+                        case CartRam0Kb: {
+                                ram_size = 0;
+                                break;
+                        }
+                        case CartRam2Kb: {
+                                ram_size = 2 * 1024;
+                                break;
+                        }
+                        case CartRam8Kb: {
+                                ram_size = 8 * 1024;
+                                break;
+                        }
+                        case CartRam32Kb: {
+                                ram_size = 32 * 1024;
+                                break;
+                        }
+                        case CartRam128Kb: {
+                                ram_size = 128 * 1024;
+                                break;
+                        }
+                        case CartRam64KB: {
+                                ram_size = 64 * 1024;
+                                break;
+                        }
+                }
+
                 // Set the MBC type.
                 switch (header.cart_type) {
                         case CartTypeRomOnly:
                         case CartTypeRomRam:
                         case CartTypeRomRamBattery:
-                                mbc = new MbcNone(header.ram_size);
+                                mbc = new MbcNone(ram_size);
                                 break;
 
                         case CartTypeMbc1:
                         case CartTypeMbc1Ram:
                         case CartTypeMbc1RamBattery:
-                                mbc = new Mbc1(header.rom_size, header.ram_size);
+                                // The rom size is usually specified such that:
+                                // 2 ^ (rom_size + 1) == num_banks
+                                // where the size of a bank is 16kb.
+                                uint32_t rom_size = pow(2, header.rom_size + 1) * (16 * 1024);
+                                mbc = new Mbc1(rom_size, ram_size);
                                 break;
 
                         // TODO: More MBC/RAM/special support
                 }
 
-                // TODO: Initialize mbc memory from ROM data.
+                mbc->loadRom(rom);
         }
 
         Cartridge::~Cartridge() {
                 delete mbc;
-                delete[] blocks;
         }
 
         void Cartridge::write(uint16_t addr, uint8_t value) {

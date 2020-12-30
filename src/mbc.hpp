@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: mbc.hpp
  * Created: 2020-12-28
- * Updated: 2020-12-28
+ * Updated: 2020-12-30
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -27,6 +27,7 @@ namespace gs {
                 virtual ~Mbc() = 0;
                 virtual bool write(uint16_t addr, uint8_t value) = 0;
                 virtual bool read(uint16_t addr, uint8_t &value) = 0;
+                virtual void loadRom(uint8_t *data) = 0;
         };
 
         class MbcNone: public Mbc {
@@ -35,10 +36,13 @@ namespace gs {
                 virtual ~MbcNone();
                 virtual bool write(uint16_t addr, uint8_t value);
                 virtual bool read(uint16_t addr, uint8_t &value);
+                virtual void loadRom(uint8_t *data);
 
+        private:
                 uint8_t rom[32 * 1024];
+                uint32_t rom_size;
                 uint8_t *ram;
-                uint8_t ram_size;
+                uint32_t ram_size;
         };
 
         class Mbc1 : public Mbc {
@@ -47,8 +51,24 @@ namespace gs {
                 virtual ~Mbc1();
                 virtual bool write(uint16_t addr, uint8_t value);
                 virtual bool read(uint16_t addr, uint8_t &value);
+                virtual void loadRom(uint8_t *data);
 
-                uint8_t bank0[16 * 1024];
+        private:
+                uint8_t *rom;
+                uint32_t rom_size;
+                uint8_t *ram;
+                uint32_t ram_size;
+
+                bool ram_enabled;
+                uint8_t rom_bank;
+                uint8_t ram_bank;
+
+                enum MemoryModeEnum {
+                        MemoryModeRom,
+                        MemoryModeRam,
+                };
+
+                MemoryModeEnum mem_mode;
         };
 
 } // namespace gs
