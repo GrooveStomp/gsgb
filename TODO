@@ -1,0 +1,8 @@
+- Instruction fetch/decode/execute
+- PPU rendering
+  (system rendering interface)
+- memory mapped IO for reading input state
+  (system input interface)
+- MBC1 support
+- Test rom execution
+- More MBC support

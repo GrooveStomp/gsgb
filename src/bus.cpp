@@ -1,19 +1,55 @@
 /******************************************************************************
  * File: bus.cpp
  * Created: 2019-09-07
- * Updated: 2020-12-23
+ * Updated: 2020-12-28
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
  * Copyright 2019 - 2020, Aaron Oman and the gsgb contributors
  * SPDX-License-Identifier: AGPL-3.0-only
  ******************************************************************************/
+
+// See: https://gbdev.io/pandocs/
 #include <cassert>
 
 #include "bus.hpp"
 #include "cpu.hpp"
 
 namespace gs {
+
+        static uint8_t HwRegBoot = 0x0;
+
+        enum AddrMemRegEnum {
+                RegBOOT = 0xFF50,
+                RegWX = 0xFF4B,
+                RegWY = 0xFF4A,
+                RegOBP1 = 0xFF49,
+                RegOBP0 = 0xFF48,
+                RegBGP = 0xFF47,
+                RegDMA = 0xFF46,
+                RegLYC = 0xFF45,
+                RegLY = 0xFF44,
+                RegSCX = 0xFF43,
+                RegSCY = 0xFF42,
+                RegSTAT = 0xFF41,
+                RegLCDC = 0xFF40,
+        };
+
+        enum AddrEnum {
+                MemRestartInterrupt = 0x0000,
+                MemCartHeader = 0x0100,
+                MemCartRomBank0 = 0x0150,
+                MemCartRomBankN = 0x4000,
+                MemCharRam = 0x8000,
+                MemBgMapData1 = 0x9800,
+                MemBgMapData2 = 0x9C00,
+                MemCartRam = 0xA000,
+                MemInternalRamBank0 = 0xC000,
+                MemOam = 0xFE00,
+                MemRegisters = 0xFF00, // Hardware I/O registers.
+                MemZeroPage = 0xFF80,
+                MemInterruptEnable = 0xFFFF,
+        };
 
         //! The first thing the program does is read the cartridge locations from
         //! $104 to $133 and place this graphic of a Nintendo logo on the screen
@@ -34,47 +70,90 @@ namespace gs {
                 // Alternatively, 0x8800-0x97FF
                 bgTileMap = &videoMemory[0x8000]; //!< Up to 0x8FFF
 
-                cpu = new Cpu(this);
-
                 // TODO: Figure out how memory works...
-                //memory[BOOT] = 0x0; // After the boot rom executes, this gets set to 0x1.
+                write(AddrMemRegEnum::RegBOOT, 0x0);
         }
 
         Bus::~Bus() {
                 delete[] videoMemory;
                 delete[] memory;
-
-                delete cpu;
         }
 
         void Bus::write(uint16_t ptr, uint8_t value) {
+                switch (ptr) {
+                        case AddrMemRegEnum::RegBOOT:
+                                HwRegBoot = value;
+                                break;
+                        default:
+                                break;
+                }
         }
 
         uint8_t Bus::read(uint16_t ptr) {
-                // TODO implement me!
+                switch (ptr) {
+                        case AddrMemRegEnum::RegBOOT:
+                                return HwRegBoot;
+                                break;
+                        default:
+                                // TODO implement more cases!
+                                return 0;
+                }
+
                 return 0;
         }
 
-        void Bus::setBootRom(char *rom, size_t size) {
-                assert(size <= 256);
-
-                for (size_t i = 0; i < size; i++) {
-                        memory[i] = rom[i];
-                }
-        }
-
-        void Bus::attachCart(char *cart, size_t size) {
-                // TODO: Assert size is less than available size in memory for GB system.
-                size_t j = 0x100;
-                for (size_t i = 0; i < size; i++) {
-                        memory[j++] = cart[i];
-                }
-
+        void Bus::attach(Cartridge *cart) {
                 cpu->registers.r16.AF = 0x0001;
                 cpu->registers.r16.BC = 0x0013;
                 cpu->registers.r16.DE = 0x00D8;
                 cpu->registers.r16.HL = 0x014D;
                 cpu->SP = 0xFFFE;
+        }
+
+        void Bus::attach(Cpu *cpu) {
+                this->cpu = cpu;
+                cpu->attach(this);
+        }
+
+        //! \see https://gbdev.io/pandocs/#power-up-sequence
+        void Bus::reset() {
+                cpu->registers.r16.AF = 0x01B0;
+                cpu->registers.r16.BC = 0x0013;
+                cpu->registers.r16.DE = 0x00D8;
+                cpu->registers.r16.HL = 0x014D;
+                cpu->SP = 0xFFFE;
+
+                write(0xFF05, 0x00); // TIMA
+                write(0xFF06, 0x00); // TMA
+                write(0xFF07, 0x00); // TAC
+                write(0xFF10, 0x80); // NR10
+                write(0xFF11, 0xBF); // NR11
+                write(0xFF12, 0xF3); // NR12
+                write(0xFF14, 0xBF); // NR14
+                write(0xFF16, 0x3F); // NR21
+                write(0xFF17, 0x00); // NR22
+                write(0xFF19, 0xBF); // NR24
+                write(0xFF1A, 0x7F); // NR30
+                write(0xFF1B, 0xFF); // NR31
+                write(0xFF1C, 0x9F); // NR32
+                write(0xFF1E, 0xBF); // NR34
+                write(0xFF20, 0xFF); // NR41
+                write(0xFF21, 0x00); // NR42
+                write(0xFF22, 0x00); // NR43
+                write(0xFF23, 0xBF); // NR44
+                write(0xFF24, 0x77); // NR50
+                write(0xFF25, 0xF3); // NR51
+                write(0xFF26, 0xF1); // NR52: $F1-GB, $F0-SGB
+                write(0xFF40, 0x91); // LCDC
+                write(0xFF42, 0x00); // SCY
+                write(0xFF43, 0x00); // SCX
+                write(0xFF45, 0x00); // LYC
+                write(0xFF47, 0xFC); // BGP
+                write(0xFF48, 0xFF); // OBP0
+                write(0xFF49, 0xFF); // OBP1
+                write(0xFF4A, 0x00); // WY
+                write(0xFF4B, 0x00); // WX
+                write(0xFFFF, 0x00); // IE
         }
 
 } // namespace gs

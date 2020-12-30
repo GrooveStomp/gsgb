@@ -25,7 +25,7 @@ class Instruction;
 
 class Cpu::Impl {
 public:
-        Impl(Cpu *cpu, Bus *bus);
+        Impl(Cpu *cpu);
         ~Impl();
 
         void InitInstructionMap();

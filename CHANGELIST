@@ -1,0 +1,5 @@
+2020-12-29 19:18 PST
+- Cartridge header checksumming.
+- Proper cartridge data loading.
+- Memory register initialization via Bus::reset().
+- Better separation of bus/cpu/cartridge.

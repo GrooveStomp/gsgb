@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: cpu.hpp
  * Created: 2019-08-29
- * Updated: 2020-12-23
+ * Updated: 2020-12-28
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -64,7 +64,7 @@ class Instruction;
 
 class Cpu {
 public:
-        Cpu(Bus *messageBus);
+        Cpu();
         ~Cpu();
 
         void InstructionFetch();
@@ -75,6 +75,8 @@ public:
         void FlagSet(char, uint8_t);
         uint8_t FlagGet(char);
         uint8_t FlagGet(uint8_t);
+
+        void attach(Bus *bus);
 
         union {
                 struct r8_type {
@@ -104,10 +106,11 @@ public:
         uint16_t I; //!< interrupt vector
 
         uint16_t opcode = 0x0;
-        Bus *bus;
+
 private:
         friend class Instruction;
         class Impl;
+        Bus *bus;
         Impl *impl;
 };
 

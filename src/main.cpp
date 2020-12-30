@@ -11,42 +11,36 @@
 #include <cstdint>
 #include <fstream>
 
-using namespace std;
-
 #include "bus.hpp"
+#include "cpu.hpp"
+#include "cartridge.hpp"
+
+using namespace std;
+using namespace gs;
 
 int main(int argc, char *argv[]) {
-        gs::Bus gb;
-        ifstream stream;
-        streampos size;
+        Cpu cpu;
+        Cartridge *cart = nullptr;
+        Bus gb;
 
-        stream.open("data/DMG_ROM.bin", ios::in | ios::binary | ios::ate);
+        ifstream stream("data/cpu_instrs/individual/01-special.gb", ios::in | ios::binary | ios::ate);
         if (stream.is_open()) {
-                size = stream.tellg();
+                streampos size = stream.tellg();
                 char *buf = new char[size];
                 stream.seekg(0, ios::beg);
                 stream.read(buf, size);
                 stream.close();
-                gb.setBootRom(buf, size);
-                delete[] buf;
-        } else {
-                fputs("Couldn't open boot rom.\n", stderr);
-                exit(1);
-        }
-
-        stream.open("data/sample.gb", ios::in | ios::binary | ios::ate);
-        if (stream.is_open()) {
-                size = stream.tellg();
-                char *buf = new char[size];
-                stream.seekg(0, ios::beg);
-                stream.read(buf, size);
-                stream.close();
-                gb.attachCart(buf, size);
+                cart = new Cartridge(reinterpret_cast<uint8_t*>(buf), size);
+                // TODO: Error handling on allocating new cartridge.
                 delete[] buf;
         } else {
                 fputs("Couldn't open rom.\n", stderr);
                 exit(1);
         }
+
+        gb.attach(&cpu);
+        gb.attach(cart);
+        gb.reset();
 
         // TODO: CPU fetch/decode/execute loop
 

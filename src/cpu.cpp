@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: Cpu.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-23
+ * Updated: 2020-12-28
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -28,7 +28,7 @@ struct Instruction {
         unsigned int cycles;
 };
 
-Cpu::Cpu(Bus *messageBus) {
+Cpu::Cpu() {
         registers.r16.BC = 0;
         registers.r16.DE = 0;
         registers.r16.HL = 0;
@@ -38,13 +38,17 @@ Cpu::Cpu(Bus *messageBus) {
         SP = 0;
         I = 0;
         opcode = 0x0;
-        bus = messageBus;
 
-        impl = new Impl(this, messageBus);
+        impl = new Impl(this);
 }
 
 Cpu::~Cpu() {
         delete impl;
+}
+
+void Cpu::attach(Bus *bus) {
+        this->bus = bus;
+        impl->bus = bus;
 }
 
 void Cpu::FlagSet(char c, uint8_t onOrOff) {
@@ -128,10 +132,8 @@ uint8_t Cpu::FlagGet(uint8_t bitToCheck) {
         return bit >> bitToCheck;
 }
 
-Cpu::Impl::Impl(Cpu *CpuIn, Bus *BusIn) {
+Cpu::Impl::Impl(Cpu *CpuIn) {
         cpu = CpuIn;
-        bus = BusIn;
-
         InitInstructionMap();
 }
 
