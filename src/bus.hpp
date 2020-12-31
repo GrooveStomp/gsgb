@@ -26,8 +26,12 @@ namespace gs {
                 Cpu *cpu;
                 Cartridge *cart;
 
-                static char *bootRom;
         public:
+                struct {
+                        uint8_t boot; // boot flag
+                        uint8_t sb; // serial byte
+                        uint8_t sc; // serial control
+                } memRegisters;
 
                 uint8_t *bgTileMap; //!< Tiles to be displayed.
 

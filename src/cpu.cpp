@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: Cpu.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-28
+ * Updated: 2020-12-31
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -13,6 +13,8 @@
 #include <string>
 #include <map>
 #include <cassert>
+#include <iostream>
+#include <iomanip>
 
 #include "cpu.hpp"
 #include "bus.hpp"
@@ -26,9 +28,20 @@ struct Instruction {
         std::string name;
         void (Cpu::Impl::*op)();
         unsigned int cycles;
+
+        friend std::ostream& operator<<(std::ostream& out, Instruction i) {
+                using namespace std;
+                out << "{ name: '" << i.name << "', op: '" << i.op << "', cycles: '" << i.cycles << "' }";
+                return out;
+        }
 };
 
 Cpu::Cpu() {
+        impl = new Impl(this);
+        reset();
+}
+
+void Cpu::reset() {
         registers.r16.BC = 0;
         registers.r16.DE = 0;
         registers.r16.HL = 0;
@@ -38,8 +51,6 @@ Cpu::Cpu() {
         SP = 0;
         I = 0;
         opcode = 0x0;
-
-        impl = new Impl(this);
 }
 
 Cpu::~Cpu() {
@@ -182,7 +193,7 @@ void Cpu::Impl::Op_0006() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.B);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -192,7 +203,7 @@ void Cpu::Impl::Op_000E() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.C);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -202,7 +213,7 @@ void Cpu::Impl::Op_0016() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.D);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -212,7 +223,7 @@ void Cpu::Impl::Op_001E() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.E);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -222,7 +233,7 @@ void Cpu::Impl::Op_0026() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.H);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -232,7 +243,7 @@ void Cpu::Impl::Op_002E() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.L);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -805,7 +816,7 @@ void Cpu::Impl::Op_0036() {
         auto op1 = std::make_shared<OperandAddress>(cpu->registers.r16.HL, bus);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -852,7 +863,7 @@ void Cpu::Impl::Op_003E() {
         auto op1 = std::make_shared<OperandReference>(cpu->registers.r8.A);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
-        auto op2 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op2 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1091,7 +1102,7 @@ void Cpu::Impl::Op_0001() {
 
         uint16_t lo = bus->read(cpu->PC++);
         uint16_t hi = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>((hi << 8) | lo);
+        auto op2 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1106,7 +1117,7 @@ void Cpu::Impl::Op_0011() {
 
         uint16_t lo = bus->read(cpu->PC++);
         uint16_t hi = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>((hi << 8) | lo);
+        auto op2 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1121,7 +1132,7 @@ void Cpu::Impl::Op_0021() {
 
         uint16_t lo = bus->read(cpu->PC++);
         uint16_t hi = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>((hi << 8) | lo);
+        auto op2 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1136,7 +1147,7 @@ void Cpu::Impl::Op_0031() {
 
         uint16_t lo = bus->read(cpu->PC++);
         uint16_t hi = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>((hi << 8) | lo);
+        auto op2 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1164,7 +1175,7 @@ void Cpu::Impl::Op_00F8() {
 
         uint16_t value = cpu->SP;
         uint16_t byte = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>(value + byte);
+        auto op2 = std::make_shared<OperandValueByte>(value + byte);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         LD();
@@ -1369,7 +1380,7 @@ void Cpu::Impl::Op_00C6() {
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         uint8_t byte = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>(byte);
+        auto op2 = std::make_shared<OperandValueByte>(byte);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         ADD8();
@@ -1469,7 +1480,7 @@ void Cpu::Impl::Op_00CE() {
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         uint8_t byte = bus->read(cpu->PC++);
-        auto op2 = std::make_shared<OperandValue>(byte);
+        auto op2 = std::make_shared<OperandValueByte>(byte);
         operand2 = std::static_pointer_cast<Operand>(op2);
 
         ADC8();
@@ -1542,7 +1553,7 @@ void Cpu::Impl::Op_0096() {
 //! \brief SUB #
 void Cpu::Impl::Op_00D6() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         SUB8();
@@ -1679,7 +1690,7 @@ void Cpu::Impl::Op_00A6() {
 //! \brief AND #
 void Cpu::Impl::Op_00E6() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         AND();
@@ -1752,7 +1763,7 @@ void Cpu::Impl::Op_00B6() {
 //! \brief OR #
 void Cpu::Impl::Op_00F6() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         OR();
@@ -1825,7 +1836,7 @@ void Cpu::Impl::Op_00AE() {
 //! \brief XOR #
 void Cpu::Impl::Op_00EE() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         XOR();
@@ -1898,7 +1909,7 @@ void Cpu::Impl::Op_00BE() {
 //! \brief CP #
 void Cpu::Impl::Op_00FE() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         CP();
@@ -2068,7 +2079,7 @@ void Cpu::Impl::Op_0039() {
 
 //! \brief ADD SP,#
 void Cpu::Impl::Op_00E8() {
-        auto op1 = std::make_shared<OperandValue>(bus->read(cpu->PC++));
+        auto op1 = std::make_shared<OperandValueByte>(bus->read(cpu->PC++));
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         ADD16();
@@ -2758,7 +2769,7 @@ void Cpu::Impl::Op_CB47() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.A);
@@ -2772,7 +2783,7 @@ void Cpu::Impl::Op_CB40() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.B);
@@ -2786,7 +2797,7 @@ void Cpu::Impl::Op_CB41() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.C);
@@ -2800,7 +2811,7 @@ void Cpu::Impl::Op_CB42() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.D);
@@ -2814,7 +2825,7 @@ void Cpu::Impl::Op_CB43() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.E);
@@ -2828,7 +2839,7 @@ void Cpu::Impl::Op_CB44() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.H);
@@ -2842,7 +2853,7 @@ void Cpu::Impl::Op_CB45() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.L);
@@ -2856,7 +2867,7 @@ void Cpu::Impl::Op_CB46() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandAddress>(cpu->registers.r16.HL, bus);
@@ -2870,7 +2881,7 @@ void Cpu::Impl::Op_CBC7() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.A);
@@ -2884,7 +2895,7 @@ void Cpu::Impl::Op_CBC0() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.B);
@@ -2898,7 +2909,7 @@ void Cpu::Impl::Op_CBC1() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.C);
@@ -2912,7 +2923,7 @@ void Cpu::Impl::Op_CBC2() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.D);
@@ -2926,7 +2937,7 @@ void Cpu::Impl::Op_CBC3() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.E);
@@ -2940,7 +2951,7 @@ void Cpu::Impl::Op_CBC4() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.H);
@@ -2954,7 +2965,7 @@ void Cpu::Impl::Op_CBC5() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.L);
@@ -2968,7 +2979,7 @@ void Cpu::Impl::Op_CBC6() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandAddress>(cpu->registers.r16.HL, bus);
@@ -2982,7 +2993,7 @@ void Cpu::Impl::Op_CB87() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.A);
@@ -2996,7 +3007,7 @@ void Cpu::Impl::Op_CB80() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.B);
@@ -3010,7 +3021,7 @@ void Cpu::Impl::Op_CB81() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.C);
@@ -3024,7 +3035,7 @@ void Cpu::Impl::Op_CB82() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.D);
@@ -3038,7 +3049,7 @@ void Cpu::Impl::Op_CB83() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.E);
@@ -3052,7 +3063,7 @@ void Cpu::Impl::Op_CB84() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.H);
@@ -3066,7 +3077,7 @@ void Cpu::Impl::Op_CB85() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandReference>(cpu->registers.r8.L);
@@ -3080,7 +3091,7 @@ void Cpu::Impl::Op_CB86() {
         uint8_t byte = bus->read(cpu->PC++);
         uint8_t bit = (byte >> 3) & 0x7;
 
-        auto op1 = std::make_shared<OperandValue>(bit);
+        auto op1 = std::make_shared<OperandValueByte>(bit);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         auto op2 = std::make_shared<OperandAddress>(cpu->registers.r16.HL, bus);
@@ -3093,9 +3104,9 @@ void Cpu::Impl::Op_CB86() {
 
 //! \brief JP ##
 void Cpu::Impl::Op_00C3() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         JP();
@@ -3103,9 +3114,9 @@ void Cpu::Impl::Op_00C3() {
 
 //! \brief JP NZ,##
 void Cpu::Impl::Op_00C2() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('z')) {
@@ -3115,9 +3126,9 @@ void Cpu::Impl::Op_00C2() {
 
 //! \brief JP Z,##
 void Cpu::Impl::Op_00CA() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('z')) {
@@ -3127,9 +3138,9 @@ void Cpu::Impl::Op_00CA() {
 
 //! \brief JP NC,##
 void Cpu::Impl::Op_00D2() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('c')) {
@@ -3139,9 +3150,9 @@ void Cpu::Impl::Op_00D2() {
 
 //! \brief JP C,##
 void Cpu::Impl::Op_00DA() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('c')) {
@@ -3160,7 +3171,7 @@ void Cpu::Impl::Op_00E9() {
 //! \brief JR #
 void Cpu::Impl::Op_0018() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         JR();
@@ -3169,7 +3180,7 @@ void Cpu::Impl::Op_0018() {
 //! \brief JR NZ,#
 void Cpu::Impl::Op_0020() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('z')) {
@@ -3180,7 +3191,7 @@ void Cpu::Impl::Op_0020() {
 //! \brief JR Z,#
 void Cpu::Impl::Op_0028() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('z')) {
@@ -3191,7 +3202,7 @@ void Cpu::Impl::Op_0028() {
 //! \brief JR NC,#
 void Cpu::Impl::Op_0030() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('c')) {
@@ -3202,7 +3213,7 @@ void Cpu::Impl::Op_0030() {
 //! \brief JR C,#
 void Cpu::Impl::Op_0038() {
         uint8_t byte = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>(byte);
+        auto op1 = std::make_shared<OperandValueByte>(byte);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('c')) {
@@ -3214,9 +3225,9 @@ void Cpu::Impl::Op_0038() {
 
 //! \brief CALL ##
 void Cpu::Impl::Op_00CD() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         CALL();
@@ -3224,9 +3235,9 @@ void Cpu::Impl::Op_00CD() {
 
 //! \brief CALL NZ,##
 void Cpu::Impl::Op_00C4() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('z')) {
@@ -3236,9 +3247,9 @@ void Cpu::Impl::Op_00C4() {
 
 //! \brief CALL Z,##
 void Cpu::Impl::Op_00CC() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('z')) {
@@ -3248,9 +3259,9 @@ void Cpu::Impl::Op_00CC() {
 
 //! \brief CALL NC,##
 void Cpu::Impl::Op_00D4() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (!cpu->flagGet('c')) {
@@ -3260,9 +3271,9 @@ void Cpu::Impl::Op_00D4() {
 
 //! \brief CALL C,##
 void Cpu::Impl::Op_00DC() {
-        uint8_t lo = bus->read(cpu->PC++);
-        uint8_t hi = bus->read(cpu->PC++);
-        auto op1 = std::make_shared<OperandValue>((hi << 8) | lo);
+        uint16_t lo = bus->read(cpu->PC++);
+        uint16_t hi = bus->read(cpu->PC++);
+        auto op1 = std::make_shared<OperandValueWord>((hi << 8) | lo);
         operand1 = std::static_pointer_cast<Operand>(op1);
 
         if (cpu->flagGet('c')) {
@@ -4379,6 +4390,7 @@ void Cpu::instructionFetch() {
         uint8_t opcodeByte;
         opcode = 0;
 
+        std::cout << "pc: " << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << PC;
         opcodeByte = bus->read(PC++);
 
         // Some opcodes are two-bytes long; these are prefixed with the byte
@@ -4392,7 +4404,13 @@ void Cpu::instructionFetch() {
         }
 
         opcode = (opcode | opcodeByte);
+        std::ostream fmt(NULL);
+        fmt.copyfmt(std::cout);
+        std::cout << ", opcode: 0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << opcode;
+        std::cout << std::endl;
+        std::cout.copyfmt(fmt);
         impl->instruction = std::make_shared<Instruction>(impl->instructionMap[opcode]);
+        std::cout << *(impl->instruction) << std::endl;
 }
 
 void Cpu::instructionExecute() {

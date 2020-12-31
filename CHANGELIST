@@ -1,4 +1,13 @@
+2020-12-31
+- Extract CPU reset into reset() function invoked by Bus::reset().
+- Split OperandValue type into OperandValueByte and OperandValueWord.
+  > Fix dropped bits for word-sized immediate operands.
+- Debugging output for cartridge rom.
+- Fix bug where cart was not being set for bus.
+
 2020-12-30
+- Debugging output of CPU instruction/opcode/PC.
+- Added serial interface.
 - MBC1 implemented.
 - Cartridge now loads MBC memory from ROM data.
 - Implemented extremely basic cpu instruction fetch/decode/execute loop.

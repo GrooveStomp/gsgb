@@ -3,3 +3,4 @@ debug
 core
 exclude
 data
+out.log

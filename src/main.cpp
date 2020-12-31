@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: main.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-30
+ * Updated: 2020-12-31
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -10,6 +10,8 @@
  ******************************************************************************/
 #include <cstdint>
 #include <fstream>
+#include <iostream>
+#include <vector>
 
 #include "bus.hpp"
 #include "cpu.hpp"
@@ -42,10 +44,23 @@ int main(int argc, char *argv[]) {
         gb.attach(cart);
         gb.reset();
 
+        vector<char> buf;
         while (true) {
                 // TODO: Simulate frequency
                 cpu.instructionFetch();
                 cpu.instructionExecute();
+
+                if (gb.memRegisters.sc == 0x81) {
+                        cout << "hi" << endl;
+                        char byte = static_cast<char>(gb.memRegisters.sb);
+                        buf.push_back(byte);
+                        if (byte == '\n') {
+                                for (auto it = buf.begin(); it != buf.end(); it++) {
+                                        cout << *it;
+                                }
+                                buf.clear();
+                        }
+                }
         }
 
         return 0;

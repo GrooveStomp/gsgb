@@ -18,8 +18,6 @@
 
 namespace gs {
 
-        static uint8_t HwRegBoot = 0x0;
-
         enum AddrMemRegEnum {
                 RegBOOT = 0xFF50,
                 RegWX = 0xFF4B,
@@ -34,6 +32,11 @@ namespace gs {
                 RegSCY = 0xFF42,
                 RegSTAT = 0xFF41,
                 RegLCDC = 0xFF40,
+        };
+
+        enum AddrSerialEnum {
+                SerialTransfer = 0xFF01,
+                SerialControl = 0xFF02,
         };
 
         enum AddrEnum {
@@ -63,6 +66,9 @@ namespace gs {
         char *bootRom = {}; //!< Boot rom and DRM check.
 
         Bus::Bus() {
+                cart = nullptr;
+                cpu = nullptr;
+
                 // RAM starts at 0xC000
                 memory = new uint8_t[8 * 1024];
                 // Video memory starts at 0x8000
@@ -74,8 +80,7 @@ namespace gs {
                 // Set boot state.
                 write(RegBOOT, 0x0);
 
-                cart = nullptr;
-                cpu = nullptr;
+                memRegisters.boot = 0x0;
         }
 
         Bus::~Bus() {
@@ -90,8 +95,29 @@ namespace gs {
 
                 switch (ptr) {
                         case AddrMemRegEnum::RegBOOT:
-                                HwRegBoot = value;
+                                memRegisters.boot = value;
                                 break;
+
+                        // Before a transfer, it holds the next byte that will
+                        // go out.
+                        // During a transfer, it has a blend of the outgoing and
+                        // incoming bytes. Each cycle, the leftmost bit is
+                        // shifted out (and over the wire) and the incoming bit
+                        // is shifted in from the other side.
+                        case AddrSerialEnum::SerialTransfer:
+                                memRegisters.sb = value;
+                                break;
+
+                        // bit 7: transfer start flag
+                        //        0: no transfer in progress or requested
+                        //        1: transfer in progress or requested
+                        // bit 1: shift clock
+                        //        0: external clock
+                        //        1: internal clock
+                        case AddrSerialEnum::SerialControl:
+                                memRegisters.sc = value;
+                                break;
+
                         default:
                                 break;
                 }
@@ -105,11 +131,13 @@ namespace gs {
 
                 switch (ptr) {
                         case AddrMemRegEnum::RegBOOT:
-                                return HwRegBoot;
-                                break;
-                        default:
-                                // TODO implement more cases!
-                                return 0;
+                                return memRegisters.boot;
+
+                        case AddrSerialEnum::SerialTransfer:
+                                return memRegisters.sb;
+
+                        case AddrSerialEnum::SerialControl:
+                                return memRegisters.sc;
                 }
 
                 return 0;
@@ -121,6 +149,7 @@ namespace gs {
                 cpu->registers.r16.DE = 0x00D8;
                 cpu->registers.r16.HL = 0x014D;
                 cpu->SP = 0xFFFE;
+                this->cart = cart;
         }
 
         void Bus::attach(Cpu *cpu) {
@@ -130,6 +159,7 @@ namespace gs {
 
         //! \see https://gbdev.io/pandocs/#power-up-sequence
         void Bus::reset() {
+                cpu->reset();
                 cpu->registers.r16.AF = 0x01B0;
                 cpu->registers.r16.BC = 0x0013;
                 cpu->registers.r16.DE = 0x00D8;

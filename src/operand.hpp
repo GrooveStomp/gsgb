@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: operand.hpp
  * Created: 2019-08-31
- * Updated: 2020-12-23
+ * Updated: 2020-12-31
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -25,11 +25,20 @@ public:
         virtual void set(uint16_t) = 0;
 };
 
-class OperandValue : public Operand {
+class OperandValueByte : public Operand {
 public:
         uint8_t value;
 
-        OperandValue(uint8_t);
+        OperandValueByte(uint8_t);
+        virtual uint16_t get();
+        virtual void set(uint16_t value) {}; // nop for value types.
+};
+
+class OperandValueWord : public Operand {
+public:
+        uint16_t value;
+
+        OperandValueWord(uint16_t);
         virtual uint16_t get();
         virtual void set(uint16_t value) {}; // nop for value types.
 };

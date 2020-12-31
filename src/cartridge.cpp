@@ -13,6 +13,8 @@
 #include <iostream> // TODO: Remove me
 #include <iomanip> // TODO: Remove me
 #include <cmath>
+#include <cassert>
+#include <cstdlib>
 
 #include "cartridge.hpp"
 #include "mbc.hpp"
@@ -79,6 +81,9 @@ namespace gs {
 
                 friend std::ostream& operator<<(std::ostream& out, const CartHeader& header) {
                         using namespace std;
+                        ostream fmt_state(NULL);
+                        fmt_state.copyfmt(out);
+
                         out << "title:       " << header.title << endl;
                         out << "nl_code:     0x" << setw(2) << setfill('0') << uppercase << hex << static_cast<uint16_t>(header.nl_code) << endl;
                         out << "sgb_flag:    0x" << setw(2) << setfill('0') << uppercase << hex << static_cast<uint16_t>(header.sgb_flag) << endl;
@@ -90,12 +95,16 @@ namespace gs {
                         out << "version:     0x" << setw(2) << setfill('0') << uppercase << hex << static_cast<uint16_t>(header.version) << endl;
                         out << "h_check:     0x" << setw(2) << setfill('0') << uppercase << hex << static_cast<uint16_t>(header.h_check) << endl;
                         out << "g_check:     0x" << setw(2) << setfill('0') << uppercase << hex << static_cast<uint16_t>(header.g_check) << endl;
+
+                        out.copyfmt(fmt_state);
                         return out;
                 }
         };
 #pragma pack(pop)
 
         Cartridge::Cartridge(uint8_t *rom, unsigned int size) {
+                mbc = nullptr;
+
                 CartHeader header = *reinterpret_cast<CartHeader*>(&rom[0x100]);
 
                 std::cout << header;
@@ -171,6 +180,7 @@ namespace gs {
 
                         // TODO: More MBC/RAM/special support
                 }
+                assert(mbc != nullptr);
 
                 mbc->loadRom(rom);
         }

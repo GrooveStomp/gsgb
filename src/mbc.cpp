@@ -10,6 +10,8 @@
  ******************************************************************************/
 //! \file mbc.cpp
 #include <cassert>
+#include <cstdio>
+
 #include "mbc.hpp"
 
 namespace gs {
@@ -217,6 +219,28 @@ namespace gs {
         void Mbc1::loadRom(uint8_t *data) {
                 for (uint32_t i = 0; i < rom_size; ++i) {
                         rom[i] = data[i];
+                }
+
+                uint32_t width = 16;
+                uint32_t r = 0;
+                printf("     ");
+                for (uint32_t i = 0; i < width; i++) {
+                        printf("%02X ", i);
+                }
+                printf("\n");
+
+                bool running = true;
+                while (running) {
+                        printf("%04X ", r * width);
+                        for (uint32_t c = 0; c < width; c++) {
+                                if ((r * width + c) >= rom_size) {
+                                        running = false;
+                                        break;
+                                }
+                                printf("%02X ", rom[r * width + c]);
+                        }
+                        r++;
+                        printf("\n");
                 }
         }
 

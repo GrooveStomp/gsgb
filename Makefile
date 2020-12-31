@@ -15,7 +15,7 @@ LIBS    = $(shell sdl2-config --libs) -lSDL2main
 CFLAGS  = -std=c++17 -fno-exceptions -pedantic -Wall
 
 SRC_DEP   =
-SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/cartridge.cpp src/display.cpp src/mbc.cpp
+SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/cartridge.cpp src/mbc.cpp
 OBJFILES  = $(patsubst %.cpp,%.o,$(SRC))
 LINTFILES = $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
 

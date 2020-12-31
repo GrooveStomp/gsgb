@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: Operand.cpp
  * Created: 2019-08-31
- * Updated: 2020-12-23
+ * Updated: 2020-12-31
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -13,11 +13,18 @@
 
 namespace gs {
 
-OperandValue::OperandValue(uint8_t in) : value(in) {
+OperandValueByte::OperandValueByte(uint8_t in) : value(in) {
 }
 
-uint16_t OperandValue::get() {
+uint16_t OperandValueByte::get() {
         return static_cast<uint16_t>(value);
+}
+
+OperandValueWord::OperandValueWord(uint16_t in) : value(in) {
+}
+
+uint16_t OperandValueWord::get() {
+        return value;
 }
 
 OperandAddress::OperandAddress(uint16_t in, Bus *b) {

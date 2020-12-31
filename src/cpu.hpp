@@ -77,6 +77,7 @@ public:
         uint8_t flagGet(uint8_t);
 
         void attach(Bus *bus);
+        void reset();
 
         union {
                 struct r8_type {
