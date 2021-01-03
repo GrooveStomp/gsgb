@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
         Cartridge *cart = nullptr;
         Bus gb;
 
-        ifstream stream("data/cpu_instrs/individual/01-special.gb", ios::in | ios::binary | ios::ate);
+        ifstream stream("data/cpu_instrs/individual/03-op sp,hl.gb", ios::in | ios::binary | ios::ate);
         if (stream.is_open()) {
                 streampos size = stream.tellg();
                 char *buf = new char[size];
@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
         while (true) {
                 // TODO: Simulate frequency
                 cpu.instructionFetch();
+                cpu.dumpState();
                 cpu.instructionExecute();
 
                 if (gb.memRegisters.sc == 0x81) {

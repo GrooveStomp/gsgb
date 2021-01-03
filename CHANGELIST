@@ -1,3 +1,7 @@
+2021-01-02
+- Fixed a major bug where 16-bit registers were endian-incorrect.
+- Improved debug output.
+
 2020-12-31
 - Extract CPU reset into reset() function invoked by Bus::reset().
 - Split OperandValue type into OperandValueByte and OperandValueWord.

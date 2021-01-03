@@ -221,6 +221,7 @@ namespace gs {
                         rom[i] = data[i];
                 }
 
+                printf("-- Begin ROM Dump\n");
                 uint32_t width = 16;
                 uint32_t r = 0;
                 printf("     ");
@@ -242,6 +243,7 @@ namespace gs {
                         r++;
                         printf("\n");
                 }
+                printf("-- End ROM Dump\n");
         }
 
 } // namespace gs

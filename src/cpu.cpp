@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: Cpu.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-31
+ * Updated: 2021-01-02
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -31,7 +31,13 @@ struct Instruction {
 
         friend std::ostream& operator<<(std::ostream& out, Instruction i) {
                 using namespace std;
-                out << "{ name: '" << i.name << "', op: '" << i.op << "', cycles: '" << i.cycles << "' }";
+                ostream fmt(NULL);
+                fmt.copyfmt(out);
+
+                out << "{ name: '" << i.name;
+                out << "', cycles: '" << dec << i.cycles << "' }";
+
+                out.copyfmt(fmt);
                 return out;
         }
 };
@@ -1110,7 +1116,7 @@ void Cpu::Impl::Op_0001() {
 
 //! \brief LD DE,##
 //!
-//! Put 16-bit value ## into register pair BC.
+//! Put 16-bit value ## into register pair DE.
 void Cpu::Impl::Op_0011() {
         auto op1 = std::make_shared<OperandPairReference>(cpu->registers.r16.DE);
         operand1 = std::static_pointer_cast<Operand>(op1);
@@ -1125,7 +1131,7 @@ void Cpu::Impl::Op_0011() {
 
 //! \brief LD HL,##
 //!
-//! Put 16-bit value ## into register pair BC.
+//! Put 16-bit value ## into register pair HL.
 void Cpu::Impl::Op_0021() {
         auto op1 = std::make_shared<OperandPairReference>(cpu->registers.r16.HL);
         operand1 = std::static_pointer_cast<Operand>(op1);
@@ -3954,7 +3960,7 @@ void Cpu::Impl::SWAP() {
         uint8_t nibbleHi = Nibble(oldValue, 1);
         uint8_t nibbleLo = Nibble(oldValue, 0);
         uint8_t newValue = (nibbleLo << 4) | nibbleHi;
-       operand2->set(newValue);
+        operand2->set(newValue);
 
         cpu->flagSet('z', !newValue);
         cpu->flagSet('n', 0);
@@ -4011,7 +4017,7 @@ void Cpu::Impl::DAA() {
 //! \brief The contents of the Accumulator (Register A) are inverted (one’s complement).
 void Cpu::Impl::CPL() {
         uint8_t val = ~(cpu->registers.r8.A);
-       operand2->set(val);
+        operand2->set(val);
 
         cpu->flagSet('h', 1);
         cpu->flagSet('n', 1);
@@ -4390,6 +4396,20 @@ void Cpu::instructionFetch() {
         uint8_t opcodeByte;
         opcode = 0;
 
+        std::ostream fmt(NULL);
+        fmt.copyfmt(std::cout);
+
+        uint16_t debug_byte_1 = static_cast<uint16_t>(bus->read(PC + 0));
+        uint16_t debug_byte_2 = static_cast<uint16_t>(bus->read(PC + 1));
+        uint16_t debug_byte_3 = static_cast<uint16_t>(bus->read(PC + 2));
+        uint16_t debug_byte_4 = static_cast<uint16_t>(bus->read(PC + 3));
+
+        std::cout << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << debug_byte_1 << " ";
+        std::cout << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << debug_byte_2 << " ";
+        std::cout << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << debug_byte_3 << " ";
+        std::cout << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << debug_byte_4 << " ";
+        std::cout.copyfmt(fmt);
+
         std::cout << "pc: " << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << PC;
         opcodeByte = bus->read(PC++);
 
@@ -4404,17 +4424,37 @@ void Cpu::instructionFetch() {
         }
 
         opcode = (opcode | opcodeByte);
-        std::ostream fmt(NULL);
-        fmt.copyfmt(std::cout);
-        std::cout << ", opcode: 0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << opcode;
-        std::cout << std::endl;
+        std::cout << ", opcode: 0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << opcode << " ";
         std::cout.copyfmt(fmt);
+
         impl->instruction = std::make_shared<Instruction>(impl->instructionMap[opcode]);
         std::cout << *(impl->instruction) << std::endl;
 }
 
 void Cpu::instructionExecute() {
         ((*impl).*(impl->instruction->op))();
+}
+
+void Cpu::dumpState() {
+        printf(
+                "\tB:    %02X C:    %02X D:    %02X E:    %02X H:    %02X L:    %02X A:    %02X F:    %02X\n",
+                registers.r8.B,
+                registers.r8.C,
+                registers.r8.D,
+                registers.r8.E,
+                registers.r8.H,
+                registers.r8.L,
+                registers.r8.A,
+                registers.r8.F
+                );
+
+        printf(
+                "\t        BC:  %04X         DE:  %04X         HL:  %04X         AF:  %04X\n",
+                registers.r16.BC,
+                registers.r16.DE,
+                registers.r16.HL,
+                registers.r16.AF
+                );
 }
 
 } // namespace gs

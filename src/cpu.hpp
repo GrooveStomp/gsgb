@@ -79,18 +79,20 @@ public:
         void attach(Bus *bus);
         void reset();
 
+        void dumpState();
+
         union {
                 struct r8_type {
-                        uint8_t B;
                         uint8_t C;
-                        uint8_t D;
+                        uint8_t B;
                         uint8_t E;
-                        uint8_t H;
+                        uint8_t D;
                         uint8_t L;
+                        uint8_t H;
 
                         // Special purpose accumulator and flag.
-                        uint8_t A;
                         uint8_t F;
+                        uint8_t A;
                 } r8;
                 struct r16_type {
                         uint16_t BC;

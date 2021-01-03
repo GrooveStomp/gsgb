@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: Operand.cpp
  * Created: 2019-08-31
- * Updated: 2020-12-31
+ * Updated: 2021-01-02
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -13,54 +13,54 @@
 
 namespace gs {
 
-OperandValueByte::OperandValueByte(uint8_t in) : value(in) {
-}
+        OperandValueByte::OperandValueByte(uint8_t in) : value(in) {
+        }
 
-uint16_t OperandValueByte::get() {
-        return static_cast<uint16_t>(value);
-}
+        uint16_t OperandValueByte::get() {
+                return static_cast<uint16_t>(value);
+        }
 
-OperandValueWord::OperandValueWord(uint16_t in) : value(in) {
-}
+        OperandValueWord::OperandValueWord(uint16_t in) : value(in) {
+        }
 
-uint16_t OperandValueWord::get() {
-        return value;
-}
+        uint16_t OperandValueWord::get() {
+                return value;
+        }
 
-OperandAddress::OperandAddress(uint16_t in, Bus *b) {
-        address = in;
-        bus = b;
-}
+        OperandAddress::OperandAddress(uint16_t in, Bus *b) {
+                address = in;
+                bus = b;
+        }
 
-uint16_t OperandAddress::get() {
-        return static_cast<uint16_t>(bus->read(address));
-}
+        uint16_t OperandAddress::get() {
+                return static_cast<uint16_t>(bus->read(address));
+        }
 
-// TODO NOTE Only uses the lower 8 bits!
-void OperandAddress::set(uint16_t value) {
-        bus->write(address, static_cast<uint8_t>(value));
-}
+        // TODO NOTE Only uses the lower 8 bits!
+        void OperandAddress::set(uint16_t value) {
+                bus->write(address, static_cast<uint8_t>(value));
+        }
 
-OperandReference::OperandReference(uint8_t &in) : ref(&in) {
-}
+        OperandReference::OperandReference(uint8_t &in) : ref(&in) {
+        }
 
-uint16_t OperandReference::get() {
-        return static_cast<uint8_t>(*ref);
-}
+        uint16_t OperandReference::get() {
+                return static_cast<uint8_t>(*ref);
+        }
 
-void OperandReference::set(uint16_t value) {
-        *ref = static_cast<uint8_t>(value);
-}
+        void OperandReference::set(uint16_t value) {
+                *ref = static_cast<uint8_t>(value);
+        }
 
-OperandPairReference::OperandPairReference(uint16_t &in) : ref(&in) {
-}
+        OperandPairReference::OperandPairReference(uint16_t &in) : ref(&in) {
+        }
 
-uint16_t OperandPairReference::get() {
-        return *ref;
-}
+        uint16_t OperandPairReference::get() {
+                return *ref;
+        }
 
-void OperandPairReference::set(uint16_t value) {
-        *ref = value;
-}
+        void OperandPairReference::set(uint16_t value) {
+                *ref = value;
+        }
 
 } // namespace gs
