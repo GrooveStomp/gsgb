@@ -5,7 +5,7 @@
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
- * Copyright 2019 - 2020, Aaron Oman and the gsgb contributors
+ * Copyright 2019 - 2021, Aaron Oman and the gsgb contributors
  * SPDX-License-Identifier: AGPL-3.0-only
  ******************************************************************************/
 #include <cstdint>
