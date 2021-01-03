@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: cpu.hpp
  * Created: 2019-08-29
- * Updated: 2020-12-30
+ * Updated: 2021-01-02
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
