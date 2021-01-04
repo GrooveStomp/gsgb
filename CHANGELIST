@@ -1,4 +1,10 @@
+2021-01-04
+- Added video component.
+- Re-indented cpu_impl.cpp.
+
 2021-01-02
+- Re-indented cpu.hpp.
+- Reformatted huge descriptive text block in cpu.hpp.
 - Fixed a major bug where 16-bit registers were endian-incorrect.
 - Improved debug output.
 

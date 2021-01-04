@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: bus.hpp
  * Created: 2019-08-30
- * Updated: 2020-12-28
+ * Updated: 2021-01-04
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -17,14 +17,14 @@
 namespace gs {
         class Cpu;
         class Cartridge;
+        class Video;
 
         class Bus {
         private:
                 uint8_t *memory;
-                uint8_t *videoMemory; //!< 256x256
-                uint8_t *videoDisplay; //!< 160x144
                 Cpu *cpu;
                 Cartridge *cart;
+                Video *video;
 
         public:
                 struct {
@@ -32,8 +32,6 @@ namespace gs {
                         uint8_t sb; // serial byte
                         uint8_t sc; // serial control
                 } memRegisters;
-
-                uint8_t *bgTileMap; //!< Tiles to be displayed.
 
                 Bus();
                 ~Bus();
@@ -43,6 +41,7 @@ namespace gs {
 
                 void attach(Cartridge *cart);
                 void attach(Cpu *cpu);
+                void attach(Video *video);
                 void reset();
         };
 

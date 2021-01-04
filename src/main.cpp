@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: main.cpp
  * Created: 2019-08-29
- * Updated: 2020-12-31
+ * Updated: 2021-01-04
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -16,6 +16,7 @@
 #include "bus.hpp"
 #include "cpu.hpp"
 #include "cartridge.hpp"
+#include "video.hpp"
 
 using namespace std;
 using namespace gs;
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]) {
         Cpu cpu;
         Cartridge *cart = nullptr;
         Bus gb;
+        Video video;
 
         ifstream stream("data/cpu_instrs/individual/03-op sp,hl.gb", ios::in | ios::binary | ios::ate);
         if (stream.is_open()) {
@@ -42,6 +44,7 @@ int main(int argc, char *argv[]) {
 
         gb.attach(&cpu);
         gb.attach(cart);
+        gb.attach(&video);
         gb.reset();
 
         vector<char> buf;

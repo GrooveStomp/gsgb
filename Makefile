@@ -1,7 +1,7 @@
 #******************************************************************************
 # File: Makefile
 # Created: 2019-06-27
-# Updated: 2020-12-23
+# Updated: 2021-01-04
 # Package: gsgb
 # Creator: Aaron Oman (GrooveStomp)
 # Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -15,7 +15,7 @@ LIBS    = $(shell sdl2-config --libs) -lSDL2main
 CFLAGS  = -std=c++17 -fno-exceptions -pedantic -Wall
 
 SRC_DEP   =
-SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/cartridge.cpp src/mbc.cpp
+SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/cartridge.cpp src/mbc.cpp src/video.cpp
 OBJFILES  = $(patsubst %.cpp,%.o,$(SRC))
 LINTFILES = $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
 

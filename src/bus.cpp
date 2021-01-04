@@ -1,7 +1,7 @@
 /******************************************************************************
  * File: bus.cpp
  * Created: 2019-09-07
- * Updated: 2020-12-30
+ * Updated: 2021-01-04
  * Package: gsgb
  * Creator: Aaron Oman (GrooveStomp)
  * Homepage: https://git.sr.ht/~groovestomp/gsgb/
@@ -15,6 +15,7 @@
 #include "bus.hpp"
 #include "cpu.hpp"
 #include "cartridge.hpp"
+#include "video.hpp"
 
 namespace gs {
 
@@ -68,14 +69,10 @@ namespace gs {
         Bus::Bus() {
                 cart = nullptr;
                 cpu = nullptr;
+                video = nullptr;
 
                 // RAM starts at 0xC000
                 memory = new uint8_t[8 * 1024];
-                // Video memory starts at 0x8000
-                videoMemory = new uint8_t[8 * 1024];
-
-                // Alternatively, 0x8800-0x97FF
-                bgTileMap = &videoMemory[0x8000]; //!< Up to 0x8FFF
 
                 // Set boot state.
                 write(RegBOOT, 0x0);
@@ -84,12 +81,13 @@ namespace gs {
         }
 
         Bus::~Bus() {
-                delete[] videoMemory;
                 delete[] memory;
         }
 
         void Bus::write(uint16_t ptr, uint8_t value) {
                 if (cart != nullptr && cart->write(ptr, value)) {
+                        return;
+                } else if (video != nullptr && video->write(ptr, value)) {
                         return;
                 }
 
@@ -127,6 +125,8 @@ namespace gs {
                 uint8_t value;
                 if (cart != nullptr && cart->read(ptr, value)) {
                         return value;
+                } else if (video != nullptr && video->read(ptr, value)) {
+                        return value;
                 }
 
                 switch (ptr) {
@@ -155,6 +155,10 @@ namespace gs {
         void Bus::attach(Cpu *cpu) {
                 this->cpu = cpu;
                 cpu->attach(this);
+        }
+
+        void Bus::attach(Video *video) {
+                this->video = video;
         }
 
         //! \see https://gbdev.io/pandocs/#power-up-sequence
