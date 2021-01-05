@@ -9,13 +9,15 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 #******************************************************************************
 CC      = /usr/bin/g++
-INC     = $(shell sdl2-config --cflags)
-HEADERS = $(wildcard src/*.hpp)
+INC     = $(shell sdl2-config --cflags) -I.
+HEADERS = $(wildcard src/*.hpp) $(wildcard external/*.h)
 LIBS    = $(shell sdl2-config --libs) -lSDL2main
-CFLAGS  = -std=c++17 -fno-exceptions -pedantic -Wall
+CFLAGS  = -std=c++17 -fno-exceptions -pedantic -Wall -Wno-unused-function
 
 SRC_DEP   =
-SRC       = src/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp src/cartridge.cpp src/mbc.cpp src/video.cpp
+SRC       = src/host/main.cpp src/cpu.cpp src/bus.cpp src/operand.cpp \
+            src/cartridge.cpp src/mbc.cpp src/video.cpp src/host/graphics.cpp \
+            src/host/sprite.cpp src/host/color.cpp src/host/input.cpp
 OBJFILES  = $(patsubst %.cpp,%.o,$(SRC))
 LINTFILES = $(patsubst %.cpp,__%.cpp,$(SRC)) $(patsubst %.cpp,_%.cpp,$(SRC))
 

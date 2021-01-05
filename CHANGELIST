@@ -1,4 +1,7 @@
 2021-01-04
+- Moved host-specific code to src/host/.
+- Added Graphics, Sprite, Input and Color components.
+- Added external stb_truetype.h dependency.
 - Added video component.
 - Re-indented cpu_impl.cpp.
 

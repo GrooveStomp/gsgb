@@ -1,5 +1,5 @@
 /******************************************************************************
- * File: main.cpp
+ * File: host/main.cpp
  * Created: 2019-08-29
  * Updated: 2021-01-04
  * Package: gsgb
@@ -8,15 +8,18 @@
  * Copyright 2019 - 2021, Aaron Oman and the gsgb contributors
  * SPDX-License-Identifier: AGPL-3.0-only
  ******************************************************************************/
+//! \file host/main.cpp
 #include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
-#include "bus.hpp"
-#include "cpu.hpp"
-#include "cartridge.hpp"
-#include "video.hpp"
+#include "../bus.hpp"
+#include "../cpu.hpp"
+#include "../cartridge.hpp"
+#include "../video.hpp"
+#include "graphics.hpp"
+#include "input.hpp"
 
 using namespace std;
 using namespace gs;
@@ -26,6 +29,8 @@ int main(int argc, char *argv[]) {
         Cartridge *cart = nullptr;
         Bus gb;
         Video video;
+        Graphics graphics(std::string("gsgb").c_str(), 160, 144);
+        Input input;
 
         ifstream stream("data/cpu_instrs/individual/03-op sp,hl.gb", ios::in | ios::binary | ios::ate);
         if (stream.is_open()) {
@@ -47,9 +52,15 @@ int main(int argc, char *argv[]) {
         gb.attach(&video);
         gb.reset();
 
+        bool running = true;
         vector<char> buf;
-        while (true) {
+        while (running) {
                 // TODO: Simulate frequency
+                graphics.begin();
+                graphics.clear(0xFFFFFFFF);
+                input.process();
+                running = !input.isQuitRequested();
+
                 cpu.instructionFetch();
                 cpu.dumpState();
                 cpu.instructionExecute();
@@ -65,6 +76,8 @@ int main(int argc, char *argv[]) {
                                 buf.clear();
                         }
                 }
+
+                graphics.end();
         }
 
         return 0;
